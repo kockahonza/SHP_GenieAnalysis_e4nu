@@ -8,6 +8,7 @@
 #include <TFile.h>
 #include <TTree.h>
 
+
 // Very simple struct to have all the fields stored in the genie summary table (gst) format
 struct GenieEvent {
     Int_t iev;
@@ -107,7 +108,7 @@ struct GenieEvent {
 
 
 class GenieAnalysis {
-private:
+public:
     GenieEvent m_loaded_event;
     const std::unique_ptr<TFile> m_genie_data_file;
     const std::unique_ptr<TTree> m_genie_data;
@@ -117,9 +118,9 @@ private:
     void point_branches_at_event();
 
 public:
-    GenieAnalysis(const char* filename) :
+    GenieAnalysis(const char* filename, const char* gst_ttree_name="gst") :
         m_genie_data_file(TFile::Open(filename, "READ")),
-        m_genie_data((TTree*)m_genie_data_file->Get("gst"))
+        m_genie_data((TTree*)m_genie_data_file->Get(gst_ttree_name))
     {
     };
 };

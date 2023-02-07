@@ -1,6 +1,7 @@
 # compiled binaries, including some specific hardcoded executables
 *.o
 genie_analysis
+genie_analysis_demo
 systematics
 e2a_ep
 
