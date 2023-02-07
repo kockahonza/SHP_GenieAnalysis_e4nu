@@ -37,6 +37,7 @@ using namespace std;
 
 // -----------------------------------------------------------------------------------------------------------------------------------------------
 
+// Not used anywhere
 vector<double> CalculateCalKineVars(double ECal, TLorentzVector FSElectron) {
 
     vector<double> CalKineVars;
@@ -331,39 +332,6 @@ void genie_analysis::Loop() {
     fiducialcut->InitEClimits();
     std::cout << " Test InitEClimits Loop " << fiducialcut->up_lim1_ec->Eval(60) << std::endl;
 
-    /* lataling: This has been deleted
-
-    // Definition and initialization of Histograms
-
-    TH1F *h1_el_theta = new TH1F("h1_el_theta","",200,0,180);
-    TH1F *h1_hit_nuc = new TH1F("h1_hit_nuc","",2,1,3);
-    TH1F *h1_hit_nuc_pass = new TH1F("h1_hit_nuc_pass","",2,1,3);
-    //NOAH :: Above this (don't care)
-    TH1F *h1_el_mom = new TH1F("h1_el_mom","",6000,0,6);
-    TH1F *h1_electron_momentum = new TH1F("h1_electron_momentum","",6000,0,6); // gchamber: electron momentum for (e,e')
-    sample TH1F *h1_el_mom_corr = new TH1F("h1_el_mom_corr","",100,0.,5.); TH1F *h1_el_mom_ratio = new
-    TH1F("h1_el_mom_ratio","",50,0.97,1.01); TH1F *h1_prot_mom = new TH1F("h1_prot_mom","",400,0,4); TH1F
-    *h1_histoweight = new TH1F("h1_histoweight","",1000,-2,2); // gchamber: histograms of histoweigh*(proton array
-    element) for 1e1p spectrum TH1F *h1_histoweight2 = new TH1F("h1_histoweight2","",1000,-2,2); // gchamber: histogram
-    of (proton array element) for 1e1p spectrum TH2F *h2_el_prot_theta = new
-    TH2F("h2_el_prot_theta","",360,0,360,360,0,360); TH2F *h2_prot_theta_phi = new
-    TH2F("h2_prot_theta_phi","",720,-360,360,720,-360,360); // gchamber: proton angular distribution for 1e1p sample
-    TH1F *h1_el_prot_phi_diff = new TH1F("h1_el_prot_phi_diff","",720,-360,360); // gchamber: difference in e phi and p
-    phi TH2F *h2_el_prot_phi = new TH2F("h2_el_prot_phi","",720,-360,360,720,-360,360); TH2F *h2_el_prot_mom = new
-    TH2F("h2_el_prot_mom","",6000,0,6,6000,0,6); TH2F *h2_el_prot_theta_incl = new
-    TH2F("h2_el_prot_theta_incl","",360,0,360,360,0,360); TH2F *h2_el_prot_phi_incl = new
-    TH2F("h2_el_prot_phi_incl","",360,0,360,360,0,360); TH2F *h2_el_prot_mom_incl = new
-    TH2F("h2_el_prot_mom_incl","",6000,0,6,6000,0,6); TH1F *h1_prot_theta = new TH1F("h1_prot_theta","",360,0,360); TH1F
-    *h1_prot_theta_noweight = new TH1F("h1_prot_theta_noweight","",360,0,360); TH1F *h1_prot_costheta = new
-    TH1F("h1_prot_costheta","",200,-1,1);  // gchamber: cos(theta) for proton TH1F *h1_prot_mom_ratio = new
-    TH1F("h1_prot_mom_ratio","",50,0.97,1.2); TH1F *h1_prot_mom_nobackground = new
-    TH1F("h1_prot_mom_nobackground","",400,0,4); // gchamber: same as h1_prot_mom but without histoweight TH1F
-    *h1_prot_angle_nobackground = new TH1F("h1_prot_angle_nobackground","",360,0,360); // gchamber: same as
-    h1_prot_angle but without histoweight
-    //NOah :: Delete below this (if it doesn't include e or p momentum)
-    //NOAH :: 13 instances of each of these plots
-    */
-
     // Lataling: Initialising the histograms & PiType variable
     int PiType = 3; // Values 0,1,2 where 0=pi-,1=pi0,2=pi+
                     // TH2F *h2_pion_mom_theta[NumInteractions][PiType];
@@ -518,9 +486,6 @@ void genie_analysis::Loop() {
     int TotalCounter = 0;
 
     for (Long64_t jentry = 0; jentry < nentries; jentry++) {
-        Long64_t ientry = LoadTree(jentry);
-        if (ientry < 0)
-            break;
         // Read Entry
         int nb = GetEntry(jentry);
         if (nb == 0) {
@@ -699,6 +664,7 @@ void genie_analysis::Loop() {
             e_acc_ratio =
                 acceptance_c(el_momentum, cos(el_theta), phi_ElectronOut, 11, file_acceptance, ApplyAccWeights);
             if (fabs(e_acc_ratio) != e_acc_ratio) {
+                cout << "HAHA" << endl;
                 continue;
             }
 
@@ -894,47 +860,7 @@ void genie_analysis::Loop() {
 
         // Fully inclusive plots & counters shown first below
 
-        /* lataling: this chunk is removed
-
-        h1_Electron_AccMapWeights->Fill(e_acc_ratio);
-        h1_Electron_Momentum->Fill(el_momentum,e_acc_ratio);
-
-
-        if (el_theta >= t_thetaEl_lb->GetVal() && el_theta <= t_thetaEl_ub->GetVal()) { // smithja: there looks to be
-        continue statements above that already necessitate this condition if(hitnuc == 2212)
-        h1_hit_nuc_pass->Fill(1,WeightIncl); if(hitnuc == 2112) h1_hit_nuc_pass->Fill(2,WeightIncl); if (Interaction >
-        -1) {
-        h1_InteractionBreakDown_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector[Interaction][ElectronSector]->Fill(nu,WeightIncl/Q4);
-        } if (Interaction > -1) { if (!(TMath::Sqrt(TMath::Power(V3_el.X(),2) + TMath::Power(V3_el.Y(),2)) > PtMax &&
-        fApplyPtCut == true)) {
-                        h1_InteractionBreakDown_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector_el_mom[Interaction][ElectronSector]->Fill(el_momentum,WeightIncl);
-                }}
-
-                h1_EePrime_FullyInclusive_NoQ4Weight_Theta_Slice_InSector[ElectronSector]->Fill(V4_el.E(),WeightIncl/Q4);
-
-                TProf_Omega_FullyInclusive_NoQ4Weight_Theta_Slice_InSector[ElectronSector]->Fill(nu,nu);
-                TProf_Theta_FullyInclusive_NoQ4Weight_Theta_Slice_InSector[ElectronSector]->Fill(el_theta,el_theta);
-
-                if (fabs(x_bjk - 1.) < 0.2) {
-                        h1_EePrime_FullyInclusive_NoQ4Weight_xBCut_Theta_Slice_InSector[ElectronSector]->Fill(V4_el.E(),WeightIncl/Q4);
-                }
-        }
-        h1_electron_momentum->Fill(el_momentum,WeightIncl);
-        h1_el_mom->Fill(V4_el_uncorr.Rho(),WeightIncl);
-        h1_el_mom_ratio->Fill(V4_el.Rho()/V4_el_uncorr.Rho(),WeightIncl);
-        h2_el_pcorr_puncorr->Fill(V4_el.Rho(),V4_el.Rho()/V4_el_uncorr.Rho(),WeightIncl);
-        h2_el_mom_diff->Fill(V4_el.Rho(),V4_el.Rho()-V4_el_uncorr.Rho(),WeightIncl);
-
-        //Filling Histogram for electron kinematics
-        //h3_Electron_Mom_Theta_Phi->Fill(V4_el.Rho(),el_theta,el_phi_mod,wght*e_acc_ratio);
-
-        h1_el_theta->Fill(el_theta);
-
-        int ThetaSlice = V4_el.Theta()*180./TMath::Pi() / ThetaStep;
-        int ThetaSlice2D = V4_el.Theta()*180./TMath::Pi() / ThetaStep2D;
-        */
-
-        // Now we are done with the selection of electrons. Next step is looking for other hadrons in the events
+       // Now we are done with the selection of electrons. Next step is looking for other hadrons in the events
 
         // Index variables for hadrons (p and pions)
         int index_p[20];     // index for each proton
@@ -996,7 +922,6 @@ void genie_analysis::Loop() {
 
         // Loop for Hadrons
         for (int i = 0; i < nf; i++) {
-
             // lataling: add basic pion counter here:
             if (pdgf[i] == 211) {
                 true_piplus = true_piplus + 1;
@@ -1005,138 +930,8 @@ void genie_analysis::Loop() {
                 true_pimin = true_pimin + 1;
             }
 
-            // -----------------------------------------------------------------------------------------------------------------------------------------------
-
-            // Start of proton selection //lataling: here (0.3 GeV)
-            //  This will be removed as we don't care about protons for now
-
-            /*
-            if (Applymomthresh ? pdgf[i] == 2212 && pf[i] > 0.3 : pdgf[i] == 2212) {
-
-                    double ProtonWeight = 1.;
-                    double ProtonPhi_Deg = -999.;
-                    int ProtonSector = -1; // smithja: just documenting that I added this variable here
-                    double ProtonTheta_Deg = -999.;
-                    double ProtonCosTheta = -999.;
-                    double ProtonMag = -999.;
-
-                    if ( fchoice > 0 ) { //GENIE MC
-
-                            //Smearing of proton
-                            double temp_smear_P = gRandom->Gaus(pf[i],reso_p*pf[i]);
-                            double temp_smear_E = sqrt( temp_smear_P*temp_smear_P + m_prot * m_prot );
-
-                            TVector3 V3_prot_corr(temp_smear_P/pf[i] * pxf[i],temp_smear_P/pf[i] *
-      pyf[i],temp_smear_P/pf[i] * pzf[i]); double phi_prot = V3_prot_corr.Phi(); V3_prot_corr.SetPhi(phi_prot +
-      TMath::Pi()); // Vec.Phi() is between (-180,180), // GENIE coordinate system flipped with respect to CLAS
-
-                            //ProtonPhi_Deg = V3_prot_corr.Phi() * 180. / TMath::Pi() + 30.;
-                            ProtonPhi_Deg = V3_prot_corr.Phi() * 180. / TMath::Pi()  + 180. + 30.;
-                            if (ProtonPhi_Deg > 360.) { ProtonPhi_Deg -= 360.; }
-                            if (ProtonPhi_Deg < 0.) { ProtonPhi_Deg += 360.; }
-                            ProtonSector = int( ProtonPhi_Deg / 60);
-                            ProtonTheta_Deg = V3_prot_corr.Theta() * 180. / TMath::Pi();
-                            // apapadop Nov 4 2020: true proton counter for truth level studies above a min theta
-      threshold (12 deg) if (PFiducialCutExtra(StoreEnergy, V3_prot_corr)) { TrueProtonsAboveThreshold++; }
-
-      //					if (ApplyFiducials) { if (!PFiducialCut(fbeam_en, V3_prot_corr) ) { continue; } } // Proton theta
-      & phi fiducial cuts if (ApplyFiducials) { if (!PFiducialCut(StoreEnergy, V3_prot_corr) ) { continue; } } // Proton
-      theta & phi fiducial cuts
-
-                            num_p = num_p + 1;
-                            index_p[num_p - 1] = i;
-                            ProtonID.push_back(i);
-                            Smeared_Pp[num_p - 1] = temp_smear_P;
-                            Smeared_Ep[num_p - 1] = temp_smear_E;
-
-                            phi_prot += TMath::Pi(); // GENIE coordinate system flipped with respect to CLAS
-                            ProtonCosTheta = V3_prot_corr.CosTheta();
-                            ProtonMag = V3_prot_corr.Mag();
-
-                            //acceptance_c takes phi in radians and here unmodified by 30 degree.
-                            ProtonWeight = wght*acceptance_c(ProtonMag,ProtonCosTheta, phi_prot,
-      2212,file_acceptance_p,ApplyAccWeights); if ( fabs(ProtonWeight) != ProtonWeight ) { continue; }
-
-                    }
-                    else { // CLAS data does not need Fiducial Cut again
-
-                            num_p = num_p + 1;
-                            index_p[num_p - 1] = i;
-                            ProtonID.push_back(i);
-
-                            TVector3 V3_prot_corr(pxf[i+60],pyf[i+60],pzf[i+60]);
-
-                            //ProtonPhi_Deg = V3_prot_corr.Phi() * 180. / TMath::Pi() + 30.;
-                            ProtonPhi_Deg = V3_prot_corr.Phi() * 180. / TMath::Pi() + 180. + 30.;
-                            if (ProtonPhi_Deg > 360.) { ProtonPhi_Deg -= 360.; }
-                            if (ProtonPhi_Deg < 0.) { ProtonPhi_Deg	+= 360.; }
-                            ProtonSector = int( ProtonPhi_Deg / 60);
-                            ProtonTheta_Deg = V3_prot_corr.Theta() * 180. / TMath::Pi();
-                            ProtonMag = V3_prot_corr.Mag();
-
-                    }
-
-                    // gchamber: below is cuts on proton angle (this is for every proton corresponding to an electron
-      passing the cuts) if (fApplyThetaSliceProt) {
-
-                            if ( ProtonTheta_Deg < t_thetaProt_lb->GetVal()) { continue; }
-                            if ( ProtonTheta_Deg > t_thetaProt_ub->GetVal()) { continue; }
-
-                    }
-
-                    if (fApplyPhiOpeningAngleProt) {
-                            if ( TMath::Abs(ProtonPhi_Deg - 30) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg - 90)
-      > PhiOpeningAngleProt &&
-      TMath::Abs(ProtonPhi_Deg - 150) > PhiOpeningAngleProt \
-                                && TMath::Abs(ProtonPhi_Deg - 210) > PhiOpeningAngleProt && TMath::Abs(ProtonPhi_Deg -
-      270) > PhiOpeningAngleProt
-      && TMath::Abs(ProtonPhi_Deg - 330) > PhiOpeningAngleProt ) { continue;
-                            }
-                    }
-
-                    if (fApplyPhiSliceProt_Sectors && ProtonSector != (ElectronSector + 3)%6) { continue; }
-                    if (fApplyProtMomCut && (ProtonMag < t_ProtMom_lb->GetVal() || ProtonMag > t_ProtMom_ub->GetVal()))
-      { continue; }
-                    */
-
-            /* lataling: this chunk also removed
-
-            if (ProtonPhi_Deg > 0 && ProtonPhi_Deg < 60) {
-            h2_Proton_Theta_Momentum_FirstSector->Fill(ProtonMag,ProtonTheta_Deg,ProtonWeight); } if (ProtonPhi_Deg > 60
-            && ProtonPhi_Deg < 120) {
-            h2_Proton_Theta_Momentum_SecondSector->Fill(ProtonMag,ProtonTheta_Deg,ProtonWeight); } if (ProtonPhi_Deg >
-            120 && ProtonPhi_Deg < 180) {
-            h2_Proton_Theta_Momentum_ThirdSector->Fill(ProtonMag,ProtonTheta_Deg,ProtonWeight); } if (ProtonPhi_Deg >
-            180 && ProtonPhi_Deg < 240) {
-            h2_Proton_Theta_Momentum_FourthSector->Fill(ProtonMag,ProtonTheta_Deg,ProtonWeight); } if (ProtonPhi_Deg >
-            240 && ProtonPhi_Deg < 300) {
-            h2_Proton_Theta_Momentum_FifthSector->Fill(ProtonMag,ProtonTheta_Deg,ProtonWeight); } if (ProtonPhi_Deg >
-            300 && ProtonPhi_Deg < 360) {
-            h2_Proton_Theta_Momentum_SixthSector->Fill(ProtonMag,ProtonTheta_Deg,ProtonWeight); }
-
-            h2_Proton_Theta_Phi->Fill( ProtonPhi_Deg,ProtonTheta_Deg,ProtonWeight);
-            h2_el_prot_theta_incl->Fill( el_theta,ProtonTheta_Deg,ProtonWeight*WeightIncl);
-            h2_el_prot_phi_incl->Fill( el_phi_mod,ProtonPhi_Deg,ProtonWeight*WeightIncl);
-            h2_el_prot_mom_incl->Fill( el_momentum,ProtonMag,ProtonWeight*WeightIncl);
-            h1_Proton_AccMapWeights->Fill( ProtonWeight);
-            h1_Proton_Momentum->Fill( ProtonMag, ProtonWeight);
-            h1_Proton_Angle_noweight->Fill( ProtonTheta_Deg);
-            h1_Proton_Angle->Fill( ProtonTheta_Deg, ProtonWeight);
-
-            h2_el_prot_theta_elSectors_protSectors[ElectronSector][ProtonSector]->Fill(el_theta,ProtonTheta_Deg,ProtonWeight*WeightIncl);
-
-            if (Interaction > -1)
-            {h1_InteractionBreakDown_Omega_NoQ4Weight_Insector_prot_mom[Interaction][ProtonSector]->Fill(ProtonMag,ProtonWeight);}
-            //h3_Proton_Mom_Theta_Phi->Fill(ProtonMag,ProtonTheta_Deg,ProtonPhi_Deg,ProtonWeight);
-            */
-
-            //}
-
-            // -------------------------------------------------------------------------------------------------------------------
-
             if (Applymomthresh ? pdgf[i] == -211 && pf[i] > 0.15
                                : pdgf[i] == -211) { // Pi minus Lataling: here (0.15 GeV)
-
                 double PiMinusWeight = 1.;
                 double PiMinusPhi_Deg = -999.;
                 double PiMinusTheta_Deg = -999.;
@@ -1144,7 +939,6 @@ void genie_analysis::Loop() {
                 double PiMinusMag = -999.;
 
                 if (fchoice > 0) { // GENIE data
-
                     // Smearing of pi minus
                     double temp_smear_P = gRandom->Gaus(pf[i], reso_pi * pf[i]);
                     double temp_smear_E = sqrt(temp_smear_P * temp_smear_P + m_pion * m_pion);
@@ -1216,7 +1010,6 @@ void genie_analysis::Loop() {
                         PiMinusPhi_Deg -= 360.;
                     }
                     PiMinusTheta_Deg = V3_pi_corr.Theta() * 180. / TMath::Pi();
-
                 } else { // CLAS data does not need Fiducial Cut again
                     num_pimi = num_pimi + 1;
                     num_pi = num_pi + 1;
@@ -1246,8 +1039,8 @@ void genie_analysis::Loop() {
 
             // -------------------------------------------------------------------------------------------------------------------
 
-            if (Applymomthresh ? pdgf[i] == 211 && pf[i] > 0.15 : pdgf[i] == 211) { // Lataling: Here as well
-
+            if (Applymomthresh ? pdgf[i] == 211 && pf[i] > 0.15
+                               : pdgf[i] == 211) { // Lataling: Here as well
                 double PiPlusWeight = 1.;
                 double PiPlusPhi_Deg = -999.;
                 double PiPlusTheta_Deg = -999.;
@@ -1348,9 +1141,9 @@ void genie_analysis::Loop() {
 
             // ---------------------------------------------------------------------------------------------------------------------------
 
+            // lataling: here too (0.3) -- photons have to be > 0.3 GeV
             if (Applymomthresh ? pdgf[i] == 22 && pf[i] > 0.3
-                               : pdgf[i] == 22) { // lataling: here too (0.3) -- photons have to be > 0.3 GeV
-
+                               : pdgf[i] == 22) {
                 // Determine photon vector for the cut on radiation photon via angle with respect to the electron
                 TVector3 V3_phot_angles(pxf[i], pyf[i], pzf[i]);
                 if (fchoice > 0) { // GENIE data
@@ -1415,32 +1208,7 @@ void genie_analysis::Loop() {
 
         // ----------------------------------------------------------------------------------------------------------------------------
 
-        // Truth level studies
-        // Requiring true level signal 1e 1p 0pi+/- 0 gammas
-        // With smearing / fiducial cuts / acceptance maps
-
-        if (TruthLevel1p0piSignalStudy || TruthLevel0piSignalStudy) {
-
-            if (TrueElectronsAboveThreshold != 1) {
-                continue;
-            }
-            if (TruthLevel1p0piSignalStudy) {
-                if (TrueProtonsAboveThreshold != 1) {
-                    continue;
-                }
-            }
-            if (TrueChargedPionsAboveThreshold != 0) {
-                continue;
-            }
-            //			if (TruePiPlusAboveThreshold != 0) { continue; }
-            //			if (TruePiMinusAboveThreshold != 0) { continue; }
-            if (TrueGammasAboveThreshold != 0) {
-                continue;
-            }
-        }
-
-        // ----------------------------------------------------------------------------------------------------------------------------
-
+        // TODO: Keep this!
         // apapadop: executive decision Dec 3
         // given that genie has much higher proton multiplicities than we observe in data
         // we ignore the num_p > 4 cases
@@ -1495,36 +1263,6 @@ void genie_analysis::Loop() {
 
             // Fill the histogram
             h2_threshold_passing[Separate_Interaction]->Fill(pionabove + 1, pionbelow + 1);
-
-            /*
-            int pluscount = 0;
-            int mincount = 0;
-            //int zerocount = 0;
-
-            for (int i = 0; i < num_pi; i++){
-                    if (charge_pi[i] == -1){mincount = mincount + 1;}
-                    //else if (charge_pi[0] == 0){zerocount = zerocount + 1;}
-                    else if (charge_pi[i] == 1){pluscount = pluscount + 1;}
-                    }
-
-                    if (pluscount > 0){SignalEventsplus = SignalEventsplus + 1;}
-                    if (mincount > 0){SignalEventsminus = SignalEventsminus + 1;}
-                    //if (zerocount > 0){SignalEventszero = SignalEventszero + 1;}
-
-                    if (pluscount > 0 && Separate_Interaction == 5){RESSignalEventsplus = RESSignalEventsplus + 1;}
-                    if (mincount > 0 && Separate_Interaction == 5){RESSignalEventsminus = RESSignalEventsminus + 1;}
-                    //if (zerocount > 0 && Separate_Interaction == 5){RESSignalEventszero = RESSignalEventszero + 1;}
-
-                    if (pluscount > 0 && Separate_Interaction == 4){DISSignalEventsplus = DISSignalEventsplus + 1;}
-                    if (mincount > 0 && Separate_Interaction == 4){DISSignalEventsminus = DISSignalEventsminus + 1;}
-                    //if (zerocount > 0 && Separate_Interaction == 4){DISSignalEventszero = DISSignalEventszero + 1;}
-
-                    if (pluscount > 0 && Separate_Interaction != 4 && Separate_Interaction != 5){OtherSignalEventsplus =
-            OtherSignalEventsplus + 1;} if (mincount > 0 && Separate_Interaction != 4 && Separate_Interaction !=
-            5){OtherSignalEventsminus = OtherSignalEventsminus + 1;}
-                    //if (zerocount > 0 && Separate_Interaction != 4 && Separate_Interaction != 5){OtherSignalEventszero
-            = OtherSignalEventszero + 1;}
-                    */
         }
 
         //----------------------------- e- ,1pi  -----------------------------------------
