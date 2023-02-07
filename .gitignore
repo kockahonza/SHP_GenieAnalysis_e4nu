@@ -1,0 +1,8 @@
+# compiled binaries, including some specific hardcoded executables
+*.o
+genie_analysis
+systematics
+e2a_ep
+
+# My vim setup makes a lot of these
+.vim
