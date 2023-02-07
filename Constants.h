@@ -31,7 +31,8 @@ const double PhiOpeningAngleEl = 6;
 const double PhiOpeningAngleProt = 22.5;
 const double PhiOpeningAngle = 6.;
 
-static const Float_t par_EcUVW[6][3] = {{60, 360, 400}, {55, 360, 400}, {50, 363, 400}, {52, 365, 396}, {60, 360, 398}, {50, 362, 398}};
+static const Float_t par_EcUVW[6][3] = {{60, 360, 400}, {55, 360, 400}, {50, 363, 400},
+                                        {52, 365, 396}, {60, 360, 398}, {50, 362, 398}};
 
 const double MinThetaProton = 12.;
 const double MinThetaPiPlus = 12.;
