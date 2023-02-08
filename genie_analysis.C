@@ -860,7 +860,6 @@ void genie_analysis::Loop() {
 
         // Fully inclusive plots & counters shown first below
 
-       // Now we are done with the selection of electrons. Next step is looking for other hadrons in the events
 
         // Index variables for hadrons (p and pions)
         int index_p[20];     // index for each proton
@@ -1224,16 +1223,11 @@ void genie_analysis::Loop() {
 
         // ---------------------------------------------------------------------------------------------------------------------------------------
 
-        // No Protons here, Next 150 lines are for the inclusive events
-
         // lataling: this has also been removed
-        // h1_el_mom_incl->Fill(V4_el.Rho(),WeightIncl);
-        // h2_el_theta_phi_incl->Fill(V4_el.Theta()*180./TMath::Pi(),V4_el.Phi(),WeightIncl);
 
         // Lataling: for counting events only, this statement looks for events in which any number of pions are produced
         // if (num_pi != 0 || pionbelow != 0){
         if (num_pi != 0) {
-
             // Define the counters
             // int pionabove = 0;
             // int pionbelow = 0;

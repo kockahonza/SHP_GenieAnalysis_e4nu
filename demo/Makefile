@@ -12,7 +12,7 @@ LDFLAGS   := $(ROOTLDFLAGS)
 	$(CXX) -c $< -O2 $(CXXFLAGS) $(INCLUDES)
 
 genie_analysis_demo: genie_analysis.o
-	$(CXX) -o genie_analysis_demo genie_analysis_demo.C $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+	$(CXX) -o genie_analysis_demo genie_analysis_demo.C genie_analysis.o $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
 clean:
 	@rm -rf *.o genie_analysis_demo
