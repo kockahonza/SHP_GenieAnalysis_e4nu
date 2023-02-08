@@ -11,7 +11,7 @@ LDFLAGS   := $(ROOTLDFLAGS)
 GenieAnalysis/%.o: GenieAnalysis/%.cpp GenieAnalysis/%.h
 	$(CXX) -o $@ -c $< -O2 $(CXXFLAGS) $(INCLUDES)
 
-genie_analysis_demo: GenieAnalysis/GenieAnalysis.o genie_analysis_demo.cpp
+genie_analysis_demo: GenieAnalysis/GenieAnalysis.o GenieAnalysis/misc.h genie_analysis_demo.cpp
 	$(CXX) -o genie_analysis_demo genie_analysis_demo.cpp GenieAnalysis/GenieAnalysis.o $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
 clean:

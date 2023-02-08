@@ -136,7 +136,8 @@ public:
 
         Long64_t message_interval = number_of_entries / 10;
         
-        m_genie_data->Reset();
+        // Makes it not work, don't know why now TODO: fix it
+        /* m_genie_data->Reset(); */
         pointBranchesAtEvent();
         for (Long64_t entry_i = 0; entry_i < number_of_entries; entry_i++) {
             if (entry_i % message_interval == 0) {
