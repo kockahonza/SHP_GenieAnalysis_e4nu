@@ -51,10 +51,15 @@ class GenieAnalysisDemoW : public GenieAnalysis {
 
 int main(int argc, char *argv[]) {
 
-    GenieAnalysisDemoW ga{"/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root",
+    GenieAnalysisAutoTH1Fs gaauto{"/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root",
+                          "genie_analysis_auto_output.root", {"W"}, {"QE", "RES", "DIS"}};
+
+    gaauto.runAnalysis();
+    GenieAnalysisDemoW gademo{"/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root",
+
                           "genie_analysis_demo_output.root"};
 
-    ga.runAnalysis();
+    gademo.runAnalysis();
 
     return 0;
 }

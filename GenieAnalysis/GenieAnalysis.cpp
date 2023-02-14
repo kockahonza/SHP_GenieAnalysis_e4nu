@@ -113,7 +113,7 @@ bool GenieAnalysisAutoTH1Fs::isObservable(const string &observable, const GenieE
     }
 }
 
-bool GenieAnalysisAutoTH1Fs::getProperty(const string &property, const GenieEvent &ge) {
+Double_t GenieAnalysisAutoTH1Fs::getProperty(const string &property, const GenieEvent &ge) {
     if (property == "W") {
         return ge.W;
     } else {

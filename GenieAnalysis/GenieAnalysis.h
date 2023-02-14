@@ -181,7 +181,9 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     GenieAnalysisAutoTH1Fs(const char *filename, const char *output_filename, const vector<string> &properties,
                            const vector<string> &observables, const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name),
-          m_output_file(TFile::Open(output_filename, "RECREATE")), m_properties{properties}, m_observables{observables} {}
+          m_output_file(TFile::Open(output_filename, "RECREATE")), m_properties{properties}, m_observables{observables} {
+              m_output_file->cd();
+          }
 
     void createTH1Fs() {
         string name_and_title;
@@ -223,7 +225,7 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     virtual const string makeName(const string &property, const string &observable) { return property + "_" + observable; }
 
     static bool isObservable(const string &observable, const GenieEvent &ge);
-    static bool getProperty(const string &property, const GenieEvent &ge);
+    static Double_t getProperty(const string &property, const GenieEvent &ge);
 };
 
 #endif
