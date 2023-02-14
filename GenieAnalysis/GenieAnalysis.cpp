@@ -1,5 +1,7 @@
 #include "GenieAnalysis.h"
 
+// GenieAnalysis
+
 void GenieAnalysis::pointBranchesAtEvent() {
     m_genie_data->SetBranchAddress("iev", &m_loaded_event.iev);
     m_genie_data->SetBranchAddress("neu", &m_loaded_event.neu);
@@ -94,4 +96,28 @@ void GenieAnalysis::pointBranchesAtEvent() {
     m_genie_data->SetBranchAddress("vtxt", &m_loaded_event.vtxt);
     m_genie_data->SetBranchAddress("sumKEf", &m_loaded_event.sumKEf);
     m_genie_data->SetBranchAddress("calresp0", &m_loaded_event.calresp0);
+}
+
+// GenieAnalysisAutoTH1Fs
+
+bool GenieAnalysisAutoTH1Fs::isObservable(const string &observable, const GenieEvent &ge) {
+    if (observable == "QE") {
+        return ge.qel;
+    } else if (observable == "RES") {
+        return ge.res;
+    } else if (observable == "DIS") {
+        return ge.dis;
+    } else {
+        // TODO: improve errors
+        throw -1;
+    }
+}
+
+bool GenieAnalysisAutoTH1Fs::getProperty(const string &property, const GenieEvent &ge) {
+    if (property == "W") {
+        return ge.W;
+    } else {
+        // TODO: improve errors
+        throw -1;
+    }
 }

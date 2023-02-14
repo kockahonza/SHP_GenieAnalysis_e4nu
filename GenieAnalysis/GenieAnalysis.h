@@ -129,6 +129,8 @@ class GenieAnalysis {
           m_genie_data((TTree *)m_genie_data_file->Get(gst_ttree_name)){};
 
     void runAnalysis(Long64_t number_of_entries = std::numeric_limits<Long64_t>::max()) {
+        runPreAnalysis();
+
         // TODO: Add a message
         number_of_entries = TMath::Min(number_of_entries, m_genie_data->GetEntriesFast());
 
@@ -146,30 +148,82 @@ class GenieAnalysis {
                 useEntry();
             }
         }
+
+        runPostAnalysis();
     }
+
+    virtual void runPreAnalysis(){};
 
     virtual bool passesCuts() { return true; }
 
     virtual void useEntry() {}
+
+    virtual void runPostAnalysis(){};
 };
 
-using std::vector, std::string, std::map, std::function;
+using std::vector, std::string, std::map, std::tuple;
 
 class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
   private:
-    const vector<string> types;
-    const vector<function<bool(GenieEvent)>> type_functions;
-    const vector<string> properties;
+    const std::unique_ptr<TFile> m_output_file;
 
-    map<string, map<string, TH1F>> hists;
+    const vector<string> m_properties;
+    const vector<string> m_observables;
 
-  protected:
+    bool m_hists_initialized{false};
+    map<string, map<string, TH1F>> m_hists;
+
   public:
-    GenieAnalysisAutoTH1Fs(const char *filename, const vector<string> &p_types,
-                           const vector<function<bool(GenieEvent)>> &p_type_functions,
-                           const vector<string> &p_properties, const char *gst_ttree_name = "gst")
-        : GenieAnalysis(filename, gst_ttree_name), types{p_types}, type_functions{p_type_functions},
-          properties{p_properties} {}
+    // Specifies how to initialize the histograms for each property
+    map<string, tuple<Int_t, Int_t, Int_t>> m_bin_params{{"W", {1000, 0, 4}}};
+
+  public:
+    GenieAnalysisAutoTH1Fs(const char *filename, const char *output_filename, const vector<string> &properties,
+                           const vector<string> &observables, const char *gst_ttree_name = "gst")
+        : GenieAnalysis(filename, gst_ttree_name),
+          m_output_file(TFile::Open(output_filename, "RECREATE")), m_properties{properties}, m_observables{observables} {}
+
+    void createTH1Fs() {
+        string name_and_title;
+        Int_t nbinsx, xlow, xup;
+
+        for (string property : m_properties) {
+            for (string observable : m_observables) {
+                name_and_title = makeName(property, observable);
+                std::tie(nbinsx, xlow, xup) = m_bin_params[property];
+                m_hists[property][observable] = TH1F(name_and_title.c_str(), name_and_title.c_str(), nbinsx, xlow, xup);
+            }
+        }
+    }
+
+    void runPreAnalysis() override {
+        if (!m_hists_initialized) {
+            createTH1Fs();
+        }
+    }
+
+    void runPostAnalysis() override {
+        for (string property : m_properties) {
+            for (string observable : m_observables) {
+                m_hists[property][observable].Write();
+            }
+        }
+    }
+
+    void useEntry() override {
+        for (string property : m_properties) {
+            for (string observable : m_observables) {
+                if (isObservable(observable, m_loaded_event)) {
+                    m_hists[property][observable].Fill(getProperty(property, m_loaded_event));
+                }
+            }
+        }
+    }
+
+    virtual const string makeName(const string &property, const string &observable) { return property + "_" + observable; }
+
+    static bool isObservable(const string &observable, const GenieEvent &ge);
+    static bool getProperty(const string &property, const GenieEvent &ge);
 };
 
 #endif
