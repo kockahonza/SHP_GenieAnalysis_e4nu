@@ -2,12 +2,14 @@
 #define GENIE_ANALYSIS_H
 
 #include <RtypesCore.h>
+#include <functional>
 #include <iostream>
+#include <map>
+#include <vector>
 
-#include <TROOT.h>
 #include <TFile.h>
+#include <TH1F.h>
 #include <TTree.h>
-
 
 // Very simple struct to have all the fields stored in the genie summary table (gst) format
 struct GenieEvent {
@@ -106,36 +108,32 @@ struct GenieEvent {
     Double_t calresp0;
 };
 
-
 // Base class for any analysis to be one on genie data, it opens the given root file and sets
 // up reading the gst and `runAnalysis` is the entry point, it uses the methods `passesCuts`
 // to filter out entries which are meant to be accepted and if they are, calls `useEntry`,
 // both have access to `m_loaded_event`.which has all the information of the event.
 class GenieAnalysis {
-private:
+  private:
     const std::unique_ptr<TFile> m_genie_data_file;
     const std::unique_ptr<TTree> m_genie_data;
-    
 
     // Set all the gst field branches in m_genie_data to point at the relevant fields in m_loaded_event
     void pointBranchesAtEvent();
 
-protected:
+  protected:
     GenieEvent m_loaded_event;
 
-public:
-    GenieAnalysis(const char* filename, const char* gst_ttree_name="gst") :
-        m_genie_data_file(TFile::Open(filename, "READ")),
-        m_genie_data((TTree*)m_genie_data_file->Get(gst_ttree_name))
-    {
-    };
+  public:
+    GenieAnalysis(const char *filename, const char *gst_ttree_name = "gst")
+        : m_genie_data_file(TFile::Open(filename, "READ")),
+          m_genie_data((TTree *)m_genie_data_file->Get(gst_ttree_name)){};
 
-    void runAnalysis(Long64_t number_of_entries=std::numeric_limits<Long64_t>::max()) {
+    void runAnalysis(Long64_t number_of_entries = std::numeric_limits<Long64_t>::max()) {
         // TODO: Add a message
         number_of_entries = TMath::Min(number_of_entries, m_genie_data->GetEntriesFast());
 
         Long64_t message_interval = number_of_entries / 10;
-        
+
         // Makes it not work, don't know why now TODO: fix it
         /* m_genie_data->Reset(); */
         pointBranchesAtEvent();
@@ -143,8 +141,6 @@ public:
             if (entry_i % message_interval == 0) {
                 std::cout << "Currently at entry " << entry_i << " out of " << number_of_entries << std::endl;
             }
-
-
             m_genie_data->GetEntry(entry_i);
             if (passesCuts()) {
                 useEntry();
@@ -152,13 +148,28 @@ public:
         }
     }
 
-    virtual bool passesCuts() {
-        return true;
-    }
+    virtual bool passesCuts() { return true; }
 
-    virtual void useEntry() {
+    virtual void useEntry() {}
+};
 
-    }
+using std::vector, std::string, std::map, std::function;
+
+class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
+  private:
+    const vector<string> types;
+    const vector<function<bool(GenieEvent)>> type_functions;
+    const vector<string> properties;
+
+    map<string, map<string, TH1F>> hists;
+
+  protected:
+  public:
+    GenieAnalysisAutoTH1Fs(const char *filename, const vector<string> &p_types,
+                           const vector<function<bool(GenieEvent)>> &p_type_functions,
+                           const vector<string> &p_properties, const char *gst_ttree_name = "gst")
+        : GenieAnalysis(filename, gst_ttree_name), types{p_types}, type_functions{p_type_functions},
+          properties{p_properties} {}
 };
 
 #endif

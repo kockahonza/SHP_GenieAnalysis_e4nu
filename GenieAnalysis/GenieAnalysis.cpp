@@ -1,6 +1,5 @@
 #include "GenieAnalysis.h"
 
-
 void GenieAnalysis::pointBranchesAtEvent() {
     m_genie_data->SetBranchAddress("iev", &m_loaded_event.iev);
     m_genie_data->SetBranchAddress("neu", &m_loaded_event.neu);
