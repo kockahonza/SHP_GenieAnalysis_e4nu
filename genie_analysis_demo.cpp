@@ -3,6 +3,7 @@
 #include <TH1F.h>
 
 #include "GenieAnalysis/GenieAnalysis.h"
+#include "GenieAnalysis/GenieAnalysisAuto.h"
 #include "GenieAnalysis/misc.h"
 
 constexpr Int_t W_hist_bins{1000};
@@ -52,12 +53,14 @@ class GenieAnalysisDemoW : public GenieAnalysis {
 int main(int argc, char *argv[]) {
 
     GenieAnalysisAutoTH1Fs gaauto{"/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root",
-                          "genie_analysis_auto_output.root", {"W"}, {"QE", "RES", "DIS"}};
+                                  "genie_analysis_auto_output.root",
+                                  {"W"},
+                                  {"QE", "RES", "DIS"}};
 
     gaauto.runAnalysis();
     GenieAnalysisDemoW gademo{"/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root",
 
-                          "genie_analysis_demo_output.root"};
+                              "genie_analysis_demo_output.root"};
 
     gademo.runAnalysis();
 
