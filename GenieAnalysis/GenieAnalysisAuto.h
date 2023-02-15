@@ -32,14 +32,13 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     GenieAnalysisAutoTH1Fs(const char *filename, const char *output_filename, const vector<string> &properties,
                            const vector<string> &types, const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name),
-          m_output_file(TFile::Open(output_filename, "RECREATE")), m_properties{properties}, m_types{types} {
-        m_output_file->cd();
-    }
+          m_output_file(TFile::Open(output_filename, "RECREATE")), m_properties{properties}, m_types{types} {}
 
     void createTH1Fs() {
         string name_and_title;
         Int_t nbinsx, xlow, xup;
 
+        m_output_file->cd();
         for (string property : m_properties) {
             for (string type : m_types) {
                 name_and_title = makeName(property, type);

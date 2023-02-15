@@ -7,6 +7,8 @@ bool GenieAnalysisAutoTH1Fs::isType(const string &type, const GenieEvent &ge) {
         return ge.res;
     } else if (type == "DIS") {
         return ge.dis;
+    } else if (type == "ALL") {
+        return true;
     } else {
         // TODO: improve errors
         throw -1;

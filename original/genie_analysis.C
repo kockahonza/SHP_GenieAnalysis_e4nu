@@ -661,8 +661,7 @@ void genie_analysis::Loop() {
 
             // acceptance_c takes phi in radians and here unmodified by 30 degree.
 
-            e_acc_ratio =
-                acceptance_c(el_momentum, cos(el_theta), phi_ElectronOut, 11, file_acceptance, ApplyAccWeights);
+            e_acc_ratio = acceptance_c(el_momentum, cos(el_theta), phi_ElectronOut, 11, file_acceptance, ApplyAccWeights);
             if (fabs(e_acc_ratio) != e_acc_ratio) {
                 cout << "HAHA" << endl;
                 continue;
