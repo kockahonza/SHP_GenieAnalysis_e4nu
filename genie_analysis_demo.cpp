@@ -29,16 +29,16 @@ class GenieAnalysisDemoW : public GenieAnalysis {
           m_hist_W_total("W_total", "W of all events", W_hist_bins, W_hist_min, W_hist_max) {}
 
     void useEntry() override {
-        if (m_loaded_event.qel) {
-            m_hist_W_qe.Fill(m_loaded_event.W);
+        if (m_ge.qel) {
+            m_hist_W_qe.Fill(m_ge.W);
         }
-        if (m_loaded_event.res) {
-            m_hist_W_res.Fill(m_loaded_event.W);
+        if (m_ge.res) {
+            m_hist_W_res.Fill(m_ge.W);
         }
-        if (m_loaded_event.dis) {
-            m_hist_W_dis.Fill(m_loaded_event.W);
+        if (m_ge.dis) {
+            m_hist_W_dis.Fill(m_ge.W);
         }
-        m_hist_W_total.Fill(m_loaded_event.W);
+        m_hist_W_total.Fill(m_ge.W);
     }
 
     ~GenieAnalysisDemoW() {

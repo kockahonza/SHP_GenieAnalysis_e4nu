@@ -23,10 +23,10 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
     using GenieAnalysisAutoTH1Fs::GenieAnalysisAutoTH1Fs;
 
     bool passesCuts() {
-        double SmearedPe{gRandom->Gaus(m_loaded_event.pl, smearing_reso_el * m_loaded_event.pl)};
+        double SmearedPe{gRandom->Gaus(m_ge.pl, smearing_reso_el * m_ge.pl)};
         double SmearedEe{sqrt(SmearedPe * SmearedPe + e_mass * e_mass)};
 
-        V3_el.SetXYZ(SmearedPe / m_loaded_event.pl * m_loaded_event.pxl, SmearedPe / m_loaded_event.pl * m_loaded_event.pyl, SmearedPe / m_loaded_event.pl * m_loaded_event.pzl);
+        V3_el.SetXYZ(SmearedPe / m_ge.pl * m_ge.pxl, SmearedPe / m_ge.pl * m_ge.pyl, SmearedPe / m_ge.pl * m_ge.pzl);
         V4_el.SetPxPyPzE(V3_el.X(), V3_el.Y(), V3_el.Z(), SmearedEe);
         
     }

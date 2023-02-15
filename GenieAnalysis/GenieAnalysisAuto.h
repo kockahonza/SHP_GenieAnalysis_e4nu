@@ -66,8 +66,8 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     void useEntry() override {
         for (string property : m_properties) {
             for (string type : m_types) {
-                if (isType(type, m_loaded_event)) {
-                    m_hists[property][type].Fill(getProperty(property, m_loaded_event));
+                if (isType(type, m_ge)) {
+                    m_hists[property][type].Fill(getProperty(property, m_ge));
                 }
             }
         }

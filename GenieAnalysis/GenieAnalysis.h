@@ -107,17 +107,17 @@ struct GenieEvent {
 // Base class for any analysis to be one on genie data, it opens the given root file and sets
 // up reading the gst and `runAnalysis` is the entry point, it uses the methods `passesCuts`
 // to filter out entries which are meant to be accepted and if they are, calls `useEntry`,
-// both have access to `m_loaded_event`.which has all the information of the event.
+// both have access to `m_ge`.which has all the information of the event.
 class GenieAnalysis {
   private:
     const std::unique_ptr<TFile> m_genie_data_file;
     const std::unique_ptr<TTree> m_genie_data;
 
-    // Set all the gst field branches in m_genie_data to point at the relevant fields in m_loaded_event
+    // Set all the gst field branches in m_genie_data to point at the relevant fields in m_ge
     void pointBranchesAtEvent();
 
   protected:
-    GenieEvent m_loaded_event;
+    GenieEvent m_ge;
 
   public:
     GenieAnalysis(const char *filename, const char *gst_ttree_name = "gst")
