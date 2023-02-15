@@ -862,48 +862,24 @@ void genie_analysis::Loop() {
 
 
         // Index variables for hadrons (p and pions)
-        int index_p[20];     // index for each proton
         int index_pi[20];    // index for each pion
-        int ind_pi_phot[20]; // index for pions and photons
-        int index_pipl[20];  // index for each pi plus
-        int index_pimi[20];  // index for each pi minus
         int charge_pi[20];   // Charge for the pions and photons
         // Smeared Momentum and Energy values for GENIE (simulation) data
-        double Smeared_Pp[20];  // smeared momentum values for protons
-        double Smeared_Ep[20];  // smeared energy values for protons
         double Smeared_Ppi[20]; // smeared momentum values for pions
-        double Smeared_Epi[20]; // smeared energy values for pions
 
         // Number of hadrons
         int num_p = 0;
         int num_pi = 0;
         int num_pi_phot = 0; // couting all pions and photons
-        int num_phot = 0;    // couting all photons
-        int num_pimi = 0;
-        int num_pipl = 0;
-        int num_pi_phot_nonrad = 0; // counting all pions and non-radiation photons
-        int num_phot_rad = 0;       // counting radiation photons
-        int num_phot_nonrad = 0;
-        int numpi0 = 0; // lataling: Delete this
         // Index and number variables for neutral particles
-        int ec_index_n[20];
-        int ec_num_n = 0;
         bool ec_radstat_n[20];
 
         // Array initialize to -1 or false
         for (int i = 0; i < 20; i++) {
-            index_p[i] = -1;
             index_pi[i] = -1;
-            index_pipl[i] = -1;
-            index_pimi[i] = -1;
-            ind_pi_phot[i] = -1;
-            ec_index_n[i] = -1;
             ec_radstat_n[i] = false;
             charge_pi[i] = -2; // default number should be not a possible real charge
-            Smeared_Pp[i] = 0;
-            Smeared_Ep[i] = 0; // default 0 momentum and energy after smearing
             Smeared_Ppi[i] = 0;
-            Smeared_Epi[i] = 0; // default 0 momentum and energy after smearing
         }
 
         const double phot_rad_cut = 40;
@@ -966,22 +942,15 @@ void genie_analysis::Loop() {
                         }
                     } // LAtaling: if fail fiducial then pion_below adds 1
 
-                    num_pimi = num_pimi + 1;
                     num_pi = num_pi + 1;
                     num_pi_phot = num_pi_phot + 1;
-                    num_pi_phot_nonrad = num_pi_phot_nonrad + 1;
-                    index_pimi[num_pi_phot - 1] = i;
                     // index_pi[num_pi_phot - 1] = i; Lataling: This is to stop pi0 taking the place of a charged pion
                     // at index 0
                     index_pi[num_pi - 1] = i;
-                    ind_pi_phot[num_pi_phot - 1] = i;
                     PiMinusID.push_back(i);
                     // charge_pi[num_pi_phot - 1] = 1; Same reason as above
                     charge_pi[num_pi - 1] = -1;
-                    // Smeared_Ppi[num_pi_phot - 1] = temp_smear_P; Same reason as above
-                    // Smeared_Epi[num_pi_phot - 1] = temp_smear_E; Same reason as above
                     Smeared_Ppi[num_pi - 1] = temp_smear_P;
-                    Smeared_Epi[num_pi - 1] = temp_smear_E;
 
                     phi_pion += TMath::Pi(); // GENIE coordinate system flipped with respect to CLAS
                     PiMinusCosTheta = V3_pi_corr.CosTheta();
@@ -1010,13 +979,9 @@ void genie_analysis::Loop() {
                     }
                     PiMinusTheta_Deg = V3_pi_corr.Theta() * 180. / TMath::Pi();
                 } else { // CLAS data does not need Fiducial Cut again
-                    num_pimi = num_pimi + 1;
                     num_pi = num_pi + 1;
                     num_pi_phot = num_pi_phot + 1;
-                    num_pi_phot_nonrad = num_pi_phot_nonrad + 1;
-                    index_pimi[num_pi_phot - 1] = i;
                     index_pi[num_pi_phot - 1] = i;
-                    ind_pi_phot[num_pi_phot - 1] = i;
                     PiMinusID.push_back(i);
                     charge_pi[num_pi_phot - 1] = -1;
 
@@ -1076,22 +1041,15 @@ void genie_analysis::Loop() {
                         }
                     } // LAtaling: if fail fiducial then pion_below adds 1
 
-                    num_pipl = num_pipl + 1;
                     num_pi = num_pi + 1;
                     num_pi_phot = num_pi_phot + 1;
-                    num_pi_phot_nonrad = num_pi_phot_nonrad + 1;
-                    index_pipl[num_pi_phot - 1] = i;
                     // index_pi[num_pi_phot - 1] = i; Lataling: This is to stop pi0 taking the place of a charged pion
                     // at index 0
                     index_pi[num_pi - 1] = i;
-                    ind_pi_phot[num_pi_phot - 1] = i;
                     PiPlusID.push_back(i);
                     // charge_pi[num_pi_phot - 1] = 1; Same reason as above
                     charge_pi[num_pi - 1] = 1;
-                    // Smeared_Ppi[num_pi_phot - 1] = temp_smear_P; Same reason as above
-                    // Smeared_Epi[num_pi_phot - 1] = temp_smear_E; Same reason as above
                     Smeared_Ppi[num_pi - 1] = temp_smear_P;
-                    Smeared_Epi[num_pi - 1] = temp_smear_E;
 
                     phi_pion += TMath::Pi(); // GENIE coordinate system flipped with respect to CLAS
                     PiPlusCosTheta = V3_pi_corr.CosTheta();
@@ -1111,13 +1069,8 @@ void genie_analysis::Loop() {
                     PiPlusTheta_Deg = V3_pi_corr.Theta() * 180. / TMath::Pi();
 
                 } else { // CLAS data does not need Fiducial Cut again
-                    num_pipl = num_pipl + 1;
                     num_pi = num_pi + 1;
                     num_pi_phot = num_pi_phot + 1;
-                    num_pi_phot_nonrad = num_pi_phot_nonrad + 1;
-                    index_pipl[num_pi_phot - 1] = i;
-                    ind_pi_phot[num_pi_phot - 1] = i;
-                    ind_pi_phot[num_pi_phot - 1] = i;
                     PiPlusID.push_back(i);
                     charge_pi[num_pi_phot - 1] = 1;
 
@@ -1168,13 +1121,10 @@ void genie_analysis::Loop() {
                 if (neut_phi_mod < 0)
                     neut_phi_mod = neut_phi_mod + 360; // Neutral particle is between 0 and 360 degree
 
-                ec_num_n = ec_num_n + 1;
                 num_pi_phot = num_pi_phot + 1;
-                ind_pi_phot[num_pi_phot - 1] = i;
                 PhotonID.push_back(i);
 
                 Smeared_Ppi[num_pi_phot - 1] = V3_phot_angles.Mag();
-                Smeared_Epi[num_pi_phot - 1] = V3_phot_angles.Mag();
 
                 // lataling: removed too
                 // CosDeltaThetaElectronPhotonAboveThreshold->Fill( cos( V3_phot_angles.Angle(V3_el) ) );
@@ -1187,16 +1137,12 @@ void genie_analysis::Loop() {
                     fabs(neut_phi_mod - el_phi_mod) < phot_e_phidiffcut) {
 
                     ec_radstat_n[num_pi_phot - 1] = true; // select radiation photons
-                    num_phot_rad = num_phot_rad + 1;
+
+                    // Skip event if there is at least one radiation photon
+                    continue;
                 }
 
                 if (!ec_radstat_n[num_pi_phot - 1]) {
-
-                    num_phot_nonrad = num_phot_nonrad + 1;
-
-                    num_pi_phot_nonrad = num_pi_phot_nonrad + 1;
-                    // charge_pi[num_pi_phot - 1] = 0;
-
                     double GammaPhi_Deg = neut_phi_mod;
                     double GammaTheta_Deg = V3_phot_angles.Theta() * TMath::RadToDeg();
                     double GammaMag = V3_phot_angles.Mag();
@@ -1214,12 +1160,7 @@ void genie_analysis::Loop() {
 
         // if (num_p > 4) { continue; }
 
-        // Skip event if there is at least one radiation photon
 
-        if (num_phot_rad > 0) {
-
-            continue;
-        }
 
         // ---------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1271,10 +1212,6 @@ void genie_analysis::Loop() {
         // Note: this used say if (num_pi_phot == 1), but now I'm only looking for charged pions as pi0 aren't decayed
         // by GENIE Thus, I have changed it to num_pi instead, which only looks at the number of pions
         if (NumOfProton != -1 ? num_pi == 1 && num_p == NumOfProton : num_pi == 1) {
-            // if (num_pi != 0){
-            // if (numpi0 > 0){eventremoved = eventremoved + 1;}
-            // if (charge_pi[0] == 0){continue;}
-
             TVector3 V3_pi_corr;
             double P_undet = 0;
             double pion_acc_ratio = 1;
@@ -1735,8 +1672,8 @@ double genie_analysis::acceptance_c(double p, double cost, double phi, int parti
         double phibin_acc = acc->GetZaxis()->FindBin(phi * 180 / TMath::Pi() + redef);
         double num_acc = acc->GetBinContent(pbin_acc, tbin_acc, phibin_acc);
 
-        double acc_ratio = (double)num_acc / (double)num_gen;
-        double acc_err = (double)sqrt(acc_ratio * (1 - acc_ratio)) / (double)num_gen;
+        double acc_ratio = num_acc / num_gen;
+        double acc_err = sqrt(acc_ratio * (1 - acc_ratio)) / num_gen;
 
         return acc_ratio;
 
