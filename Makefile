@@ -8,11 +8,19 @@ CXXFLAGS  += -std=c++17 -Wall -Wshadow -Warray-bounds -Wmissing-field-initialize
 LD        := g++
 LDFLAGS   := $(ROOTLDFLAGS)
 
-GenieAnalysis/%.o: GenieAnalysis/%.cpp GenieAnalysis/%.h
-	$(CXX) -o $@ -c $< -O2 $(CXXFLAGS) $(INCLUDES)
+
+# Executables
+genie_analysis_lucass_cuts: GenieAnalysis/GenieAnalysis.o GenieAnalysis/GenieAnalysisAuto.o GenieAnalysis/misc.h genie_analysis_lucass_cuts.cpp
+	$(CXX) -o $@ $^ $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
 genie_analysis_demo: GenieAnalysis/GenieAnalysis.o GenieAnalysis/GenieAnalysisAuto.o GenieAnalysis/misc.h genie_analysis_demo.cpp
 	$(CXX) -o $@ $^ $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+
+
+# GenieAnalysis "library"
+GenieAnalysis/%.o: GenieAnalysis/%.cpp GenieAnalysis/%.h
+	$(CXX) -o $@ -c $< -O2 $(CXXFLAGS) $(INCLUDES)
+
 
 clean:
 	@rm -rf GenieAnalysis/*.o *.o genie_analysis_demo
