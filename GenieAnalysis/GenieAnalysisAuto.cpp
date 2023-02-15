@@ -1,11 +1,11 @@
 #include "GenieAnalysisAuto.h"
 
-bool GenieAnalysisAutoTH1Fs::isObservable(const string &observable, const GenieEvent &ge) {
-    if (observable == "QE") {
+bool GenieAnalysisAutoTH1Fs::isType(const string &type, const GenieEvent &ge) {
+    if (type == "QE") {
         return ge.qel;
-    } else if (observable == "RES") {
+    } else if (type == "RES") {
         return ge.res;
-    } else if (observable == "DIS") {
+    } else if (type == "DIS") {
         return ge.dis;
     } else {
         // TODO: improve errors

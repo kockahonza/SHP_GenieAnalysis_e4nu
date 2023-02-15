@@ -19,7 +19,7 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     const std::unique_ptr<TFile> m_output_file;
 
     const vector<string> m_properties;
-    const vector<string> m_observables;
+    const vector<string> m_types;
 
     bool m_hists_initialized{false};
     map<string, map<string, TH1F>> m_hists;
@@ -30,10 +30,9 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
 
   public:
     GenieAnalysisAutoTH1Fs(const char *filename, const char *output_filename, const vector<string> &properties,
-                           const vector<string> &observables, const char *gst_ttree_name = "gst")
+                           const vector<string> &types, const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name),
-          m_output_file(TFile::Open(output_filename, "RECREATE")), m_properties{properties}, m_observables{
-                                                                                                 observables} {
+          m_output_file(TFile::Open(output_filename, "RECREATE")), m_properties{properties}, m_types{types} {
         m_output_file->cd();
     }
 
@@ -42,10 +41,10 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
         Int_t nbinsx, xlow, xup;
 
         for (string property : m_properties) {
-            for (string observable : m_observables) {
-                name_and_title = makeName(property, observable);
+            for (string type : m_types) {
+                name_and_title = makeName(property, type);
                 std::tie(nbinsx, xlow, xup) = m_bin_params[property];
-                m_hists[property][observable] = TH1F(name_and_title.c_str(), name_and_title.c_str(), nbinsx, xlow, xup);
+                m_hists[property][type] = TH1F(name_and_title.c_str(), name_and_title.c_str(), nbinsx, xlow, xup);
             }
         }
     }
@@ -58,27 +57,25 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
 
     void runPostAnalysis() override {
         for (string property : m_properties) {
-            for (string observable : m_observables) {
-                m_hists[property][observable].Write();
+            for (string type : m_types) {
+                m_hists[property][type].Write();
             }
         }
     }
 
     void useEntry() override {
         for (string property : m_properties) {
-            for (string observable : m_observables) {
-                if (isObservable(observable, m_loaded_event)) {
-                    m_hists[property][observable].Fill(getProperty(property, m_loaded_event));
+            for (string type : m_types) {
+                if (isType(type, m_loaded_event)) {
+                    m_hists[property][type].Fill(getProperty(property, m_loaded_event));
                 }
             }
         }
     }
 
-    virtual const string makeName(const string &property, const string &observable) {
-        return property + "_" + observable;
-    }
+    virtual const string makeName(const string &property, const string &type) { return property + "_" + type; }
 
-    static bool isObservable(const string &observable, const GenieEvent &ge);
+    static bool isType(const string &type, const GenieEvent &ge);
     static Double_t getProperty(const string &property, const GenieEvent &ge);
 };
 
