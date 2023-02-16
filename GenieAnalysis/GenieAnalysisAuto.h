@@ -31,13 +31,9 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     bool m_hists_initialized{false};
     map<string, map<string, TH1F>> m_hists;
 
-    map<string, AutoProperty> m_known_properties{
-        {"W", {{1000, 0, 4}, [this]() { return m_ge.W; }}},
-        {"wght", {{100, 0, 2}, [this]() { return m_ge.wght; }}},
-        {"el_phi", {{720, -30, 330}, [this]() {
-                        double phi_deg{TVector3(m_ge.pxl, m_ge.pyl, m_ge.pzl).Phi() * TMath::RadToDeg()};
-                        return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
-                    }}}};
+  protected:
+    map<string, AutoProperty> m_known_properties{{"W", {{1000, 0, 4}, [this]() { return m_ge.W; }}},
+                                                 {"wght", {{100, 0, 2}, [this]() { return m_ge.wght; }}}};
 
     map<string, function<bool()>> m_known_types{
         {"ALL", [this]() { return true; }},

@@ -45,15 +45,28 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
     static constexpr double m_smearing_reso_el{0.005}; // smearing for the electrons
     static constexpr double m_smearing_reso_pi{0.007}; // smearing for pions, executive decision by Larry (28.08.19)
 
-    // Properties of the loaded event to be set and used in passesCuts and useEntry
+    // Properties of the loaded event to be set and used in passesCuts and new properties
     TVector3 m_smeared_el_V3;
     TLorentzVector m_smeared_el_V4;
 
+    double electron_acceptance_weight;
+
+    // Extensions to automatic TH1Fs
+    map<string, AutoProperty> m_new_known_properties{
+        {"el_smeared_phi",
+         {{720, -30, 330},
+          [this]() {
+              double phi_deg{m_smeared_el_V3.Phi() * TMath::RadToDeg()};
+              return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
+          }}},
+        {"el_acceptance", {{100, 0, 1}, [this]() { return electron_acceptance_weight; }}}};
+
   public:
-    using GenieAnalysisAutoTH1Fs::GenieAnalysisAutoTH1Fs;
     GenieAnalysisLucassCuts(const char *filename, const char *output_filename, const vector<string> &properties,
                             const vector<string> &types, const char *gst_ttree_name = "gst")
-        : GenieAnalysisAutoTH1Fs(filename, output_filename, properties, types, gst_ttree_name), m_fiducials{} {}
+        : GenieAnalysisAutoTH1Fs(filename, output_filename, properties, types, gst_ttree_name), m_fiducials{} {
+        m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
+    }
 
     bool passesCuts() {
         const double smeared_pl{gRandom->Gaus(m_ge.pl, m_smearing_reso_el * m_ge.pl)};
@@ -107,9 +120,9 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
         const double x_bjk = reco_Q2 / (2 * m_prot * nu);
 
         // Get the electron acceptance weight from the e2a map
-        const double electron_acceptance_weight{
+        electron_acceptance_weight =
             electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(),
-                               m_smeared_el_V3.Phi() + TMath::Pi())}; // could be issue here - angles and CoTheta
+                               m_smeared_el_V3.Phi() + TMath::Pi()); // could be issue here - angles and CoTheta
 
         return true;
     }
@@ -142,10 +155,9 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
 };
 
 int main(int argc, char *argv[]) {
-
     GenieAnalysisLucassCuts ga{"/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root",
                                "output_lucass_cuts.root",
-                               {"W", "wght", "el_phi"},
+                               {"W", "wght", "el_smeared_phi", "el_acceptance"},
                                {"ALL", "QE", "RES", "DIS"}};
 
     ga.runAnalysis();
