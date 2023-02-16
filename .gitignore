@@ -3,6 +3,7 @@
 *.root
 genie_analysis
 genie_analysis_demo
+genie_analysis_lucass_cuts
 systematics
 e2a_ep
 
