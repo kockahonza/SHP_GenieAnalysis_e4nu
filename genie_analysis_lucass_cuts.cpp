@@ -1,3 +1,4 @@
+#include <TVector3.h>
 #include <iostream>
 
 #include <TH3D.h>
@@ -8,6 +9,23 @@
 #include "GenieAnalysis/Fiducial.h"
 #include "GenieAnalysis/GenieAnalysisAuto.h"
 #include "GenieAnalysis/misc.h"
+
+class FiducialWrapper {
+  private:
+    Fiducial m_fiducial;
+
+  public:
+    FiducialWrapper() : m_fiducial{} {
+        // Set up fiducial for 2.261Gev and carbon 12 target
+        m_fiducial.InitPiMinusFit("2261");
+        m_fiducial.InitEClimits();
+
+        m_fiducial.SetConstants(2250, "12C", {{"1161", 1.161}, {"2261", 2.261}, {"4461", 4.461}});
+        m_fiducial.SetFiducialCutParameters("2261");
+    }
+
+    bool electron_cut(TVector3 electron_3V) { return m_fiducial.EFiducialCut("2261", electron_3V); }
+};
 
 // So far I'm only focusing on exactly the stuff used with the command line arguments in the README,
 // specifically this means 2.261GeV beam on C12 target and more.
@@ -20,7 +38,7 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
     const std::unique_ptr<TH3D> m_el_acceptance_acc{(TH3D *)m_el_acceptance_file->Get("Accepted Particles")};
     const std::unique_ptr<TH3D> m_el_acceptance_gen{(TH3D *)m_el_acceptance_file->Get("Generated Particles")};
 
-    Fiducial m_fiducial{};
+    FiducialWrapper m_fiducials;
 
     // Parameters
     static constexpr double m_smearing_reso_p{0.01};   // smearing for the proton
@@ -34,16 +52,8 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
   public:
     using GenieAnalysisAutoTH1Fs::GenieAnalysisAutoTH1Fs;
     GenieAnalysisLucassCuts(const char *filename, const char *output_filename, const vector<string> &properties,
-                           const vector<string> &types, const char *gst_ttree_name = "gst")
-        : GenieAnalysisAutoTH1Fs(filename, output_filename, properties, types, gst_ttree_name) {
-
-            // Set up fiducial for 2.261Gev and carbon 12 target
-            m_fiducial.InitPiMinusFit("2261");
-            m_fiducial.InitEClimits();
-
-            m_fiducial.SetConstants(2250, "12C", {{"1161", 1.161}, {"2261", 2.261}, {"4461", 4.461}});
-            m_fiducial.SetFiducialCutParameters("2261");
-        }
+                            const vector<string> &types, const char *gst_ttree_name = "gst")
+        : GenieAnalysisAutoTH1Fs(filename, output_filename, properties, types, gst_ttree_name), m_fiducials{} {}
 
     bool passesCuts() {
         const double smeared_pl{gRandom->Gaus(m_ge.pl, m_smearing_reso_el * m_ge.pl)};
@@ -56,9 +66,6 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
         // GENIE coordinate system flipped with respect to CLAS -- blindly taken from original
         m_smeared_el_V3.SetPhi(m_smeared_el_V3.Phi() + TMath::Pi());
 
-        const double electron_acceptance_weight{electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(),
-                                                            m_smeared_el_V3.Phi())}; // MARK:CosTheta could be an issue
-
         // Electron theta and momentum fiducial (I think) cut, the values are specifically for C12 ~2GeV set by
         // inspecting
         // https://docs.google.com/presentation/d/1ghG08JfCYXRXh6O8hcXKrhJOFxkAs_9i5ZfoIkiiEHU/edit?usp=sharing and
@@ -68,19 +75,41 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
             return false;
         }
 
+        // This was originally later on but I think it makes more sense here
+        if (!m_fiducials.electron_cut(m_smeared_el_V3)) {
+            return false;
+        }
+
+        // Filter some specific sectors, this was enabled and probably makes some sense, essentially only
+        // use sectors 0, 1 and 5
+        // Sectors are a bit weird, the first goes from -30 to 30 and the rest go as expected to 330
+        double temp{(m_smeared_el_V3.Phi() + TMath::Pi() / 6)};
+        if (temp < 0) {
+            temp += 2 * TMath::Pi();
+        }
+        const int ElectronSector = temp / (TMath::Pi() / 3);
+        if ((ElectronSector >= 2) && (ElectronSector <= 4)) {
+            return false;
+        }
+
         // ## There was a cut on electron phi here but unused given the command line options
         // ## Cut on electron sectors here, but unused given our command line options
 
         // Here there's a longish part calculating weights but the "Mott_cross_section" is hardcoded
         // to 1 and wghts are I think all 1 so essentially it's just the e acceptance weight
 
-        // Calculation of kinematic quantities (nu, Q2, x bjorken, q and W) -- mostly taken from original though specific 2Gev beam
-        const TLorentzVector el_change{m_ge.pxl, m_ge.pyl, m_ge.pzl - 2.261, m_ge.El - 2.261};
+        // Calculation of kinematic quantities (nu, Q2, x bjorken, q and W) -- mostly taken from original though
+        // specific 2Gev beam
+        const TLorentzVector el_change{m_smeared_el_V4 - TLorentzVector{0, 0, 2.261, 2.261}};
         const double reco_Q2 = -el_change.Mag2();
 
         const double nu = -el_change.E();
         const double x_bjk = reco_Q2 / (2 * m_prot * nu);
 
+        // Get the electron acceptance weight from the e2a map
+        const double electron_acceptance_weight{
+            electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(),
+                               m_smeared_el_V3.Phi() + TMath::Pi())}; // could be issue here - angles and CoTheta
 
         return true;
     }

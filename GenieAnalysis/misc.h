@@ -1,17 +1,9 @@
 #ifndef MISC_H
 #define MISC_H
 
-#include "GenieAnalysis.h"
+#include <TMath.h>
 
-// Not sure if this is a useful thing or not, but keeping it for now, it's the same values as in the original code
-enum class InteractionType {
-    AllInteractions = 0,
-    QuasiElastic = 1,
-    MesonExchangeCurrent = 2,
-    Resonance = 3,
-    DeepInelastic = 4,
-    CoherentMesonProduction = 5
-};
+#include "GenieAnalysis.h"
 
 constexpr double m_pimi = 0.139570, m_pipl = 0.139570, m_pion = 0.139570;
 constexpr double m_prot = 0.9382720813, m_neut = 0.939565;

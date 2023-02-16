@@ -630,7 +630,6 @@ void genie_analysis::Loop() {
         // Outgoing e',	Uncorr and corrected are the same read from root file.
         // V4_el and V3_el will be changed by smearing for GENIE simulation data
         TLorentzVector V4_el(pxl, pyl, pzl, El);
-        TLorentzVector V4_el_uncorr(pxl, pyl, pzl, El);
         TVector3 V3_el(pxl, pyl, pzl);
 
         double el_momentum = V3_el.Mag();

@@ -20,6 +20,9 @@ Double_t GenieAnalysisAutoTH1Fs::getProperty(const string &property, const Genie
         return ge.W;
     } else if (property == "wght") {
         return ge.wght;
+    } else if (property == "el_phi") {
+        double phi_deg{TVector3(ge.pxl, ge.pyl, ge.pzl).Phi() * TMath::RadToDeg()};
+        return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
     } else {
         // TODO: improve errors
         throw -1;

@@ -1012,8 +1012,8 @@ Bool_t Fiducial::EFiducialCut(std::string beam_en, TVector3 momentum) {
         //		tested against EFiducialCut for both 2.2 (with and without bad scintillator cuts) and 4.4 GeV
         //		discrepancy less than 2 in 10^6 events
         //		Please refer to <A HREF="http://www.jlab.org/Hall-B/secure/e2/bzh/efiducialcut.html">Electron
-        //Fiducial Cuts</A> -- Bin Zhang (MIT). 		For 4.4GeV please refer to <A
-        //HREF="http://einstein.unh.edu/protopop/FiducialCuts/fc4E2.html">Fiducial Cuts</A> -- D.Protopopescu (UNH)
+        // Fiducial Cuts</A> -- Bin Zhang (MIT). 		For 4.4GeV please refer to <A
+        // HREF="http://einstein.unh.edu/protopop/FiducialCuts/fc4E2.html">Fiducial Cuts</A> -- D.Protopopescu (UNH)
         // Please refer to <a href="http://www.jlab.org/Hall-B/secure/e2/stevenmc/FiducialCuts/index.html">1.1 GeV
         // fiducial cuts</a> -- Steven McLauchlan (GU). 		<pre>
         //		//End_Html

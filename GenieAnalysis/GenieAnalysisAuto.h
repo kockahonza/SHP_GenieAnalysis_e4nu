@@ -9,8 +9,10 @@
 #include <TFile.h>
 #include <TH1F.h>
 #include <TTree.h>
+#include <TVector3.h>
 
 #include "GenieAnalysis.h"
+#include "misc.h"
 
 using std::vector, std::string, std::map, std::tuple;
 
@@ -26,7 +28,11 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
 
   public:
     // Specifies how to initialize the histograms for each property
-    map<string, tuple<Int_t, Int_t, Int_t>> m_bin_params{{"W", {1000, 0, 4}}};
+    map<string, tuple<Int_t, Int_t, Int_t>> m_bin_params{
+        {"W", {1000, 0, 4}},
+        {"wght", {100, 0, 2}},
+        {"el_phi", {720, -30, 330}},
+    };
 
   public:
     GenieAnalysisAutoTH1Fs(const char *filename, const char *output_filename, const vector<string> &properties,

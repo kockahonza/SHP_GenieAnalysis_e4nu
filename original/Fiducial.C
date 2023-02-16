@@ -611,7 +611,6 @@ Bool_t Fiducial::GetEPhiLimits(std::string beam_en, Float_t momentum, Float_t th
 // --------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Bool_t Fiducial::EFiducialCut(std::string beam_en, TVector3 momentum) {
-
     // Electron fiducial cut, return kTRUE if pass or kFALSE if not
 
     Bool_t status = kTRUE;
