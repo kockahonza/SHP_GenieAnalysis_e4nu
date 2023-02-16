@@ -14,7 +14,12 @@
 #include "GenieAnalysis.h"
 #include "misc.h"
 
-using std::vector, std::string, std::map, std::tuple;
+using std::vector, std::string, std::map, std::tuple, std::function;
+
+struct AutoProperty {
+    tuple<Int_t, Int_t, Int_t> bin_params; // How to initialize the TH1F - nbinsx, xlow, xup in order
+    function<double()> get_property;
+};
 
 class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
   private:
@@ -26,12 +31,19 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     bool m_hists_initialized{false};
     map<string, map<string, TH1F>> m_hists;
 
-  public:
-    // Specifies how to initialize the histograms for each property
-    map<string, tuple<Int_t, Int_t, Int_t>> m_bin_params{
-        {"W", {1000, 0, 4}},
-        {"wght", {100, 0, 2}},
-        {"el_phi", {720, -30, 330}},
+    map<string, AutoProperty> m_known_properties{
+        {"W", {{1000, 0, 4}, [this]() { return m_ge.W; }}},
+        {"wght", {{100, 0, 2}, [this]() { return m_ge.wght; }}},
+        {"el_phi", {{720, -30, 330}, [this]() {
+                        double phi_deg{TVector3(m_ge.pxl, m_ge.pyl, m_ge.pzl).Phi() * TMath::RadToDeg()};
+                        return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
+                    }}}};
+
+    map<string, function<bool()>> m_known_types{
+        {"ALL", [this]() { return true; }},
+        {"QE", [this]() { return m_ge.qel; }},
+        {"RES", [this]() { return m_ge.res; }},
+        {"DIS", [this]() { return m_ge.dis; }},
     };
 
   public:
@@ -48,7 +60,7 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
         for (string property : m_properties) {
             for (string type : m_types) {
                 name_and_title = makeName(property, type);
-                std::tie(nbinsx, xlow, xup) = m_bin_params[property];
+                std::tie(nbinsx, xlow, xup) = m_known_properties[property].bin_params;
                 m_hists[property][type] = TH1F(name_and_title.c_str(), name_and_title.c_str(), nbinsx, xlow, xup);
             }
         }
@@ -71,17 +83,14 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     void useEntry() override {
         for (string property : m_properties) {
             for (string type : m_types) {
-                if (isType(type, m_ge)) {
-                    m_hists[property][type].Fill(getProperty(property, m_ge));
+                if (m_known_types[type]()) {
+                    m_hists[property][type].Fill(m_known_properties[property].get_property());
                 }
             }
         }
     }
 
     virtual const string makeName(const string &property, const string &type) { return property + "_" + type; }
-
-    static bool isType(const string &type, const GenieEvent &ge);
-    static Double_t getProperty(const string &property, const GenieEvent &ge);
 };
 
 #endif

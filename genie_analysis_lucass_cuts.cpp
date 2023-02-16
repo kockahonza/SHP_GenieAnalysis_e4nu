@@ -145,8 +145,8 @@ int main(int argc, char *argv[]) {
 
     GenieAnalysisLucassCuts ga{"/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root",
                                "output_lucass_cuts.root",
-                               {"W"},
-                               {"QE", "RES", "DIS"}};
+                               {"W", "wght", "el_phi"},
+                               {"ALL", "QE", "RES", "DIS"}};
 
     ga.runAnalysis();
 
