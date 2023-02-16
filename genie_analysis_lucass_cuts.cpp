@@ -20,7 +20,7 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
     const std::unique_ptr<TH3D> m_el_acceptance_acc{(TH3D *)m_el_acceptance_file->Get("Accepted Particles")};
     const std::unique_ptr<TH3D> m_el_acceptance_gen{(TH3D *)m_el_acceptance_file->Get("Generated Particles")};
 
-    const Fiducial m_fiducial{};
+    Fiducial m_fiducial{};
 
     // Parameters
     static constexpr double m_smearing_reso_p{0.01};   // smearing for the proton
@@ -33,6 +33,17 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
 
   public:
     using GenieAnalysisAutoTH1Fs::GenieAnalysisAutoTH1Fs;
+    GenieAnalysisLucassCuts(const char *filename, const char *output_filename, const vector<string> &properties,
+                           const vector<string> &types, const char *gst_ttree_name = "gst")
+        : GenieAnalysisAutoTH1Fs(filename, output_filename, properties, types, gst_ttree_name) {
+
+            // Set up fiducial for 2.261Gev and carbon 12 target
+            m_fiducial.InitPiMinusFit("2261");
+            m_fiducial.InitEClimits();
+
+            m_fiducial.SetConstants(2250, "12C", {{"1161", 1.161}, {"2261", 2.261}, {"4461", 4.461}});
+            m_fiducial.SetFiducialCutParameters("2261");
+        }
 
     bool passesCuts() {
         const double smeared_pl{gRandom->Gaus(m_ge.pl, m_smearing_reso_el * m_ge.pl)};
