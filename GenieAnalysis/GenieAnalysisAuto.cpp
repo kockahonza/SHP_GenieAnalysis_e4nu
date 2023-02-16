@@ -18,6 +18,8 @@ bool GenieAnalysisAutoTH1Fs::isType(const string &type, const GenieEvent &ge) {
 Double_t GenieAnalysisAutoTH1Fs::getProperty(const string &property, const GenieEvent &ge) {
     if (property == "W") {
         return ge.W;
+    } else if (property == "wght") {
+        return ge.wght;
     } else {
         // TODO: improve errors
         throw -1;

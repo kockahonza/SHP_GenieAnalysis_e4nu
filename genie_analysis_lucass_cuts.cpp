@@ -5,9 +5,12 @@
 #include <TMath.h>
 #include <TRandom.h>
 
+#include "GenieAnalysis/Fiducial.h"
 #include "GenieAnalysis/GenieAnalysisAuto.h"
 #include "GenieAnalysis/misc.h"
 
+// So far I'm only focusing on exactly the stuff used with the command line arguments in the README,
+// specifically this means 2.261GeV beam on C12 target and more.
 class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
   private:
     // Paths and other system stuff
@@ -16,6 +19,8 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
     const std::unique_ptr<TFile> m_el_acceptance_file{TFile::Open(m_el_acceptance_filename, "READ")};
     const std::unique_ptr<TH3D> m_el_acceptance_acc{(TH3D *)m_el_acceptance_file->Get("Accepted Particles")};
     const std::unique_ptr<TH3D> m_el_acceptance_gen{(TH3D *)m_el_acceptance_file->Get("Generated Particles")};
+
+    const Fiducial m_fiducial{};
 
     // Parameters
     static constexpr double m_smearing_reso_p{0.01};   // smearing for the proton
@@ -37,18 +42,34 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
                                smeared_pl / m_ge.pl * m_ge.pzl);
         m_smeared_el_V4.SetPxPyPzE(m_smeared_el_V3.X(), m_smeared_el_V3.Y(), m_smeared_el_V3.Z(), smeared_El);
 
-        // Vec.Phi() is between (-180,180), GENIE coordinate system flipped with respect to CLAS
+        // GENIE coordinate system flipped with respect to CLAS -- blindly taken from original
         m_smeared_el_V3.SetPhi(m_smeared_el_V3.Phi() + TMath::Pi());
 
-        const double electron_acceptance{electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(),
+        const double electron_acceptance_weight{electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(),
                                                             m_smeared_el_V3.Phi())}; // MARK:CosTheta could be an issue
 
-        // Electron theta and momentum fiducial (I think) cut, the values are specifically for C12 ~2GeV set by inspecting 
-        // https://docs.google.com/presentation/d/1ghG08JfCYXRXh6O8hcXKrhJOFxkAs_9i5ZfoIkiiEHU/edit?usp=sharing and previous values
+        // Electron theta and momentum fiducial (I think) cut, the values are specifically for C12 ~2GeV set by
+        // inspecting
+        // https://docs.google.com/presentation/d/1ghG08JfCYXRXh6O8hcXKrhJOFxkAs_9i5ZfoIkiiEHU/edit?usp=sharing and
+        // previous values
         const double theta_min{TMath::DegToRad() * (16 + 10.5 / m_smeared_el_V3.Mag())};
         if ((m_smeared_el_V3.Theta() < theta_min) || (m_smeared_el_V3.Theta() < 0) || (m_smeared_el_V3.Theta() > 60)) {
             return false;
         }
+
+        // ## There was a cut on electron phi here but unused given the command line options
+        // ## Cut on electron sectors here, but unused given our command line options
+
+        // Here there's a longish part calculating weights but the "Mott_cross_section" is hardcoded
+        // to 1 and wghts are I think all 1 so essentially it's just the e acceptance weight
+
+        // Calculation of kinematic quantities (nu, Q2, x bjorken, q and W) -- mostly taken from original though specific 2Gev beam
+        const TLorentzVector el_change{m_ge.pxl, m_ge.pyl, m_ge.pzl - 2.261, m_ge.El - 2.261};
+        const double reco_Q2 = -el_change.Mag2();
+
+        const double nu = -el_change.E();
+        const double x_bjk = reco_Q2 / (2 * m_prot * nu);
+
 
         return true;
     }

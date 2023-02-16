@@ -10,7 +10,7 @@ LDFLAGS   := $(ROOTLDFLAGS)
 
 
 # Executables
-genie_analysis_lucass_cuts: GenieAnalysis/GenieAnalysis.o GenieAnalysis/GenieAnalysisAuto.o GenieAnalysis/misc.h genie_analysis_lucass_cuts.cpp
+genie_analysis_lucass_cuts: GenieAnalysis/GenieAnalysis.o GenieAnalysis/GenieAnalysisAuto.o GenieAnalysis/misc.h GenieAnalysis/Fiducial.o genie_analysis_lucass_cuts.cpp
 	$(CXX) -o $@ $^ $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
 genie_analysis_demo: GenieAnalysis/GenieAnalysis.o GenieAnalysis/GenieAnalysisAuto.o GenieAnalysis/misc.h genie_analysis_demo.cpp

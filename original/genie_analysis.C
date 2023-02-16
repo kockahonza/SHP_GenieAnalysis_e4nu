@@ -741,7 +741,6 @@ void genie_analysis::Loop() {
         // double Mott_cross_sec = (
         // pow(fine_struc_const,2.)*(cos(el_theta)+1))/(2*pow(El,2.)*pow((1-cos(el_theta)),2.));
 
-        double reco_q3 = (V4_el - V4_beam).Rho();
         double reco_Q2 = -(V4_el - V4_beam).Mag2();
         //		double Q4 = reco_Q2 * reco_Q2;
         double Q4 = 1.; // smithja: to eliminate Q4 dependence as part of re-doing Graham's Procedure 2 analysis, I
@@ -776,9 +775,9 @@ void genie_analysis::Loop() {
 
         // Calculation of Reconstructed Energy from ELectron only
         // using the same value of single nucleon separation E Ecal and Eqe
-        double E_rec =
-            (m_prot * bind_en[ftarget] + m_prot * V4_el.E()) / (m_prot - V4_el.E() + V4_el.Rho() * cos(el_theta));
-        double EQE_Reso = (E_rec - en_beam_Ecal[fbeam_en]) / en_beam_Ecal[fbeam_en];
+        /* double E_rec = */
+            /* (m_prot * bind_en[ftarget] + m_prot * V4_el.E()) / (m_prot - V4_el.E() + V4_el.Rho() * cos(el_theta)); */
+        /* double EQE_Reso = (E_rec - en_beam_Ecal[fbeam_en]) / en_beam_Ecal[fbeam_en]; */
 
         // Calculation of kinematic quantities (nu, Q2, x bjorken, q and W)
         double nu = -(V4_el - V4_beam).E();
@@ -789,14 +788,6 @@ void genie_analysis::Loop() {
 
         // ---------------------------------------------------------------------------------------------------------------------
         TVector3 V3_q = (V4_beam - V4_el).Vect();
-        double V3_q_theta_deg = V3_q.Theta() * 180. / TMath::Pi();
-        double V3_q_phi_deg = V3_q.Phi() * 180. / TMath::Pi() + 30.;
-        if (V3_q_phi_deg > 360) {
-            V3_q_phi_deg = V3_q_phi_deg - 360.;
-        }
-        if (V3_q_phi_deg < 0) {
-            V3_q_phi_deg = V3_q_phi_deg + 360.;
-        }
         double W_var = TMath::Sqrt((m_prot + nu) * (m_prot + nu) - V3_q * V3_q);
 
         // converting theta to degrees
