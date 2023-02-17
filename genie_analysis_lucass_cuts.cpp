@@ -11,6 +11,9 @@
 #include "GenieAnalysis/misc.h"
 
 class FiducialWrapper {
+  public:
+    enum class PiPhotonId : int { Minus = -1, Photon = 0, Plus = 1 };
+
   private:
     Fiducial m_fiducial;
 
@@ -24,7 +27,11 @@ class FiducialWrapper {
         m_fiducial.SetFiducialCutParameters("2261");
     }
 
-    bool electron_cut(TVector3 electron_3V) { return m_fiducial.EFiducialCut("2261", electron_3V); }
+    bool electronCut(TVector3 momentum_V3) { return m_fiducial.EFiducialCut("2261", momentum_V3); }
+
+    bool piAndPhotonCuts(TVector3 momentum_V3, PiPhotonId which_particle) {
+        return m_fiducial.Pi_phot_fid_united("2261", momentum_V3, static_cast<int>(which_particle));
+    }
 };
 
 // So far I'm only focusing on exactly the stuff used with the command line arguments in the README,
@@ -33,10 +40,14 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
   private:
     // Paths and other system stuff
     // TODO: Move these to the constructor in some nice way, should not just be hardcoded
-    const char *m_el_acceptance_filename{"original/e2a_maps/e2a_maps_12C_E_2_261.root"};
-    const std::unique_ptr<TFile> m_el_acceptance_file{TFile::Open(m_el_acceptance_filename, "READ")};
-    const std::unique_ptr<TH3D> m_el_acceptance_acc{(TH3D *)m_el_acceptance_file->Get("Accepted Particles")};
-    const std::unique_ptr<TH3D> m_el_acceptance_gen{(TH3D *)m_el_acceptance_file->Get("Generated Particles")};
+    const std::unique_ptr<TFile> m_el_acceptance_file{
+        TFile::Open("original/e2a_maps/e2a_maps_12C_E_2_261.root", "READ")};
+    const std::unique_ptr<TFile> m_p_acceptance_file{
+        TFile::Open("original/e2a_maps/e2a_maps_12C_E_2_261_p.root", "READ")};
+    const std::unique_ptr<TFile> m_pip_acceptance_file{
+        TFile::Open("original/e2a_maps/e2a_maps_12C_E_2_261_pip.root", "READ")};
+    const std::unique_ptr<TFile> m_pim_acceptance_file{
+        TFile::Open("original/e2a_maps/e2a_maps_12C_E_2_261_pim.root", "READ")};
 
     FiducialWrapper m_fiducials;
 
@@ -46,8 +57,18 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
     static constexpr double m_smearing_reso_pi{0.007}; // smearing for pions, executive decision by Larry (28.08.19)
 
     // Properties of the loaded event to be set and used in passesCuts and new properties
-    TVector3 m_smeared_el_V3;
+    // electron
+    TVector3 m_smeared_el_V3; // Smeared and rotated by pi
     TLorentzVector m_smeared_el_V4;
+
+    // hadrons -- all of these only contain information on particles passing relevant cuts (pions need momentum above
+    // 0.15 for example)
+    vector<tuple<TLorentzVector, TVector3, double>>
+        m_passed_pi_plus; // tuple has the smeared 4 momentum, smeared 3 momentum and the pions calculated acceptance
+    vector<tuple<TLorentzVector, TVector3, double>>
+        m_passed_pi_minus; // tuple has the smeared 4 momentum, smeared 3 momentum and the pions calculated acceptance
+    vector<tuple<TLorentzVector, TVector3, double>>
+        m_passed_photons; // tuple has the smeared 4 momentum, smeared 3 momentum and the pions calculated acceptance
 
     double electron_acceptance_weight;
 
@@ -59,6 +80,8 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
               double phi_deg{m_smeared_el_V3.Phi() * TMath::RadToDeg()};
               return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
           }}},
+        {"el_smeared_cos_theta", {{720, -1, 1}, [this]() { return m_smeared_el_V3.CosTheta(); }}},
+        {"el_smeared_mag", {{720, 0, 3}, [this]() { return m_smeared_el_V3.Mag(); }}},
         {"el_acceptance", {{100, 0, 1}, [this]() { return electron_acceptance_weight; }}}};
 
   public:
@@ -79,8 +102,8 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
         // GENIE coordinate system flipped with respect to CLAS -- blindly taken from original
         m_smeared_el_V3.SetPhi(m_smeared_el_V3.Phi() + TMath::Pi());
 
-        // Electron theta and momentum fiducial (I think) cut, the values are specifically for C12 ~2GeV set by
-        // inspecting
+        // Electron theta and momentum fiducial (essentially I think) cut, the values are specifically for C12 2.261GeV
+        // set by inspecting
         // https://docs.google.com/presentation/d/1ghG08JfCYXRXh6O8hcXKrhJOFxkAs_9i5ZfoIkiiEHU/edit?usp=sharing and
         // previous values
         const double theta_min{TMath::DegToRad() * (16 + 10.5 / m_smeared_el_V3.Mag())};
@@ -89,7 +112,7 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
         }
 
         // This was originally later on but I think it makes more sense here
-        if (!m_fiducials.electron_cut(m_smeared_el_V3)) {
+        if (!m_fiducials.electronCut(m_smeared_el_V3)) {
             return false;
         }
 
@@ -112,7 +135,7 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
         // to 1 and wghts are I think all 1 so essentially it's just the e acceptance weight
 
         // Calculation of kinematic quantities (nu, Q2, x bjorken, q and W) -- mostly taken from original though
-        // specific 2Gev beam
+        // specific to 2.261Gev beam
         const TLorentzVector el_change{m_smeared_el_V4 - TLorentzVector{0, 0, 2.261, 2.261}};
         const double reco_Q2 = -el_change.Mag2();
 
@@ -124,10 +147,72 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
             electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(),
                                m_smeared_el_V3.Phi() + TMath::Pi()); // could be issue here - angles and CoTheta
 
+        // Hadron loop -- need to add
+        for (int i{0}; i < m_ge.nf; i++) {
+            // pi-
+            if (m_ge.pdgf[i] == -221) {
+                // required momentum for detection
+                if (m_ge.pf[i] < 0.15) {
+                    continue;
+                }
+                const double smeared_p = gRandom->Gaus(m_ge.pf[i], m_smearing_reso_pi * m_ge.pf[i]);
+                const double smeared_E = sqrt(smeared_p * smeared_p + m_pion * m_pion);
+
+                TVector3 V3{smeared_p / m_ge.pf[i] * m_ge.pxf[i], smeared_p / m_ge.pf[i] * m_ge.pyf[i],
+                            smeared_p / m_ge.pf[i] * m_ge.pzf[i]};
+                V3.SetPhi(V3.Phi() + TMath::Pi());
+                TLorentzVector V4{V3, smeared_E};
+
+                if (!m_fiducials.piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Minus)) {
+                    continue;
+                }
+
+                m_passed_pi_minus.push_back({V4, V3, piMinusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});
+            }
+            // pi+
+            if (m_ge.pdgf[i] == 221) {
+                // required momentum for detection
+                if (m_ge.pf[i] < 0.15) {
+                    continue;
+                }
+                const double smeared_p = gRandom->Gaus(m_ge.pf[i], m_smearing_reso_pi * m_ge.pf[i]);
+                const double smeared_E = sqrt(smeared_p * smeared_p + m_pion * m_pion);
+
+                TVector3 V3{smeared_p / m_ge.pf[i] * m_ge.pxf[i], smeared_p / m_ge.pf[i] * m_ge.pyf[i],
+                            smeared_p / m_ge.pf[i] * m_ge.pzf[i]};
+                V3.SetPhi(V3.Phi() + TMath::Pi());
+                TLorentzVector V4{V3, smeared_E};
+
+                if (!m_fiducials.piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Plus)) {
+                    continue;
+                }
+
+                m_passed_pi_plus.push_back({V4, V3, piPlusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});
+            }
+            // photons
+            if (m_ge.pdgf[i] == 22) {
+                // required momentum for detection
+                if (m_ge.pf[i] < 0.3) {
+                    continue;
+                }
+                // No photon smearing
+                TVector3 V3{m_ge.pxf[i], m_ge.pyf[i], m_ge.pzf[i]};
+                V3.SetPhi(V3.Phi() + TMath::Pi());
+                TLorentzVector V4{V3, m_ge.Ef[i]};
+
+                if (!m_fiducials.piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Photon)) {
+                    continue;
+                }
+
+                m_passed_photons.push_back({V4, V3, photonAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});
+            }
+        }
+
         return true;
     }
 
-    double electronAcceptance(const double &p, const double &cos_theta, double phi) {
+    double ePiPAcceptanceJoined(const double &p, const double &cos_theta, double phi,
+                                const std::unique_ptr<TFile> &acceptance_file) {
         // map 330 till 360 to [-30:0] for the acceptance map histogram
         if (phi > (2 * TMath::Pi() - TMath::Pi() / 6.)) {
             phi -= 2 * TMath::Pi();
@@ -135,29 +220,48 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
 
         int redef = 0; // or -30 I think, it was this way in the original
 
+        const std::unique_ptr<TH3D> generated{(TH3D *)acceptance_file->Get("Generated Particles")};
+        const std::unique_ptr<TH3D> accepted{(TH3D *)acceptance_file->Get("Accepted Particles")};
+
         // Find number of generated events
-        double pbin_gen = m_el_acceptance_gen->GetXaxis()->FindBin(p);
-        double tbin_gen = m_el_acceptance_gen->GetYaxis()->FindBin(cos_theta);
-        double phibin_gen = m_el_acceptance_gen->GetZaxis()->FindBin(phi * 180 / TMath::Pi() + redef);
-        double num_gen = m_el_acceptance_gen->GetBinContent(pbin_gen, tbin_gen, phibin_gen);
+        double pbin_gen = generated->GetXaxis()->FindBin(p);
+        double tbin_gen = generated->GetYaxis()->FindBin(cos_theta);
+        double phibin_gen = generated->GetZaxis()->FindBin(phi * 180 / TMath::Pi() + redef);
+        double num_gen = generated->GetBinContent(pbin_gen, tbin_gen, phibin_gen);
 
         // Find number of accepted events
-        double pbin_acc = m_el_acceptance_acc->GetXaxis()->FindBin(p);
-        double tbin_acc = m_el_acceptance_acc->GetYaxis()->FindBin(cos_theta);
-        double phibin_acc = m_el_acceptance_acc->GetZaxis()->FindBin(phi * 180 / TMath::Pi() + redef);
-        double num_acc = m_el_acceptance_acc->GetBinContent(pbin_acc, tbin_acc, phibin_acc);
+        double pbin_acc = accepted->GetXaxis()->FindBin(p);
+        double tbin_acc = accepted->GetYaxis()->FindBin(cos_theta);
+        double phibin_acc = accepted->GetZaxis()->FindBin(phi * 180 / TMath::Pi() + redef);
+        double num_acc = accepted->GetBinContent(pbin_acc, tbin_acc, phibin_acc);
 
         double acc_ratio = num_acc / num_gen;
         double acc_err = sqrt(acc_ratio * (1 - acc_ratio)) / num_gen;
 
         return acc_ratio;
     }
+
+    double electronAcceptance(const double &p, const double &cos_theta, const double &phi) {
+        return ePiPAcceptanceJoined(p, cos_theta, phi, m_el_acceptance_file);
+    }
+
+    double photonAcceptance(const double &p, const double &cos_theta, const double &phi) {
+        return ePiPAcceptanceJoined(p, cos_theta, phi, m_p_acceptance_file);
+    }
+
+    double piPlusAcceptance(const double &p, const double &cos_theta, const double &phi) {
+        return ePiPAcceptanceJoined(p, cos_theta, phi, m_pip_acceptance_file);
+    }
+
+    double piMinusAcceptance(const double &p, const double &cos_theta, const double &phi) {
+        return ePiPAcceptanceJoined(p, cos_theta, phi, m_pim_acceptance_file);
+    }
 };
 
 int main(int argc, char *argv[]) {
     GenieAnalysisLucassCuts ga{"/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root",
                                "output_lucass_cuts.root",
-                               {"W", "wght", "el_smeared_phi", "el_acceptance"},
+                               {"W", "el_smeared_mag", "el_smeared_phi", "el_smeared_mag", "el_acceptance"},
                                {"ALL", "QE", "RES", "DIS"}};
 
     ga.runAnalysis();
