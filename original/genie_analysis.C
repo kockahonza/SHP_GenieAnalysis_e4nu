@@ -1131,6 +1131,7 @@ void genie_analysis::Loop() {
                     continue;
                 }
 
+                // not used anymore
                 if (!ec_radstat_n[num_pi_phot - 1]) {
                     double GammaPhi_Deg = neut_phi_mod;
                     double GammaTheta_Deg = V3_phot_angles.Theta() * TMath::RadToDeg();

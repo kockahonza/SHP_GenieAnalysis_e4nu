@@ -1,4 +1,3 @@
-#include <TVector3.h>
 #include <iostream>
 
 #include <TH3D.h>
@@ -72,6 +71,7 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
 
     double electron_acceptance_weight;
 
+  protected:
     // Extensions to automatic TH1Fs
     map<string, AutoProperty> m_new_known_properties{
         {"el_smeared_phi",
@@ -147,8 +147,11 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
             electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(),
                                m_smeared_el_V3.Phi() + TMath::Pi()); // could be issue here - angles and CoTheta
 
+        return true;
+
         // Hadron loop -- need to add
         for (int i{0}; i < m_ge.nf; i++) {
+            std::cout << i << std::endl;
             // pi-
             if (m_ge.pdgf[i] == -221) {
                 // required momentum for detection
@@ -195,6 +198,7 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
                 if (m_ge.pf[i] < 0.3) {
                     continue;
                 }
+
                 // No photon smearing
                 TVector3 V3{m_ge.pxf[i], m_ge.pyf[i], m_ge.pzf[i]};
                 V3.SetPhi(V3.Phi() + TMath::Pi());
@@ -202,6 +206,15 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
 
                 if (!m_fiducials.piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Photon)) {
                     continue;
+                }
+
+                // TODO: The following should cut on presence of radiation electrons but it's worth reviewing, a comment in original says
+                // "within 40 degrees in theta and 30 in phi" but that's not what it did, even after fixing a clear(ish) bug
+                // For the second condition there's a phi angle difference the +2pi is to bring it to the 0 to 4pi range adn then mod 2pi and compare to 
+                /* if ((V3.Angle(m_smeared_el_V3) < 40) && (TMath::Abs(fmod(V3.Phi() - m_smeared_el_V3.Phi() + 2 * TMath::Pi(), 2 * TMath::Pi())) < 30)) { */
+                const double positive_phi_difference{TMath::Abs(V3.Phi() - m_smeared_el_V3.Phi()) * TMath::RadToDeg()}; // will be in the [0, 360) range]
+                if ((V3.Angle(m_smeared_el_V3) < 40) && ((positive_phi_difference < 30) || (positive_phi_difference > 330))) {
+                    return false;
                 }
 
                 m_passed_photons.push_back({V4, V3, photonAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});
@@ -260,8 +273,8 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
 
 int main(int argc, char *argv[]) {
     GenieAnalysisLucassCuts ga{"/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root",
-                               "output_lucass_cuts.root",
-                               {"W", "el_smeared_mag", "el_smeared_phi", "el_smeared_mag", "el_acceptance"},
+                               "output_lucass_cuts_allcuts.root",
+                               {"W", "el_smeared_mag", "el_smeared_phi", "el_smeared_cos_theta", "el_acceptance"},
                                {"ALL", "QE", "RES", "DIS"}};
 
     ga.runAnalysis();
