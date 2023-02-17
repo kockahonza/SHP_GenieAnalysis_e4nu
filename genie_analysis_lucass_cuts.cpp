@@ -4,6 +4,7 @@
 #include <TLorentzVector.h>
 #include <TMath.h>
 #include <TRandom.h>
+#include <memory>
 
 #include "GenieAnalysis/Fiducial.h"
 #include "GenieAnalysis/GenieAnalysisAuto.h"
@@ -48,6 +49,9 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
     const std::unique_ptr<TFile> m_pim_acceptance_file{
         TFile::Open("original/e2a_maps/e2a_maps_12C_E_2_261_pim.root", "READ")};
 
+    // It seems to be necessary for I suppose performance reason? that these are found beforehand and not at each call to acceptanceJoined
+    const std::unique_ptr<TH3D> m_acc_el_gen, m_acc_el_acc, m_acc_p_gen, m_acc_p_acc, m_acc_pip_gen, m_acc_pip_acc, m_acc_pim_gen, m_acc_pim_acc;
+
     FiducialWrapper m_fiducials;
 
     // Parameters
@@ -87,7 +91,16 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
   public:
     GenieAnalysisLucassCuts(const char *filename, const char *output_filename, const vector<string> &properties,
                             const vector<string> &types, const char *gst_ttree_name = "gst")
-        : GenieAnalysisAutoTH1Fs(filename, output_filename, properties, types, gst_ttree_name), m_fiducials{} {
+        : GenieAnalysisAutoTH1Fs(filename, output_filename, properties, types, gst_ttree_name), m_fiducials{},
+        m_acc_el_gen{(TH3D*)m_el_acceptance_file->Get("Generated Particles")},
+        m_acc_el_acc{(TH3D*)m_el_acceptance_file->Get("Accepted Particles")},
+        m_acc_p_gen{(TH3D*)m_p_acceptance_file->Get("Generated Particles")},
+        m_acc_p_acc{(TH3D*)m_p_acceptance_file->Get("Accepted Particles")},
+        m_acc_pip_gen{(TH3D*)m_pip_acceptance_file->Get("Generated Particles")},
+        m_acc_pip_acc{(TH3D*)m_pip_acceptance_file->Get("Accepted Particles")},
+        m_acc_pim_gen{(TH3D*)m_pim_acceptance_file->Get("Generated Particles")},
+        m_acc_pim_acc{(TH3D*)m_pim_acceptance_file->Get("Accepted Particles")}
+    {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
 
@@ -147,11 +160,8 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
             electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(),
                                m_smeared_el_V3.Phi() + TMath::Pi()); // could be issue here - angles and CoTheta
 
-        return true;
-
         // Hadron loop -- need to add
         for (int i{0}; i < m_ge.nf; i++) {
-            std::cout << i << std::endl;
             // pi-
             if (m_ge.pdgf[i] == -221) {
                 // required momentum for detection
@@ -224,17 +234,14 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
         return true;
     }
 
-    double ePiPAcceptanceJoined(const double &p, const double &cos_theta, double phi,
-                                const std::unique_ptr<TFile> &acceptance_file) {
+    double acceptanceJoined(const double &p, const double &cos_theta, double phi,
+                                const std::unique_ptr<TH3D> &generated, const std::unique_ptr<TH3D> &accepted) {
         // map 330 till 360 to [-30:0] for the acceptance map histogram
         if (phi > (2 * TMath::Pi() - TMath::Pi() / 6.)) {
             phi -= 2 * TMath::Pi();
         }
 
         int redef = 0; // or -30 I think, it was this way in the original
-
-        const std::unique_ptr<TH3D> generated{(TH3D *)acceptance_file->Get("Generated Particles")};
-        const std::unique_ptr<TH3D> accepted{(TH3D *)acceptance_file->Get("Accepted Particles")};
 
         // Find number of generated events
         double pbin_gen = generated->GetXaxis()->FindBin(p);
@@ -255,19 +262,19 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
     }
 
     double electronAcceptance(const double &p, const double &cos_theta, const double &phi) {
-        return ePiPAcceptanceJoined(p, cos_theta, phi, m_el_acceptance_file);
+        return acceptanceJoined(p, cos_theta, phi, m_acc_el_gen, m_acc_el_acc);
     }
 
     double photonAcceptance(const double &p, const double &cos_theta, const double &phi) {
-        return ePiPAcceptanceJoined(p, cos_theta, phi, m_p_acceptance_file);
+        return acceptanceJoined(p, cos_theta, phi, m_acc_p_gen, m_acc_p_acc);
     }
 
     double piPlusAcceptance(const double &p, const double &cos_theta, const double &phi) {
-        return ePiPAcceptanceJoined(p, cos_theta, phi, m_pip_acceptance_file);
+        return acceptanceJoined(p, cos_theta, phi, m_acc_pip_gen, m_acc_pip_acc);
     }
 
     double piMinusAcceptance(const double &p, const double &cos_theta, const double &phi) {
-        return ePiPAcceptanceJoined(p, cos_theta, phi, m_pim_acceptance_file);
+        return acceptanceJoined(p, cos_theta, phi, m_acc_pim_gen, m_acc_pim_acc);
     }
 };
 
