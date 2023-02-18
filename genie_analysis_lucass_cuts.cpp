@@ -49,8 +49,10 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
     const std::unique_ptr<TFile> m_pim_acceptance_file{
         TFile::Open("original/e2a_maps/e2a_maps_12C_E_2_261_pim.root", "READ")};
 
-    // It seems to be necessary for I suppose performance reason? that these are found beforehand and not at each call to acceptanceJoined
-    const std::unique_ptr<TH3D> m_acc_el_gen, m_acc_el_acc, m_acc_p_gen, m_acc_p_acc, m_acc_pip_gen, m_acc_pip_acc, m_acc_pim_gen, m_acc_pim_acc;
+    // It seems to be necessary for I suppose performance reason? that these are found beforehand and not at each call
+    // to acceptanceJoined
+    const std::unique_ptr<TH3D> m_acc_el_gen, m_acc_el_acc, m_acc_p_gen, m_acc_p_acc, m_acc_pip_gen, m_acc_pip_acc,
+        m_acc_pim_gen, m_acc_pim_acc;
 
     FiducialWrapper m_fiducials;
 
@@ -89,18 +91,18 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
         {"el_acceptance", {{100, 0, 1}, [this]() { return electron_acceptance_weight; }}}};
 
   public:
-    GenieAnalysisLucassCuts(const char *filename, const char *output_filename, const vector<string> &properties,
-                            const vector<string> &types, const char *gst_ttree_name = "gst")
-        : GenieAnalysisAutoTH1Fs(filename, output_filename, properties, types, gst_ttree_name), m_fiducials{},
-        m_acc_el_gen{(TH3D*)m_el_acceptance_file->Get("Generated Particles")},
-        m_acc_el_acc{(TH3D*)m_el_acceptance_file->Get("Accepted Particles")},
-        m_acc_p_gen{(TH3D*)m_p_acceptance_file->Get("Generated Particles")},
-        m_acc_p_acc{(TH3D*)m_p_acceptance_file->Get("Accepted Particles")},
-        m_acc_pip_gen{(TH3D*)m_pip_acceptance_file->Get("Generated Particles")},
-        m_acc_pip_acc{(TH3D*)m_pip_acceptance_file->Get("Accepted Particles")},
-        m_acc_pim_gen{(TH3D*)m_pim_acceptance_file->Get("Generated Particles")},
-        m_acc_pim_acc{(TH3D*)m_pim_acceptance_file->Get("Accepted Particles")}
-    {
+    GenieAnalysisLucassCuts(const char *filename, const char *output_filename, const vector<string> &stages,
+                            const vector<string> &properties, const vector<string> &types,
+                            const char *gst_ttree_name = "gst")
+        : GenieAnalysisAutoTH1Fs(filename, output_filename, stages, properties, types, gst_ttree_name), m_fiducials{},
+          m_acc_el_gen{(TH3D *)m_el_acceptance_file->Get("Generated Particles")},
+          m_acc_el_acc{(TH3D *)m_el_acceptance_file->Get("Accepted Particles")},
+          m_acc_p_gen{(TH3D *)m_p_acceptance_file->Get("Generated Particles")},
+          m_acc_p_acc{(TH3D *)m_p_acceptance_file->Get("Accepted Particles")},
+          m_acc_pip_gen{(TH3D *)m_pip_acceptance_file->Get("Generated Particles")},
+          m_acc_pip_acc{(TH3D *)m_pip_acceptance_file->Get("Accepted Particles")},
+          m_acc_pim_gen{(TH3D *)m_pim_acceptance_file->Get("Generated Particles")},
+          m_acc_pim_acc{(TH3D *)m_pim_acceptance_file->Get("Accepted Particles")} {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
 
@@ -114,6 +116,8 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
 
         // GENIE coordinate system flipped with respect to CLAS -- blindly taken from original
         m_smeared_el_V3.SetPhi(m_smeared_el_V3.Phi() + TMath::Pi());
+
+        useEntryAtStage("nocut");
 
         // Electron theta and momentum fiducial (essentially I think) cut, the values are specifically for C12 2.261GeV
         // set by inspecting
@@ -218,12 +222,16 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
                     continue;
                 }
 
-                // TODO: The following should cut on presence of radiation electrons but it's worth reviewing, a comment in original says
-                // "within 40 degrees in theta and 30 in phi" but that's not what it did, even after fixing a clear(ish) bug
-                // For the second condition there's a phi angle difference the +2pi is to bring it to the 0 to 4pi range adn then mod 2pi and compare to 
-                /* if ((V3.Angle(m_smeared_el_V3) < 40) && (TMath::Abs(fmod(V3.Phi() - m_smeared_el_V3.Phi() + 2 * TMath::Pi(), 2 * TMath::Pi())) < 30)) { */
-                const double positive_phi_difference{TMath::Abs(V3.Phi() - m_smeared_el_V3.Phi()) * TMath::RadToDeg()}; // will be in the [0, 360) range]
-                if ((V3.Angle(m_smeared_el_V3) < 40) && ((positive_phi_difference < 30) || (positive_phi_difference > 330))) {
+                // TODO: The following should cut on presence of radiation electrons but it's worth reviewing, a comment
+                // in original says "within 40 degrees in theta and 30 in phi" but that's not what it did, even after
+                // fixing a clear(ish) bug For the second condition there's a phi angle difference the +2pi is to bring
+                // it to the 0 to 4pi range adn then mod 2pi and compare to
+                /* if ((V3.Angle(m_smeared_el_V3) < 40) && (TMath::Abs(fmod(V3.Phi() - m_smeared_el_V3.Phi() + 2 *
+                 * TMath::Pi(), 2 * TMath::Pi())) < 30)) { */
+                const double positive_phi_difference{TMath::Abs(V3.Phi() - m_smeared_el_V3.Phi()) *
+                                                     TMath::RadToDeg()}; // will be in the [0, 360) range]
+                if ((V3.Angle(m_smeared_el_V3) < 40) &&
+                    ((positive_phi_difference < 30) || (positive_phi_difference > 330))) {
                     return false;
                 }
 
@@ -235,7 +243,7 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
     }
 
     double acceptanceJoined(const double &p, const double &cos_theta, double phi,
-                                const std::unique_ptr<TH3D> &generated, const std::unique_ptr<TH3D> &accepted) {
+                            const std::unique_ptr<TH3D> &generated, const std::unique_ptr<TH3D> &accepted) {
         // map 330 till 360 to [-30:0] for the acceptance map histogram
         if (phi > (2 * TMath::Pi() - TMath::Pi() / 6.)) {
             phi -= 2 * TMath::Pi();
@@ -281,6 +289,7 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
 int main(int argc, char *argv[]) {
     GenieAnalysisLucassCuts ga{"/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root",
                                "output_lucass_cuts_allcuts.root",
+                               {"nocut"},
                                {"W", "el_smeared_mag", "el_smeared_phi", "el_smeared_cos_theta", "el_acceptance"},
                                {"ALL", "QE", "RES", "DIS"}};
 
