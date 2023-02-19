@@ -28,7 +28,7 @@ class GenieAnalysisDemoW : public GenieAnalysis {
           m_hist_W_dis("W_dis", "W of Deep Inelastic events", W_hist_bins, W_hist_min, W_hist_max),
           m_hist_W_total("W_total", "W of all events", W_hist_bins, W_hist_min, W_hist_max) {}
 
-    void useEntry() override {
+    void useEntry(Double_t weight) override {
         if (m_ge.qel) {
             m_hist_W_qe.Fill(m_ge.W);
         }

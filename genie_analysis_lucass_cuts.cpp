@@ -10,6 +10,7 @@
 #include "GenieAnalysis/GenieAnalysisAuto.h"
 #include "GenieAnalysis/misc.h"
 
+
 class FiducialWrapper {
   public:
     enum class PiPhotonId : int { Minus = -1, Photon = 0, Plus = 1 };
@@ -106,7 +107,7 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
 
-    bool passesCuts() {
+    Double_t passesCuts() {
         const double smeared_pl{gRandom->Gaus(m_ge.pl, m_smearing_reso_el * m_ge.pl)};
         const double smeared_El{sqrt(smeared_pl * smeared_pl + e_mass * e_mass)};
 
@@ -239,7 +240,7 @@ class GenieAnalysisLucassCuts : public GenieAnalysisAutoTH1Fs {
             }
         }
 
-        return true;
+        return electron_acceptance_weight;
     }
 
     double acceptanceJoined(const double &p, const double &cos_theta, double phi,

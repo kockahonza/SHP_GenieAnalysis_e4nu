@@ -119,21 +119,21 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
         }
     }
 
-    void useEntryAtStage(string stage) {
+    void useEntryAtStage(string stage, Double_t weight=1) {
         for (string property : m_properties) {
             for (string type : m_types) {
                 if (m_known_types[type]()) {
-                    m_staged_hists[stage][property][type].Fill(m_known_properties[property].get_property());
+                    m_staged_hists[stage][property][type].Fill(m_known_properties[property].get_property(), weight);
                 }
             }
         }
     }
 
-    void useEntry() override {
+    void useEntry(Double_t weight) override {
         for (string property : m_properties) {
             for (string type : m_types) {
                 if (m_known_types[type]()) {
-                    m_hists[property][type].Fill(m_known_properties[property].get_property());
+                    m_hists[property][type].Fill(m_known_properties[property].get_property(), weight);
                 }
             }
         }

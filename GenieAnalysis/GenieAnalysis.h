@@ -140,8 +140,9 @@ class GenieAnalysis {
                 std::cout << "Currently at entry " << entry_i << " out of " << number_of_entries << std::endl;
             }
             m_genie_data->GetEntry(entry_i);
-            if (passesCuts()) {
-                useEntry();
+            Double_t weight{passesCuts()};
+            if (weight != 0) {
+                useEntry(weight);
             }
         }
 
@@ -150,9 +151,9 @@ class GenieAnalysis {
 
     virtual void runPreAnalysis(){};
 
-    virtual bool passesCuts() { return true; }
+    virtual Double_t passesCuts() { return 1; }
 
-    virtual void useEntry() {}
+    virtual void useEntry(Double_t weight=1) {}
 
     virtual void runPostAnalysis(){};
 };

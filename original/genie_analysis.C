@@ -1376,8 +1376,6 @@ void genie_analysis::Loop() {
             double histoweight = pion_acc_ratio * WeightIncl;
         }
 
-        //----------------------------- e- ,2pi  -----------------------------------------
-
         // Add the heatmap values
         if (Separate_Interaction == 4) { // DIS
             if (true_pimin == 0 &&
