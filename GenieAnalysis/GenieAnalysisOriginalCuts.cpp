@@ -20,12 +20,12 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
     // previous values
     const double theta_min{TMath::DegToRad() * (16 + 10.5 / m_smeared_el_V3.Mag())};
     if ((m_smeared_el_V3.Theta() < theta_min) || (m_smeared_el_V3.Theta() < 0) || (m_smeared_el_V3.Theta() > 60)) {
-        return false;
+        return 0;
     }
 
     // This was originally later on but I think it makes more sense here
     if (!m_fiducials.electronCut(m_smeared_el_V3)) {
-        return false;
+        return 0;
     }
 
     // Filter some specific sectors, this was enabled and probably makes some sense, essentially only
@@ -37,7 +37,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
     }
     const int ElectronSector = temp / (TMath::Pi() / 3);
     if ((ElectronSector >= 2) && (ElectronSector <= 4)) {
-        return false;
+        return 0;
     }
 
     // ## There was a cut on electron phi here but unused given the command line options
@@ -59,11 +59,17 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
     electron_acceptance_weight =
         electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(),
                            m_smeared_el_V3.Phi() + TMath::Pi()); // could be issue here - angles and CoTheta
+    if (electron_acceptance_weight != TMath::Abs(electron_acceptance_weight)) {
+        throw "Electron acceptance not reasonable";
+    }
 
-    // Hadron loop -- need to add
+    // Hadron loop, first clear the vectors though
+    m_passed_pi_minus.clear();
+    m_passed_pi_plus.clear();
+    m_passed_photons.clear();
     for (int i{0}; i < m_ge.nf; i++) {
         // pi-
-        if (m_ge.pdgf[i] == -221) {
+        if (m_ge.pdgf[i] == -211) {
             // required momentum for detection
             if (m_ge.pf[i] < 0.15) {
                 continue;
@@ -83,7 +89,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
             m_passed_pi_minus.push_back({V4, V3, piMinusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});
         }
         // pi+
-        if (m_ge.pdgf[i] == 221) {
+        if (m_ge.pdgf[i] == 211) {
             // required momentum for detection
             if (m_ge.pf[i] < 0.15) {
                 continue;
@@ -128,7 +134,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
                                                  TMath::RadToDeg()}; // will be in the [0, 360) range]
             if ((V3.Angle(m_smeared_el_V3) < 40) &&
                 ((positive_phi_difference < 30) || (positive_phi_difference > 330))) {
-                return false;
+                return 0;
             }
 
             m_passed_photons.push_back({V4, V3, photonAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});

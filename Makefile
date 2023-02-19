@@ -12,6 +12,9 @@ LDFLAGS   := $(ROOTLDFLAGS)
 
 
 # Executables
+genie_analysis_jan: genie_analysis_jan.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o $@ $^ $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+
 genie_analysis_lucass_cuts: genie_analysis_lucass_cuts.cpp $(GA_LIB_OBJECTS)
 	$(CXX) -o $@ $^ $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 

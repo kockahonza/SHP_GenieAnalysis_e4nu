@@ -59,6 +59,7 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
     const std::unique_ptr<TH3D> m_acc_el_gen, m_acc_el_acc, m_acc_p_gen, m_acc_p_acc, m_acc_pip_gen, m_acc_pip_acc,
         m_acc_pim_gen, m_acc_pim_acc;
 
+  protected:
     // Parameters
     static constexpr double m_smearing_reso_p{0.01};   // smearing for the proton
     static constexpr double m_smearing_reso_el{0.005}; // smearing for the electrons
@@ -68,6 +69,7 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
     // electron
     TVector3 m_smeared_el_V3; // Smeared and rotated by pi
     TLorentzVector m_smeared_el_V4;
+    double electron_acceptance_weight;
 
     // hadrons -- all of these only contain information on particles passing relevant cuts (pions need momentum above
     // 0.15 for example)
@@ -78,9 +80,7 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
     vector<tuple<TLorentzVector, TVector3, double>>
         m_passed_photons; // tuple has the smeared 4 momentum, smeared 3 momentum and the pions calculated acceptance
 
-    double electron_acceptance_weight;
 
-  protected:
     // Extensions to automatic TH1Fs
     map<string, AutoProperty> m_new_known_properties{
         {"el_smeared_phi",
