@@ -52,7 +52,7 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
             }
 
             if (m_pion_acceptance != TMath::Abs(m_pion_acceptance)) {
-                /* throw "Pion acceptance is not reasonable"; */
+                // Seems the pion maps have a lot of invalid values so don't use the events that fail, but don't throw and error, it is expected
                 return 0;
             }
 

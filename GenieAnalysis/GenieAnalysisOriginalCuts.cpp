@@ -2,6 +2,8 @@
 
 
 Double_t GenieAnalysisOriginalCuts::passesCuts() {
+    useEntryAtStage("nocut");
+
     const double smeared_pl{gRandom->Gaus(m_ge.pl, m_smearing_reso_el * m_ge.pl)};
     const double smeared_El{sqrt(smeared_pl * smeared_pl + e_mass * e_mass)};
 
@@ -11,8 +13,6 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
 
     // GENIE coordinate system flipped with respect to CLAS -- blindly taken from original
     m_smeared_el_V3.SetPhi(m_smeared_el_V3.Phi() + TMath::Pi());
-
-    useEntryAtStage("nocut");
 
     // Electron theta and momentum fiducial (essentially I think) cut, the values are specifically for C12 2.261GeV
     // set by inspecting
