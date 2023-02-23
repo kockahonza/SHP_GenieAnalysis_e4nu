@@ -1,11 +1,11 @@
 #ifndef GENIE_ANALYSIS_AUTO_H
 #define GENIE_ANALYSIS_AUTO_H
 
+#include <array>
 #include <functional>
 #include <iostream>
 #include <map>
 #include <vector>
-#include <array>
 
 #include <TFile.h>
 #include <TH1F.h>

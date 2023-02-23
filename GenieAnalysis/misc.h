@@ -3,10 +3,10 @@
 
 #include <TMath.h>
 
-
 // Useful environment constants
-constexpr const char* gst_path_jan{"/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root"};
-constexpr const char* genie_machine_path{"/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/C12_2261GeV/apapadop_SuSav2_C12_2261GeV_master.root"};
+constexpr const char *gst_path_jan{"/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root"};
+constexpr const char *genie_machine_path{"/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/"
+                                         "C12_2261GeV/apapadop_SuSav2_C12_2261GeV_master.root"};
 
 // Constants used within GenieAnalysis
 constexpr double m_pion{0.139570};

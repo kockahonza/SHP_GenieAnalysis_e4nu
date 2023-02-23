@@ -75,6 +75,14 @@ int main(int argc, char *argv[]) {
                            "pi_phi", "pi_cos_theta", "pi_acceptance"},
                           {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}};
 
+    /* GenieAnalysis1Pion ga{genie_machine_path, */
+    /*                       "output_jan_full.root", */
+    /*                       {}, */
+    /*                       {"W", "el_smeared_mag", "el_smeared_phi", "el_smeared_cos_theta", "el_acceptance",
+     * "pi_mag", */
+    /*                        "pi_phi", "pi_cos_theta", "pi_acceptance"}, */
+    /*                       {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}}; */
+
     ga.runAnalysis();
 
     return 0;
