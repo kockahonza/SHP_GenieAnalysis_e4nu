@@ -1,6 +1,5 @@
 #include "GenieAnalysisOriginalCuts.h"
 
-
 Double_t GenieAnalysisOriginalCuts::passesCuts() {
     useEntryAtStage("nocut");
 
@@ -145,7 +144,8 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
 }
 
 double GenieAnalysisOriginalCuts::acceptanceJoined(const double &p, const double &cos_theta, double phi,
-                        const std::unique_ptr<TH3D> &generated, const std::unique_ptr<TH3D> &accepted) {
+                                                   const std::unique_ptr<TH3D> &generated,
+                                                   const std::unique_ptr<TH3D> &accepted) {
     // map 330 till 360 to [-30:0] for the acceptance map histogram
     if (phi > (2 * TMath::Pi() - TMath::Pi() / 6.)) {
         phi -= 2 * TMath::Pi();

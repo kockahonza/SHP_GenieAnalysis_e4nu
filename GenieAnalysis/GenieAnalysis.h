@@ -137,7 +137,8 @@ class GenieAnalysis {
         pointBranchesAtEvent();
         for (Long64_t entry_i = 0; entry_i < number_of_entries; entry_i++) {
             if (entry_i % message_interval == 0) {
-                std::cout << "Currently at entry " << entry_i << " out of " << number_of_entries << " - " << 100 * entry_i / number_of_entries << "%" << std::endl;
+                std::cout << "Currently at entry " << entry_i << " out of " << number_of_entries << " - "
+                          << 100 * entry_i / number_of_entries << "%" << std::endl;
             }
             m_genie_data->GetEntry(entry_i);
             Double_t weight{passesCuts()};
@@ -153,7 +154,7 @@ class GenieAnalysis {
 
     virtual Double_t passesCuts() { return 1; }
 
-    virtual void useEntry(Double_t weight=1) {}
+    virtual void useEntry(Double_t weight = 1) {}
 
     virtual void runPostAnalysis(){};
 };

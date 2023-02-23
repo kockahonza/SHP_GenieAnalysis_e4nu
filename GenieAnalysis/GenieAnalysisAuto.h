@@ -39,9 +39,8 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
                                                  {"wght", {{100, 0, 2}, [this]() { return m_ge.wght; }}}};
 
     map<string, function<bool()>> m_known_types{
-        {"ALL", [this]() { return true; }},
-        {"QE", [this]() { return m_ge.qel; }},
-        {"RES", [this]() { return m_ge.res; }},
+        {"ALL", [this]() { return true; }},         {"QE", [this]() { return m_ge.qel; }},
+        {"RES_ALL", [this]() { return m_ge.res; }}, {"DELTA1232", [this]() { return (m_ge.res && (m_ge.resid == 0)); }},
         {"DIS", [this]() { return m_ge.dis; }},
     };
 
@@ -119,7 +118,7 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
         }
     }
 
-    void useEntryAtStage(string stage, Double_t weight=1) {
+    void useEntryAtStage(string stage, Double_t weight = 1) {
         for (string property : m_properties) {
             for (string type : m_types) {
                 if (m_known_types[type]()) {

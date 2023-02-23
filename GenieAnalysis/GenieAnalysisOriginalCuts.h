@@ -10,7 +10,6 @@
 #include "GenieAnalysisAuto.h"
 #include "misc.h"
 
-
 class FiducialWrapper {
   public:
     enum class PiPhotonId : int { Minus = -1, Photon = 0, Plus = 1 };
@@ -80,7 +79,6 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
     vector<tuple<TLorentzVector, TVector3, double>>
         m_passed_photons; // tuple has the smeared 4 momentum, smeared 3 momentum and the pions calculated acceptance
 
-
     // Extensions to automatic TH1Fs
     map<string, AutoProperty> m_new_known_properties{
         {"el_smeared_phi",
@@ -95,8 +93,8 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
 
   public:
     GenieAnalysisOriginalCuts(const char *filename, const char *output_filename, const vector<string> &stages,
-                            const vector<string> &properties, const vector<string> &types,
-                            const char *gst_ttree_name = "gst")
+                              const vector<string> &properties, const vector<string> &types,
+                              const char *gst_ttree_name = "gst")
         : GenieAnalysisAutoTH1Fs(filename, output_filename, stages, properties, types, gst_ttree_name), m_fiducials{},
           m_acc_el_gen{(TH3D *)m_el_acceptance_file->Get("Generated Particles")},
           m_acc_el_acc{(TH3D *)m_el_acceptance_file->Get("Accepted Particles")},

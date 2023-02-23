@@ -5,7 +5,6 @@
 
 #include "GenieAnalysis/GenieAnalysisOriginalCuts.h"
 
-
 // And specifically only pi- and pi+ for now, same as original code
 class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
   private:
@@ -28,8 +27,9 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
 
   public:
     GenieAnalysis1Pion(const char *filename, const char *output_filename, const vector<string> &stages,
-                            const vector<string> &properties, const vector<string> &types,
-                            const char *gst_ttree_name = "gst") : GenieAnalysisOriginalCuts(filename, output_filename, stages, properties, types) {
+                       const vector<string> &properties, const vector<string> &types,
+                       const char *gst_ttree_name = "gst")
+        : GenieAnalysisOriginalCuts(filename, output_filename, stages, properties, types) {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
 
@@ -52,10 +52,10 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
             }
 
             if (m_pion_acceptance != TMath::Abs(m_pion_acceptance)) {
-                // Seems the pion maps have a lot of invalid values so don't use the events that fail, but don't throw and error, it is expected
+                // Seems the pion maps have a lot of invalid values so don't use the events that fail, but don't throw
+                // and error, it is expected
                 return 0;
             }
-
 
             /* std::cout << weight << ", " << m_pion_acceptance << ", " << m_pion_charge << std::endl; */
             return weight * m_pion_acceptance;
@@ -65,14 +65,13 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
     }
 };
 
-
 int main(int argc, char *argv[]) {
     GenieAnalysis1Pion ga{"/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root",
-                               "output_jan.root",
-                               {"nocut"},
-                               {"W", "el_smeared_mag", "el_smeared_phi", "el_smeared_cos_theta", "el_acceptance",
-                                "pi_mag", "pi_phi", "pi_cos_theta", "pi_acceptance"},
-                               {"ALL", "QE", "RES", "DIS"}};
+                          "output_jan.root",
+                          {"nocut"},
+                          {"W", "el_smeared_mag", "el_smeared_phi", "el_smeared_cos_theta", "el_acceptance", "pi_mag",
+                           "pi_phi", "pi_cos_theta", "pi_acceptance"},
+                          {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}};
 
     ga.runAnalysis();
 
