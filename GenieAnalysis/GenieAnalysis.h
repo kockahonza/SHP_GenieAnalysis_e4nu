@@ -130,14 +130,14 @@ class GenieAnalysis {
         // TODO: Add a message
         number_of_entries = TMath::Min(number_of_entries, m_genie_data->GetEntriesFast());
 
-        Long64_t message_interval = number_of_entries / 10;
+        Long64_t message_interval = number_of_entries / 100;
 
         // Makes it not work, don't know why now TODO: fix it
         /* m_genie_data->Reset(); */
         pointBranchesAtEvent();
         for (Long64_t entry_i = 0; entry_i < number_of_entries; entry_i++) {
             if (entry_i % message_interval == 0) {
-                std::cout << "Currently at entry " << entry_i << " out of " << number_of_entries << std::endl;
+                std::cout << "Currently at entry " << entry_i << " out of " << number_of_entries << " - " << 100 * entry_i / number_of_entries << "%" << std::endl;
             }
             m_genie_data->GetEntry(entry_i);
             Double_t weight{passesCuts()};
