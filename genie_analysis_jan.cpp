@@ -16,14 +16,15 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
   protected:
     map<string, AutoProperty> m_new_known_properties{
         {"pi_phi",
-         {{720, -30, 330},
+         {"Pion phi",
+          {720, -30, 330},
           [this]() {
               double phi_deg{m_pion_V3.Phi() * TMath::RadToDeg()};
               return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
           }}},
-        {"pi_cos_theta", {{720, -1, 1}, [this]() { return m_pion_V3.CosTheta(); }}},
-        {"pi_mag", {{720, 0, 3}, [this]() { return m_pion_V3.Mag(); }}},
-        {"pi_acceptance", {{100, 0, 1}, [this]() { return m_pion_acceptance; }}}};
+        {"pi_cos_theta", {"Pion cos theta", {720, -1, 1}, [this]() { return m_pion_V3.CosTheta(); }}},
+        {"pi_mag", {"Pion momentum", {720, 0, 3}, [this]() { return m_pion_V3.Mag(); }}},
+        {"pi_acceptance", {"Pion acceptance weight", {100, 0, 1}, [this]() { return m_pion_acceptance; }}}};
 
   public:
     GenieAnalysis1Pion(const char *filename, const char *output_filename, const vector<string> &stages,

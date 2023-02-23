@@ -9,6 +9,7 @@
 #include <TFile.h>
 #include <TH1F.h>
 #include <THStack.h>
+#include <TLegend.h>
 #include <TTree.h>
 #include <TVector3.h>
 
@@ -18,8 +19,14 @@
 using std::vector, std::string, std::map, std::tuple, std::function;
 
 struct AutoProperty {
+    string title;
     tuple<Int_t, Int_t, Int_t> bin_params; // How to initialize the TH1F - nbinsx, xlow, xup in order
     function<double()> get_property;
+};
+
+struct AutoType {
+    string title;
+    function<bool()> is_type;
 };
 
 class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
@@ -35,13 +42,16 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     map<string, map<string, map<string, TH1F>>> m_staged_hists;
 
   protected:
-    map<string, AutoProperty> m_known_properties{{"W", {{1000, 0, 4}, [this]() { return m_ge.W; }}},
-                                                 {"wght", {{100, 0, 2}, [this]() { return m_ge.wght; }}}};
+    map<string, AutoProperty> m_known_properties{
+        {"W", {"W from gst", {1000, 0, 4}, [this]() { return m_ge.W; }}},
+        {"wght", {"wght from gst", {100, 0, 2}, [this]() { return m_ge.wght; }}}};
 
-    map<string, function<bool()>> m_known_types{
-        {"ALL", [this]() { return true; }},         {"QE", [this]() { return m_ge.qel; }},
-        {"RES_ALL", [this]() { return m_ge.res; }}, {"DELTA1232", [this]() { return (m_ge.res && (m_ge.resid == 0)); }},
-        {"DIS", [this]() { return m_ge.dis; }},
+    map<string, AutoType> m_known_types{
+        {"ALL", {"All events", [this]() { return true; }}},
+        {"QE", {"Quasi-Elastic events", [this]() { return m_ge.qel; }}},
+        {"RES_ALL", {"Resonant events", [this]() { return m_ge.res; }}},
+        {"DELTA1232", {"Resonant events with a Delta1232", [this]() { return (m_ge.res && (m_ge.resid == 0)); }}},
+        {"DIS", {"Deep-inelastic events", [this]() { return m_ge.dis; }}},
     };
 
   public:
@@ -53,16 +63,18 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
           m_properties{properties}, m_types{types} {}
 
     void createTH1Fs() {
-        string name_and_title;
+        string name;
+        string title;
         Int_t nbinsx, xlow, xup;
 
         m_output_file->cd();
         // Create "final" stage (post all cuts) hists
         for (string property : m_properties) {
             for (string type : m_types) {
-                name_and_title = makeName(property, type);
+                name = makeName(property, type);
+                title = makeTitle(property, type);
                 std::tie(nbinsx, xlow, xup) = m_known_properties[property].bin_params;
-                m_hists[property][type] = TH1F(name_and_title.c_str(), name_and_title.c_str(), nbinsx, xlow, xup);
+                m_hists[property][type] = TH1F(name.c_str(), title.c_str(), nbinsx, xlow, xup);
             }
         }
 
@@ -70,10 +82,10 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
         for (string stage : m_stages) {
             for (string property : m_properties) {
                 for (string type : m_types) {
-                    name_and_title = makeName(stage, property, type);
+                    name = makeName(stage, property, type);
+                    title = makeTitle(stage, property, type);
                     std::tie(nbinsx, xlow, xup) = m_known_properties[property].bin_params;
-                    m_staged_hists[stage][property][type] =
-                        TH1F(name_and_title.c_str(), name_and_title.c_str(), nbinsx, xlow, xup);
+                    m_staged_hists[stage][property][type] = TH1F(name.c_str(), title.c_str(), nbinsx, xlow, xup);
                 }
             }
         }
@@ -87,7 +99,9 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
 
     void runPostAnalysis() override {
         for (string property : m_properties) {
-            THStack th_p{property.c_str(), (property + " stack").c_str()};
+            THStack hist_stack{property.c_str(), m_known_properties[property].title.c_str()};
+            TLegend stack_legend{33, 16, "By interaction types"};
+            stack_legend.SetName((property + "_legend").c_str());
 
             Color_t color{0};
             for (string type : m_types) {
@@ -95,25 +109,32 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
                 m_hists[property][type].SetLineColor(1 + color);
                 color = (color + 1) % 10;
                 m_hists[property][type].Write();
-                th_p.Add(&m_hists[property][type]);
+                hist_stack.Add(&m_hists[property][type]);
+                stack_legend.AddEntry(&m_hists[property][type], m_known_types[type].title.c_str());
             }
 
-            th_p.Write();
+            hist_stack.Write();
+            stack_legend.Write();
         }
 
         for (string stage : m_stages) {
             for (string property : m_properties) {
-                THStack th_p{(stage + "_" + property).c_str(), (stage + "_" + property + " stack").c_str()};
+                THStack hist_stack{(stage + "_" + property).c_str(),
+                                   (m_known_properties[property].title + " - at " + stage).c_str()};
+                TLegend stack_legend{33, 16, "By interaction types"};
+                stack_legend.SetName((stage + "_" + property + "_legend").c_str());
 
                 Color_t color{0};
                 for (string type : m_types) {
                     m_staged_hists[stage][property][type].SetLineColor(1 + color);
                     color = (color + 1) % 10;
                     m_staged_hists[stage][property][type].Write();
-                    th_p.Add(&m_staged_hists[stage][property][type]);
+                    hist_stack.Add(&m_staged_hists[stage][property][type]);
+                    stack_legend.AddEntry(&m_hists[property][type], m_known_types[type].title.c_str());
                 }
 
-                th_p.Write();
+                hist_stack.Write();
+                stack_legend.Write();
             }
         }
     }
@@ -121,7 +142,7 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     void useEntryAtStage(string stage, Double_t weight = 1) {
         for (string property : m_properties) {
             for (string type : m_types) {
-                if (m_known_types[type]()) {
+                if (m_known_types[type].is_type()) {
                     m_staged_hists[stage][property][type].Fill(m_known_properties[property].get_property(), weight);
                 }
             }
@@ -131,7 +152,7 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     void useEntry(Double_t weight) override {
         for (string property : m_properties) {
             for (string type : m_types) {
-                if (m_known_types[type]()) {
+                if (m_known_types[type].is_type()) {
                     m_hists[property][type].Fill(m_known_properties[property].get_property(), weight);
                 }
             }
@@ -140,7 +161,13 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
 
     virtual const string makeName(const string &property, const string &type) { return property + "_" + type; }
     virtual const string makeName(const string &stage, const string &property, const string &type) {
-        return stage + "_" + property + "_" + type;
+        return stage + "_" + makeName(property, type);
+    }
+    virtual const string makeTitle(const string &property, const string &type) {
+        return m_known_properties[property].title + " - " + m_known_types[type].title;
+    }
+    virtual const string makeTitle(const string &stage, const string &property, const string &type) {
+        return makeTitle(property, type) + " - at " + stage;
     }
 };
 
