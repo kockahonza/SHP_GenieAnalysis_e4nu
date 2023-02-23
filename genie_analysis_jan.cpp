@@ -4,6 +4,7 @@
 #include <tuple>
 
 #include "GenieAnalysis/GenieAnalysisOriginalCuts.h"
+#include "GenieAnalysis/misc.h"
 
 // And specifically only pi- and pi+ for now, same as original code
 class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
@@ -67,7 +68,7 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
 };
 
 int main(int argc, char *argv[]) {
-    GenieAnalysis1Pion ga{"/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root",
+    GenieAnalysis1Pion ga{gst_path_jan,
                           "output_jan.root",
                           {"nocut"},
                           {"W", "el_smeared_mag", "el_smeared_phi", "el_smeared_cos_theta", "el_acceptance", "pi_mag",

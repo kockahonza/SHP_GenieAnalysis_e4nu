@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <array>
 
 #include <TFile.h>
 #include <TH1F.h>
@@ -55,6 +56,9 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     };
 
   public:
+    constexpr static size_t m_number_colors{7};
+    std::array<Color_t, m_number_colors> m_colors{kBlack, kRed, kGreen, kBlue, kMagenta, kCyan, kOrange};
+
     GenieAnalysisAutoTH1Fs(const char *filename, const char *output_filename, const vector<string> &stages,
                            const vector<string> &properties, const vector<string> &types,
                            const char *gst_ttree_name = "gst")
@@ -98,16 +102,15 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     }
 
     void runPostAnalysis() override {
+        int color_i;
         for (string property : m_properties) {
             THStack hist_stack{property.c_str(), m_known_properties[property].title.c_str()};
             TLegend stack_legend{33, 16, "By interaction types"};
             stack_legend.SetName((property + "_legend").c_str());
 
-            Color_t color{0};
+            color_i = 0;
             for (string type : m_types) {
-                // Using colors 1 to 49 right now - this is a specific part of the default ROOT color table
-                m_hists[property][type].SetLineColor(1 + color);
-                color = (color + 1) % 10;
+                m_hists[property][type].SetLineColor(m_colors[color_i++ % m_number_colors]);
                 m_hists[property][type].Write();
                 hist_stack.Add(&m_hists[property][type]);
                 stack_legend.AddEntry(&m_hists[property][type], m_known_types[type].title.c_str());
@@ -124,10 +127,9 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
                 TLegend stack_legend{33, 16, "By interaction types"};
                 stack_legend.SetName((stage + "_" + property + "_legend").c_str());
 
-                Color_t color{0};
+                color_i = 0;
                 for (string type : m_types) {
-                    m_staged_hists[stage][property][type].SetLineColor(1 + color);
-                    color = (color + 1) % 10;
+                    m_staged_hists[stage][property][type].SetLineColor(m_colors[color_i++ % m_number_colors]);
                     m_staged_hists[stage][property][type].Write();
                     hist_stack.Add(&m_staged_hists[stage][property][type]);
                     stack_legend.AddEntry(&m_hists[property][type], m_known_types[type].title.c_str());
