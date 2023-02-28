@@ -1,4 +1,5 @@
 #include "GenieAnalysisOriginalCuts.h"
+#include <TMath.h>
 
 Double_t GenieAnalysisOriginalCuts::passesCuts() {
     useEntryAtStage("nocut");
@@ -18,7 +19,8 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
     // https://docs.google.com/presentation/d/1ghG08JfCYXRXh6O8hcXKrhJOFxkAs_9i5ZfoIkiiEHU/edit?usp=sharing and
     // previous values
     const double theta_min{TMath::DegToRad() * (16 + 10.5 / m_smeared_el_V3.Mag())};
-    if ((m_smeared_el_V3.Theta() < theta_min) || (m_smeared_el_V3.Theta() < 0) || (m_smeared_el_V3.Theta() > 60)) {
+    if ((m_smeared_el_V3.Theta() < theta_min) || (m_smeared_el_V3.Theta() < 0 * TMath::DegToRad()) ||
+        (m_smeared_el_V3.Theta() > 60 * TMath::DegToRad())) {
         return 0;
     }
 
@@ -38,9 +40,6 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
     if ((ElectronSector >= 2) && (ElectronSector <= 4)) {
         return 0;
     }
-
-    // ## There was a cut on electron phi here but unused given the command line options
-    // ## Cut on electron sectors here, but unused given our command line options
 
     // Here there's a longish part calculating weights but the "Mott_cross_section" is hardcoded
     // to 1 and wghts are I think all 1 so essentially it's just the e acceptance weight
@@ -141,11 +140,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
             // in original says "within 40 degrees in theta and 30 in phi" but that's not what it did, even after
             // fixing a clear(ish) bug For the second condition there's a phi angle difference the +2pi is to bring
             // it to the 0 to 4pi range adn then mod 2pi and compare to
-            positive_phi_difference = (V3.Phi() - m_smeared_el_V3.Phi()) * TMath::RadToDeg();
-            if (positive_phi_difference < 0) {
-                positive_phi_difference += 360;
-            }
-
+            positive_phi_difference = TMath::Abs(V3.Phi() - m_smeared_el_V3.Phi()) * TMath::RadToDeg();
             if ((V3.Angle(m_smeared_el_V3) < 40) &&
                 ((positive_phi_difference < 30) || (positive_phi_difference > 330))) {
                 return 0;
@@ -155,7 +150,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
         }
     }
 
-    return electron_acceptance_weight;
+    return electron_acceptance_weight * m_ge.wght; // I'm pretty sure all the events have wght=1
 }
 
 double GenieAnalysisOriginalCuts::acceptanceJoined(const double &p, const double &cos_theta, double phi,

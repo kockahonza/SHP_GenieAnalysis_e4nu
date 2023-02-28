@@ -10,7 +10,6 @@
 #include "GenieAnalysisAuto.h"
 #include "misc.h"
 
-
 // So far I'm only focusing on exactly the stuff used with the command line arguments in the README,
 // specifically this means 2.261GeV beam on C12 target and more.
 class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
