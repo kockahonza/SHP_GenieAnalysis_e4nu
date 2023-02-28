@@ -7,6 +7,9 @@
 #include <TH1F.h>
 #include <TTree.h>
 
+#include "Fiducial.h"
+
+
 // Very simple struct to have all the fields stored in the genie summary table (gst) format
 struct GenieEvent {
     Int_t iev;
@@ -104,6 +107,7 @@ struct GenieEvent {
     Double_t calresp0;
 };
 
+
 // Base class for any analysis to be one on genie data, it opens the given root file and sets
 // up reading the gst and `runAnalysis` is the entry point, it uses the methods `passesCuts`
 // to filter out entries which are meant to be accepted and if they are, calls `useEntry`,
@@ -158,5 +162,31 @@ class GenieAnalysis {
 
     virtual void runPostAnalysis(){};
 };
+
+
+class FiducialWrapper {
+  public:
+    enum class PiPhotonId : int { Minus = -1, Photon = 0, Plus = 1 };
+
+  private:
+    Fiducial m_fiducial;
+
+  public:
+    FiducialWrapper() : m_fiducial{} {
+        // Set up fiducial for 2.261Gev and carbon 12 target
+        m_fiducial.InitPiMinusFit("2261");
+        m_fiducial.InitEClimits();
+
+        m_fiducial.SetConstants(2250, "12C", {{"1161", 1.161}, {"2261", 2.261}, {"4461", 4.461}});
+        m_fiducial.SetFiducialCutParameters("2261");
+    }
+
+    bool electronCut(TVector3 momentum_V3) { return m_fiducial.EFiducialCut("2261", momentum_V3); }
+
+    bool piAndPhotonCuts(TVector3 momentum_V3, PiPhotonId which_particle) {
+        return m_fiducial.Pi_phot_fid_united("2261", momentum_V3, static_cast<int>(which_particle));
+    }
+};
+
 
 #endif
