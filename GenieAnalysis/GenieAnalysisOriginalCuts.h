@@ -25,6 +25,8 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
     const Target m_target;
     const BeamEnergy m_beam_energy;
 
+    const bool m_do_sectors;
+
   private:
     // Paths and other system stuff
 
@@ -50,7 +52,7 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
     // electron
     TVector3 m_smeared_el_V3; // Smeared and rotated by pi
     TLorentzVector m_smeared_el_V4;
-    double electron_acceptance_weight;
+    double m_electron_acceptance_weight;
 
     // hadrons -- all of these only contain information on particles passing relevant cuts (pions need momentum above
     // 0.15 for example)
@@ -74,15 +76,16 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
         {"el_p", {"Out electron momentum", {720, 0, 3}, [this]() { return m_smeared_el_V4.P(); }}},
         {"el_E", {"Out electron energy", {720, 0, 3}, [this]() { return m_smeared_el_V4.Energy(); }}},
         {"el_acceptance",
-         {"Out electron acceptance weight", {100, 0, 1}, [this]() { return electron_acceptance_weight; }}}};
+         {"Out electron acceptance weight", {100, 0, 1}, [this]() { return m_electron_acceptance_weight; }}}};
 
   public:
     GenieAnalysisOriginalCuts(const char *filename, const char *output_filename, const Target &target,
                               const BeamEnergy &beam_energy, const vector<string> &stages,
-                              const vector<string> &properties, const vector<string> &types,
+                              const vector<string> &properties, const vector<string> &types, const bool &do_sectors = false,
                               const char *gst_ttree_name = "gst")
         : GenieAnalysisAutoTH1Fs(filename, output_filename, stages, properties, types, gst_ttree_name),
           m_target{target}, m_beam_energy{beam_energy},
+          m_do_sectors{do_sectors},
 
           m_fiducials{std::make_unique<FiducialWrapper>(m_target, m_beam_energy)},
           // Initializing acceptance map files and TH3Ds

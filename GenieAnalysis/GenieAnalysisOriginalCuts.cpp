@@ -53,10 +53,10 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
     /* const double x_bjk = reco_Q2 / (2 * m_prot * nu); */
 
     // Get the electron acceptance weight from the e2a map
-    electron_acceptance_weight =
+    m_electron_acceptance_weight =
         electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(),
                            m_smeared_el_V3.Phi() + TMath::Pi()); // could be issue here - angles and CoTheta
-    if (electron_acceptance_weight != TMath::Abs(electron_acceptance_weight)) {
+    if (m_electron_acceptance_weight != TMath::Abs(m_electron_acceptance_weight)) {
         throw "Electron acceptance not reasonable";
     }
 
@@ -149,7 +149,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
         }
     }
 
-    return electron_acceptance_weight * m_ge.wght; // I'm pretty sure all the events have wght=1
+    return m_electron_acceptance_weight * m_ge.wght; // I'm pretty sure all the events have wght=1
 }
 
 double GenieAnalysisOriginalCuts::acceptanceJoined(const double &p, const double &cos_theta, double phi,
