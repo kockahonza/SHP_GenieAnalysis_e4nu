@@ -9,7 +9,6 @@
 
 #include "Fiducial.h"
 
-
 // Very simple struct to have all the fields stored in the genie summary table (gst) format
 struct GenieEvent {
     Int_t iev;
@@ -107,7 +106,6 @@ struct GenieEvent {
     Double_t calresp0;
 };
 
-
 // Base class for any analysis to be one on genie data, it opens the given root file and sets
 // up reading the gst and `runAnalysis` is the entry point, it uses the methods `passesCuts`
 // to filter out entries which are meant to be accepted and if they are, calls `useEntry`,
@@ -158,11 +156,10 @@ class GenieAnalysis {
 
     virtual Double_t passesCuts() { return 1; }
 
-    virtual void useEntry(Double_t weight = 1) {}
+    virtual void useEntry(const Double_t &weight = 1) {}
 
     virtual void runPostAnalysis(){};
 };
-
 
 class FiducialWrapper {
   public:
@@ -181,12 +178,11 @@ class FiducialWrapper {
         m_fiducial.SetFiducialCutParameters("2261");
     }
 
-    bool electronCut(TVector3 momentum_V3) { return m_fiducial.EFiducialCut("2261", momentum_V3); }
+    bool electronCut(const TVector3 &momentum_V3) { return m_fiducial.EFiducialCut("2261", momentum_V3); }
 
-    bool piAndPhotonCuts(TVector3 momentum_V3, PiPhotonId which_particle) {
+    bool piAndPhotonCuts(const TVector3 &momentum_V3, const PiPhotonId &which_particle) {
         return m_fiducial.Pi_phot_fid_united("2261", momentum_V3, static_cast<int>(which_particle));
     }
 };
-
 
 #endif

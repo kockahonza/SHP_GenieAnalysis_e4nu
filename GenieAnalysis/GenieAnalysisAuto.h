@@ -141,17 +141,19 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
         }
     }
 
-    void useEntryAtStage(string stage, Double_t weight = 1) {
-        for (string property : m_properties) {
-            for (string type : m_types) {
-                if (m_known_types[type].is_type()) {
-                    m_staged_hists[stage][property][type].Fill(m_known_properties[property].get_property(), weight);
+    void useEntryAtStage(const string &stage, const Double_t &weight = 1) {
+        if (auto stage_hists{m_staged_hists.find(stage)}; stage_hists != m_staged_hists.end()) {
+            for (string property : m_properties) {
+                for (string type : m_types) {
+                    if (m_known_types[type].is_type()) {
+                        (stage_hists->second)[property][type].Fill(m_known_properties[property].get_property(), weight);
+                    }
                 }
             }
         }
     }
 
-    void useEntry(Double_t weight) override {
+    void useEntry(const Double_t &weight) override {
         for (string property : m_properties) {
             for (string type : m_types) {
                 if (m_known_types[type].is_type()) {
