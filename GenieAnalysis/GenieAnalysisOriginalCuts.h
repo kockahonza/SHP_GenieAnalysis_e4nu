@@ -189,6 +189,7 @@ class FiducialWrapper {
         } else if (target == GenieAnalysisOriginalCuts::Target::Fe56) {
             return "12C"; // There's no dedicated Fe file and original used 12C for anything except He
         }
+        throw "This should not happen";
     }
 
     static string beamEnergyStr(const GenieAnalysisOriginalCuts::BeamEnergy &beam_energy) {
@@ -199,6 +200,7 @@ class FiducialWrapper {
         } else if (beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_4461) {
             return "4461";
         }
+        throw "This should not happen";
     }
 };
 
