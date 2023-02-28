@@ -81,16 +81,16 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
 
     // Extensions to automatic TH1Fs
     map<string, AutoProperty> m_new_known_properties{
-        {"el_smeared_phi",
+        {"el_phi",
          {"Out electron phi",
           {720, -30, 330},
           [this]() {
               double phi_deg{m_smeared_el_V3.Phi() * TMath::RadToDeg()};
               return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
           }}},
-        {"el_smeared_cos_theta",
-         {"Out electron cos theta", {720, -1, 1}, [this]() { return m_smeared_el_V3.CosTheta(); }}},
-        {"el_smeared_mag", {"Out electron momentum", {720, 0, 3}, [this]() { return m_smeared_el_V3.Mag(); }}},
+        {"el_cos_theta", {"Out electron cos theta", {720, -1, 1}, [this]() { return m_smeared_el_V3.CosTheta(); }}},
+        {"el_p", {"Out electron momentum", {720, 0, 3}, [this]() { return m_smeared_el_V4.P(); }}},
+        {"el_E", {"Out electron energy", {720, 0, 3}, [this]() { return m_smeared_el_V4.Energy(); }}},
         {"el_acceptance",
          {"Out electron acceptance weight", {100, 0, 1}, [this]() { return electron_acceptance_weight; }}}};
 

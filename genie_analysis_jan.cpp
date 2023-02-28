@@ -24,7 +24,8 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
               return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
           }}},
         {"pi_cos_theta", {"Pion cos theta", {720, -1, 1}, [this]() { return m_pion_V3.CosTheta(); }}},
-        {"pi_mag", {"Pion momentum", {720, 0, 3}, [this]() { return m_pion_V3.Mag(); }}},
+        {"pi_p", {"Pion momentum", {720, 0, 3}, [this]() { return m_pion_V4.P(); }}},
+        {"pi_E", {"Pion energy", {720, 0, 3}, [this]() { return m_pion_V4.E(); }}},
         {"pi_acceptance", {"Pion acceptance weight", {100, 0, 1}, [this]() { return m_pion_acceptance; }}}};
 
   public:
@@ -71,8 +72,8 @@ int main(int argc, char *argv[]) {
     GenieAnalysis1Pion ga{gst_path_jan,
                           "output_jan.root",
                           {"nocut"},
-                          {"W", "el_smeared_mag", "el_smeared_phi", "el_smeared_cos_theta", "el_acceptance", "pi_mag",
-                           "pi_phi", "pi_cos_theta", "pi_acceptance"},
+                          {"W", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_p", "pi_phi",
+                           "pi_cos_theta", "pi_acceptance"},
                           {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}};
 
     /* GenieAnalysis1Pion ga{genie_machine_path, */
