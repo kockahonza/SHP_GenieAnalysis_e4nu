@@ -81,11 +81,10 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
   public:
     GenieAnalysisOriginalCuts(const char *filename, const char *output_filename, const Target &target,
                               const BeamEnergy &beam_energy, const vector<string> &stages,
-                              const vector<string> &properties, const vector<string> &types, const bool &do_sectors = false,
-                              const char *gst_ttree_name = "gst")
+                              const vector<string> &properties, const vector<string> &types,
+                              const bool &do_sectors = false, const char *gst_ttree_name = "gst")
         : GenieAnalysisAutoTH1Fs(filename, output_filename, stages, properties, types, gst_ttree_name),
-          m_target{target}, m_beam_energy{beam_energy},
-          m_do_sectors{do_sectors},
+          m_target{target}, m_beam_energy{beam_energy}, m_do_sectors{do_sectors},
 
           m_fiducials{std::make_unique<FiducialWrapper>(m_target, m_beam_energy)},
           // Initializing acceptance map files and TH3Ds
@@ -157,7 +156,8 @@ class FiducialWrapper {
 
     const GenieAnalysisOriginalCuts::Target m_target;
     const GenieAnalysisOriginalCuts::BeamEnergy m_beam_energy;
-    string m_target_str, m_beam_energy_str;
+    const string m_target_str;
+    const string m_beam_energy_str;
 
   private:
     Fiducial m_fiducial;
@@ -165,27 +165,14 @@ class FiducialWrapper {
   public:
     FiducialWrapper(const GenieAnalysisOriginalCuts::Target &target,
                     const GenieAnalysisOriginalCuts::BeamEnergy &beam_energy)
-        : m_target(target), m_beam_energy(beam_energy), m_fiducial{} {
-
-        if (target == GenieAnalysisOriginalCuts::Target::C12) {
-            m_target_str = "12C";
-        } else if (target == GenieAnalysisOriginalCuts::Target::Fe56) {
-            m_target_str = "12C"; // There's no dedicated Fe file and original used 12C for anything except He
-        }
-
-        if (beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_1161) {
-            m_beam_energy_str = "1161";
-        } else if (beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261) {
-            m_beam_energy_str = "2261";
-        } else if (beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_4461) {
-            m_beam_energy_str = "4461";
-        }
+        : m_target(target), m_beam_energy(beam_energy), m_target_str{targetStr(m_target)},
+          m_beam_energy_str{beamEnergyStr(m_beam_energy)}, m_fiducial{} {
 
         // Set up fiducial for 2.261Gev and carbon 12 target
         m_fiducial.InitPiMinusFit(m_beam_energy_str);
         m_fiducial.InitEClimits();
 
-        m_fiducial.SetConstants(m_beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261 ? 750 : 2250,
+        m_fiducial.SetConstants(m_beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_1161 ? 750 : 2250,
                                 m_target_str, {{"1161", 1.161}, {"2261", 2.261}, {"4461", 4.461}});
         m_fiducial.SetFiducialCutParameters(m_beam_energy_str);
     }
@@ -194,6 +181,24 @@ class FiducialWrapper {
 
     bool piAndPhotonCuts(const TVector3 &momentum_V3, const PiPhotonId &which_particle) {
         return m_fiducial.Pi_phot_fid_united(m_beam_energy_str, momentum_V3, static_cast<int>(which_particle));
+    }
+
+    static string targetStr(const GenieAnalysisOriginalCuts::Target &target) {
+        if (target == GenieAnalysisOriginalCuts::Target::C12) {
+            return "12C";
+        } else if (target == GenieAnalysisOriginalCuts::Target::Fe56) {
+            return "12C"; // There's no dedicated Fe file and original used 12C for anything except He
+        }
+    }
+
+    static string beamEnergyStr(const GenieAnalysisOriginalCuts::BeamEnergy &beam_energy) {
+        if (beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_1161) {
+            return "1161";
+        } else if (beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261) {
+            return "2261";
+        } else if (beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_4461) {
+            return "4461";
+        }
     }
 };
 
