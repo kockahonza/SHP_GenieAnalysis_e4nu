@@ -66,6 +66,13 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
     m_passed_pi_minus.clear();
     m_passed_pi_plus.clear();
     m_passed_photons.clear();
+
+    // Temp variables for the loop, declared here for performance
+    double smeared_p;
+    double smeared_E;
+    double pi_acceptance;
+    TVector3 V3;
+    double positive_phi_difference;
     for (int i{0}; i < m_ge.nf; i++) {
         // pi-
         if (m_ge.pdgf[i] == -211) {
@@ -73,19 +80,23 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
             if (m_ge.pf[i] < 0.15) {
                 continue;
             }
-            const double smeared_p = gRandom->Gaus(m_ge.pf[i], m_smearing_reso_pi * m_ge.pf[i]);
-            const double smeared_E = sqrt(smeared_p * smeared_p + m_pion * m_pion);
+            smeared_p = gRandom->Gaus(m_ge.pf[i], m_smearing_reso_pi * m_ge.pf[i]);
+            smeared_E = sqrt(smeared_p * smeared_p + m_pion * m_pion);
 
-            TVector3 V3{smeared_p / m_ge.pf[i] * m_ge.pxf[i], smeared_p / m_ge.pf[i] * m_ge.pyf[i],
-                        smeared_p / m_ge.pf[i] * m_ge.pzf[i]};
+            V3.SetXYZ(smeared_p / m_ge.pf[i] * m_ge.pxf[i], smeared_p / m_ge.pf[i] * m_ge.pyf[i],
+                      smeared_p / m_ge.pf[i] * m_ge.pzf[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
-            TLorentzVector V4{V3, smeared_E};
 
             if (!m_fiducials.piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Minus)) {
                 continue;
             }
 
-            m_passed_pi_minus.push_back({V4, V3, piMinusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});
+            // And only use pirns with reasonable acceptance, quite often they are negative or so on, this is kindof a
+            // workaround
+            pi_acceptance = piMinusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi());
+            if (pi_acceptance == TMath::Abs(pi_acceptance)) {
+                m_passed_pi_minus.push_back({{V3, smeared_E}, V3, pi_acceptance});
+            }
         }
         // pi+
         if (m_ge.pdgf[i] == 211) {
@@ -93,19 +104,23 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
             if (m_ge.pf[i] < 0.15) {
                 continue;
             }
-            const double smeared_p = gRandom->Gaus(m_ge.pf[i], m_smearing_reso_pi * m_ge.pf[i]);
-            const double smeared_E = sqrt(smeared_p * smeared_p + m_pion * m_pion);
+            smeared_p = gRandom->Gaus(m_ge.pf[i], m_smearing_reso_pi * m_ge.pf[i]);
+            smeared_E = sqrt(smeared_p * smeared_p + m_pion * m_pion);
 
-            TVector3 V3{smeared_p / m_ge.pf[i] * m_ge.pxf[i], smeared_p / m_ge.pf[i] * m_ge.pyf[i],
-                        smeared_p / m_ge.pf[i] * m_ge.pzf[i]};
+            V3.SetXYZ(smeared_p / m_ge.pf[i] * m_ge.pxf[i], smeared_p / m_ge.pf[i] * m_ge.pyf[i],
+                      smeared_p / m_ge.pf[i] * m_ge.pzf[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
-            TLorentzVector V4{V3, smeared_E};
 
             if (!m_fiducials.piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Plus)) {
                 continue;
             }
 
-            m_passed_pi_plus.push_back({V4, V3, piPlusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});
+            // And only use pirns with reasonable acceptance, quite often they are negative or so on, this is kindof a
+            // workaround
+            pi_acceptance = piMinusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi());
+            if (pi_acceptance == TMath::Abs(pi_acceptance)) {
+                m_passed_pi_plus.push_back({{V3, smeared_E}, V3, piPlusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});
+            }
         }
         // photons
         if (m_ge.pdgf[i] == 22) {
@@ -115,9 +130,8 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
             }
 
             // No photon smearing
-            TVector3 V3{m_ge.pxf[i], m_ge.pyf[i], m_ge.pzf[i]};
+            V3.SetXYZ(m_ge.pxf[i], m_ge.pyf[i], m_ge.pzf[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
-            TLorentzVector V4{V3, m_ge.Ef[i]};
 
             if (!m_fiducials.piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Photon)) {
                 continue;
@@ -127,16 +141,17 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
             // in original says "within 40 degrees in theta and 30 in phi" but that's not what it did, even after
             // fixing a clear(ish) bug For the second condition there's a phi angle difference the +2pi is to bring
             // it to the 0 to 4pi range adn then mod 2pi and compare to
-            /* if ((V3.Angle(m_smeared_el_V3) < 40) && (TMath::Abs(fmod(V3.Phi() - m_smeared_el_V3.Phi() + 2 *
-             * TMath::Pi(), 2 * TMath::Pi())) < 30)) { */
-            const double positive_phi_difference{TMath::Abs(V3.Phi() - m_smeared_el_V3.Phi()) *
-                                                 TMath::RadToDeg()}; // will be in the [0, 360) range]
+            positive_phi_difference = (V3.Phi() - m_smeared_el_V3.Phi()) * TMath::RadToDeg();
+            if (positive_phi_difference < 0) {
+                positive_phi_difference += 360;
+            }
+
             if ((V3.Angle(m_smeared_el_V3) < 40) &&
                 ((positive_phi_difference < 30) || (positive_phi_difference > 330))) {
                 return 0;
             }
 
-            m_passed_photons.push_back({V4, V3, photonAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});
+            m_passed_photons.push_back({{V3, m_ge.Ef[i]}, V3, photonAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});
         }
     }
 

@@ -54,16 +54,10 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
                 std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_plus[0];
             }
 
-            if (m_pion_acceptance != TMath::Abs(m_pion_acceptance)) {
-                // Seems the pion maps have a lot of invalid values so don't use the events that fail, but don't throw
-                // and error, it is expected
-                return 0;
-            }
-
             /* std::cout << weight << ", " << m_pion_acceptance << ", " << m_pion_charge << std::endl; */
             return weight * m_pion_acceptance;
         } else {
-            return weight;
+            return 0;
         }
     }
 };
