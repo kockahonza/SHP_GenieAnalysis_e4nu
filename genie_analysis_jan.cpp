@@ -29,10 +29,10 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
         {"pi_acceptance", {"Pion acceptance weight", {100, 0, 1}, [this]() { return m_pion_acceptance; }}}};
 
   public:
-    GenieAnalysis1Pion(const char *filename, const char *output_filename, const vector<string> &stages,
-                       const vector<string> &properties, const vector<string> &types,
-                       const char *gst_ttree_name = "gst")
-        : GenieAnalysisOriginalCuts(filename, output_filename, stages, properties, types) {
+    GenieAnalysis1Pion(const char *filename, const char *output_filename, const Target &target,
+                       const BeamEnergy &beam_energy, const vector<string> &stages, const vector<string> &properties,
+                       const vector<string> &types, const char *gst_ttree_name = "gst")
+        : GenieAnalysisOriginalCuts(filename, output_filename, target, beam_energy, stages, properties, types) {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
 
@@ -72,6 +72,8 @@ int main(int argc, char *argv[]) {
 
     GenieAnalysisOriginalCuts ga{gst_path_jan,
                                  "output_jan.root",
+                                 GenieAnalysisOriginalCuts::Target::C12,
+                                 GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261,
                                  {"nocut", "p_gdoc", "p_efid"},
                                  {"W", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance"},
                                  {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}};

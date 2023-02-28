@@ -161,28 +161,4 @@ class GenieAnalysis {
     virtual void runPostAnalysis(){};
 };
 
-class FiducialWrapper {
-  public:
-    enum class PiPhotonId : int { Minus = -1, Photon = 0, Plus = 1 };
-
-  private:
-    Fiducial m_fiducial;
-
-  public:
-    FiducialWrapper() : m_fiducial{} {
-        // Set up fiducial for 2.261Gev and carbon 12 target
-        m_fiducial.InitPiMinusFit("2261");
-        m_fiducial.InitEClimits();
-
-        m_fiducial.SetConstants(2250, "12C", {{"1161", 1.161}, {"2261", 2.261}, {"4461", 4.461}});
-        m_fiducial.SetFiducialCutParameters("2261");
-    }
-
-    bool electronCut(const TVector3 &momentum_V3) { return m_fiducial.EFiducialCut("2261", momentum_V3); }
-
-    bool piAndPhotonCuts(const TVector3 &momentum_V3, const PiPhotonId &which_particle) {
-        return m_fiducial.Pi_phot_fid_united("2261", momentum_V3, static_cast<int>(which_particle));
-    }
-};
-
 #endif

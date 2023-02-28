@@ -26,7 +26,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
     useEntryAtStage("p_gdoc", m_ge.wght);
 
     // This was originally later on but I think it makes more sense here
-    if (!m_fiducials.electronCut(m_smeared_el_V3)) {
+    if (!m_fiducials->electronCut(m_smeared_el_V3)) {
         return 0;
     }
     useEntryAtStage("p_efid", m_ge.wght);
@@ -85,7 +85,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
                       smeared_p / m_ge.pf[i] * m_ge.pzf[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
-            if (!m_fiducials.piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Minus)) {
+            if (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Minus)) {
                 continue;
             }
 
@@ -109,7 +109,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
                       smeared_p / m_ge.pf[i] * m_ge.pzf[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
-            if (!m_fiducials.piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Plus)) {
+            if (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Plus)) {
                 continue;
             }
 
@@ -131,7 +131,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
             V3.SetXYZ(m_ge.pxf[i], m_ge.pyf[i], m_ge.pzf[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
-            if (!m_fiducials.piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Photon)) {
+            if (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Photon)) {
                 continue;
             }
 

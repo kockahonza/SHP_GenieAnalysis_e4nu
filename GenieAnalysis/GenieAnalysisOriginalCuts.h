@@ -7,33 +7,37 @@
 #include <TRandom.h>
 #include <memory>
 
-#include "GenieAnalysis.h"
 #include "GenieAnalysisAuto.h"
 #include "misc.h"
+
+class FiducialWrapper;
+
+using std::unique_ptr;
 
 // So far I'm only focusing on exactly the stuff used with the command line arguments in the README,
 // specifically this means 2.261GeV beam on C12 target and more.
 class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
   public:
+    // Configuration options for the major target/energy runs
     enum class Target { C12, Fe56 };
-
     enum class BeamEnergy { MeV_1161, MeV_2261, MeV_4461 };
+
+    const Target m_target;
+    const BeamEnergy m_beam_energy;
 
   private:
     // Paths and other system stuff
 
-    FiducialWrapper m_fiducials;
+    const unique_ptr<FiducialWrapper> m_fiducials;
 
     // e2a acceptance maps
-    // TODO: Move these to the constructor in some nice way, should not just be hardcoded
-    const std::unique_ptr<TFile> m_el_acceptance_file;
-    const std::unique_ptr<TFile> m_p_acceptance_file;
-    const std::unique_ptr<TFile> m_pip_acceptance_file;
-    const std::unique_ptr<TFile> m_pim_acceptance_file;
-
+    const unique_ptr<TFile> m_el_acceptance_file;
+    const unique_ptr<TFile> m_p_acceptance_file;
+    const unique_ptr<TFile> m_pip_acceptance_file;
+    const unique_ptr<TFile> m_pim_acceptance_file;
     // It seems to be necessary for I suppose performance reason? that these are found beforehand and not at each call
     // to acceptanceJoined
-    const std::unique_ptr<TH3D> m_acc_el_gen, m_acc_el_acc, m_acc_p_gen, m_acc_p_acc, m_acc_pip_gen, m_acc_pip_acc,
+    const unique_ptr<TH3D> m_acc_el_gen, m_acc_el_acc, m_acc_p_gen, m_acc_p_acc, m_acc_pip_gen, m_acc_pip_acc,
         m_acc_pim_gen, m_acc_pim_acc;
 
   protected:
@@ -73,15 +77,19 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
          {"Out electron acceptance weight", {100, 0, 1}, [this]() { return electron_acceptance_weight; }}}};
 
   public:
-    GenieAnalysisOriginalCuts(const char *filename, const char *output_filename, const vector<string> &stages,
+    GenieAnalysisOriginalCuts(const char *filename, const char *output_filename, const Target &target,
+                              const BeamEnergy &beam_energy, const vector<string> &stages,
                               const vector<string> &properties, const vector<string> &types,
                               const char *gst_ttree_name = "gst")
-        : GenieAnalysisAutoTH1Fs(filename, output_filename, stages, properties, types, gst_ttree_name), m_fiducials{},
+        : GenieAnalysisAutoTH1Fs(filename, output_filename, stages, properties, types, gst_ttree_name),
+          m_target{target}, m_beam_energy{beam_energy},
+
+          m_fiducials{std::make_unique<FiducialWrapper>(m_target, m_beam_energy)},
           // Initializing acceptance map files and TH3Ds
-          m_el_acceptance_file{getAcceptanceMapFile(Target::C12, BeamEnergy::MeV_2261, "")},
-          m_p_acceptance_file{getAcceptanceMapFile(Target::C12, BeamEnergy::MeV_2261, "_p")},
-          m_pip_acceptance_file{getAcceptanceMapFile(Target::C12, BeamEnergy::MeV_2261, "_pip")},
-          m_pim_acceptance_file{getAcceptanceMapFile(Target::C12, BeamEnergy::MeV_2261, "_pim")},
+          m_el_acceptance_file{getAcceptanceMapFile(m_target, m_beam_energy, "")},
+          m_p_acceptance_file{getAcceptanceMapFile(m_target, m_beam_energy, "_p")},
+          m_pip_acceptance_file{getAcceptanceMapFile(m_target, m_beam_energy, "_pip")},
+          m_pim_acceptance_file{getAcceptanceMapFile(m_target, m_beam_energy, "_pim")},
           m_acc_el_gen{(TH3D *)m_el_acceptance_file->Get("Generated Particles")},
           m_acc_el_acc{(TH3D *)m_el_acceptance_file->Get("Accepted Particles")},
           m_acc_p_gen{(TH3D *)m_p_acceptance_file->Get("Generated Particles")},
@@ -97,8 +105,8 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
 
     Double_t passesCuts();
 
-    double acceptanceJoined(const double &p, const double &cos_theta, double phi,
-                            const std::unique_ptr<TH3D> &generated, const std::unique_ptr<TH3D> &accepted);
+    double acceptanceJoined(const double &p, const double &cos_theta, double phi, const unique_ptr<TH3D> &generated,
+                            const unique_ptr<TH3D> &accepted);
 
     double electronAcceptance(const double &p, const double &cos_theta, const double &phi) {
         return acceptanceJoined(p, cos_theta, phi, m_acc_el_gen, m_acc_el_acc);
@@ -116,8 +124,8 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
         return acceptanceJoined(p, cos_theta, phi, m_acc_pim_gen, m_acc_pim_acc);
     }
 
-    static std::unique_ptr<TFile> getAcceptanceMapFile(const Target &target, const BeamEnergy &beam_energy,
-                                                       const string &ending) {
+    static unique_ptr<TFile> getAcceptanceMapFile(const Target &target, const BeamEnergy &beam_energy,
+                                                  const string &ending) {
         string target_str, beam_energy_str;
         if (target == Target::C12) {
             target_str = "12C";
@@ -133,9 +141,57 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
             beam_energy_str = "4_461";
         }
 
-        return std::unique_ptr<TFile>(TFile::Open(
+        return unique_ptr<TFile>(TFile::Open(
             ("original/e2a_maps/e2a_maps_" + target_str + "_E_" + beam_energy_str + ending + ".root").c_str(), "READ"));
     };
+};
+
+// A very simple wrapper around the Fiducial class, taken exactly as in original, so that it can be referred to in a
+// more modern way
+class FiducialWrapper {
+  public:
+    enum class PiPhotonId : int { Minus = -1, Photon = 0, Plus = 1 };
+
+    const GenieAnalysisOriginalCuts::Target m_target;
+    const GenieAnalysisOriginalCuts::BeamEnergy m_beam_energy;
+    string m_target_str, m_beam_energy_str;
+
+  private:
+    Fiducial m_fiducial;
+
+  public:
+    FiducialWrapper(const GenieAnalysisOriginalCuts::Target &target,
+                    const GenieAnalysisOriginalCuts::BeamEnergy &beam_energy)
+        : m_target(target), m_beam_energy(beam_energy), m_fiducial{} {
+
+        if (target == GenieAnalysisOriginalCuts::Target::C12) {
+            m_target_str = "12C";
+        } else if (target == GenieAnalysisOriginalCuts::Target::Fe56) {
+            m_target_str = "12C"; // There's no dedicated Fe file and original used 12C for anything except He
+        }
+
+        if (beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_1161) {
+            m_beam_energy_str = "1161";
+        } else if (beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261) {
+            m_beam_energy_str = "2261";
+        } else if (beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_4461) {
+            m_beam_energy_str = "4461";
+        }
+
+        // Set up fiducial for 2.261Gev and carbon 12 target
+        m_fiducial.InitPiMinusFit(m_beam_energy_str);
+        m_fiducial.InitEClimits();
+
+        m_fiducial.SetConstants(m_beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261 ? 750 : 2250,
+                                m_target_str, {{"1161", 1.161}, {"2261", 2.261}, {"4461", 4.461}});
+        m_fiducial.SetFiducialCutParameters(m_beam_energy_str);
+    }
+
+    bool electronCut(const TVector3 &momentum_V3) { return m_fiducial.EFiducialCut(m_beam_energy_str, momentum_V3); }
+
+    bool piAndPhotonCuts(const TVector3 &momentum_V3, const PiPhotonId &which_particle) {
+        return m_fiducial.Pi_phot_fid_united(m_beam_energy_str, momentum_V3, static_cast<int>(which_particle));
+    }
 };
 
 #endif
