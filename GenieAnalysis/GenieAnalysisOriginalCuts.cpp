@@ -2,7 +2,7 @@
 #include <TMath.h>
 
 Double_t GenieAnalysisOriginalCuts::passesCuts() {
-    useEntryAtStage("nocut");
+    useEntryAtStage("nocut", m_ge.wght);
 
     const double smeared_pl{gRandom->Gaus(m_ge.pl, m_smearing_reso_el * m_ge.pl)};
     const double smeared_El{sqrt(smeared_pl * smeared_pl + e_mass * e_mass)};
@@ -23,26 +23,25 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
         (m_smeared_el_V3.Theta() > 60 * TMath::DegToRad())) {
         return 0;
     }
+    useEntryAtStage("p_gdoc", m_ge.wght);
 
     // This was originally later on but I think it makes more sense here
     if (!m_fiducials.electronCut(m_smeared_el_V3)) {
         return 0;
     }
+    useEntryAtStage("p_efid", m_ge.wght);
 
     // Filter some specific sectors, this was enabled and probably makes some sense, essentially only
     // use sectors 0, 1 and 5
     // Sectors are a bit weird, the first goes from -30 to 30 and the rest go as expected to 330
-    double temp{(m_smeared_el_V3.Phi() + TMath::Pi() / 6)};
-    if (temp < 0) {
-        temp += 2 * TMath::Pi();
-    }
-    const int ElectronSector = temp / (TMath::Pi() / 3);
-    if ((ElectronSector >= 2) && (ElectronSector <= 4)) {
-        return 0;
-    }
-
-    // Here there's a longish part calculating weights but the "Mott_cross_section" is hardcoded
-    // to 1 and wghts are I think all 1 so essentially it's just the e acceptance weight
+    /* double temp{(m_smeared_el_V3.Phi() + TMath::Pi() / 6)}; */
+    /* if (temp < 0) { */
+    /*     temp += 2 * TMath::Pi(); */
+    /* } */
+    /* const int ElectronSector = temp / (TMath::Pi() / 3); */
+    /* if ((ElectronSector >= 2) && (ElectronSector <= 4)) { */
+    /*     return 0; */
+    /* } */
 
     // Calculation of kinematic quantities (nu, Q2, x bjorken, q and W) -- mostly taken from original though
     // specific to 2.261Gev beam
@@ -176,7 +175,7 @@ double GenieAnalysisOriginalCuts::acceptanceJoined(const double &p, const double
     double num_acc = accepted->GetBinContent(pbin_acc, tbin_acc, phibin_acc);
 
     double acc_ratio = num_acc / num_gen;
-    // TODO: Unused, use or delet soon
+    // TODO: Unused, use or delete soon
     /* double acc_err = sqrt(acc_ratio * (1 - acc_ratio)) / num_gen; */
 
     return acc_ratio;

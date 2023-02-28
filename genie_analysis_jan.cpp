@@ -63,12 +63,18 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
 };
 
 int main(int argc, char *argv[]) {
-    GenieAnalysis1Pion ga{gst_path_jan,
-                          "output_jan.root",
-                          {"nocut"},
-                          {"W", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_p", "pi_phi",
-                           "pi_cos_theta", "pi_acceptance"},
-                          {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}};
+    /* GenieAnalysis1Pion ga{gst_path_jan, */
+    /*                       "output_jan.root", */
+    /*                       {"nocut"}, */
+    /*                       {"W", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_p", "pi_phi", */
+    /*                        "pi_cos_theta", "pi_acceptance"}, */
+    /*                       {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}}; */
+
+    GenieAnalysisOriginalCuts ga{gst_path_jan,
+                                 "output_jan.root",
+                                 {"nocut", "p_gdoc", "p_efid"},
+                                 {"W", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance"},
+                                 {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}};
 
     /* GenieAnalysis1Pion ga{genie_machine_path, */
     /*                       "output_jan_full.root", */

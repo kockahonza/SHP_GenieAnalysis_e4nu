@@ -5,6 +5,7 @@
 #include <TLorentzVector.h>
 #include <TMath.h>
 #include <TRandom.h>
+#include <memory>
 
 #include "GenieAnalysis.h"
 #include "GenieAnalysisAuto.h"
@@ -13,6 +14,11 @@
 // So far I'm only focusing on exactly the stuff used with the command line arguments in the README,
 // specifically this means 2.261GeV beam on C12 target and more.
 class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
+  public:
+    enum class Target { C12, Fe56 };
+
+    enum class BeamEnergy { MeV_1161, MeV_2261, MeV_4461 };
+
   private:
     // Paths and other system stuff
 
@@ -20,14 +26,10 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
 
     // e2a acceptance maps
     // TODO: Move these to the constructor in some nice way, should not just be hardcoded
-    const std::unique_ptr<TFile> m_el_acceptance_file{
-        TFile::Open("original/e2a_maps/e2a_maps_12C_E_2_261.root", "READ")};
-    const std::unique_ptr<TFile> m_p_acceptance_file{
-        TFile::Open("original/e2a_maps/e2a_maps_12C_E_2_261_p.root", "READ")};
-    const std::unique_ptr<TFile> m_pip_acceptance_file{
-        TFile::Open("original/e2a_maps/e2a_maps_12C_E_2_261_pip.root", "READ")};
-    const std::unique_ptr<TFile> m_pim_acceptance_file{
-        TFile::Open("original/e2a_maps/e2a_maps_12C_E_2_261_pim.root", "READ")};
+    const std::unique_ptr<TFile> m_el_acceptance_file;
+    const std::unique_ptr<TFile> m_p_acceptance_file;
+    const std::unique_ptr<TFile> m_pip_acceptance_file;
+    const std::unique_ptr<TFile> m_pim_acceptance_file;
 
     // It seems to be necessary for I suppose performance reason? that these are found beforehand and not at each call
     // to acceptanceJoined
@@ -75,6 +77,11 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
                               const vector<string> &properties, const vector<string> &types,
                               const char *gst_ttree_name = "gst")
         : GenieAnalysisAutoTH1Fs(filename, output_filename, stages, properties, types, gst_ttree_name), m_fiducials{},
+          // Initializing acceptance map files and TH3Ds
+          m_el_acceptance_file{getAcceptanceMapFile(Target::C12, BeamEnergy::MeV_2261, "")},
+          m_p_acceptance_file{getAcceptanceMapFile(Target::C12, BeamEnergy::MeV_2261, "_p")},
+          m_pip_acceptance_file{getAcceptanceMapFile(Target::C12, BeamEnergy::MeV_2261, "_pip")},
+          m_pim_acceptance_file{getAcceptanceMapFile(Target::C12, BeamEnergy::MeV_2261, "_pim")},
           m_acc_el_gen{(TH3D *)m_el_acceptance_file->Get("Generated Particles")},
           m_acc_el_acc{(TH3D *)m_el_acceptance_file->Get("Accepted Particles")},
           m_acc_p_gen{(TH3D *)m_p_acceptance_file->Get("Generated Particles")},
@@ -82,7 +89,9 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
           m_acc_pip_gen{(TH3D *)m_pip_acceptance_file->Get("Generated Particles")},
           m_acc_pip_acc{(TH3D *)m_pip_acceptance_file->Get("Accepted Particles")},
           m_acc_pim_gen{(TH3D *)m_pim_acceptance_file->Get("Generated Particles")},
-          m_acc_pim_acc{(TH3D *)m_pim_acceptance_file->Get("Accepted Particles")} {
+          m_acc_pim_acc{(TH3D *)m_pim_acceptance_file->Get("Accepted Particles")}
+
+    {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
 
@@ -106,6 +115,27 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
     double piMinusAcceptance(const double &p, const double &cos_theta, const double &phi) {
         return acceptanceJoined(p, cos_theta, phi, m_acc_pim_gen, m_acc_pim_acc);
     }
+
+    static std::unique_ptr<TFile> getAcceptanceMapFile(const Target &target, const BeamEnergy &beam_energy,
+                                                       const string &ending) {
+        string target_str, beam_energy_str;
+        if (target == Target::C12) {
+            target_str = "12C";
+        } else if (target == Target::Fe56) {
+            target_str = "12C"; // There's no dedicated Fe file and original used 12C for anything except He
+        }
+
+        if (beam_energy == BeamEnergy::MeV_1161) {
+            beam_energy_str = "1_161";
+        } else if (beam_energy == BeamEnergy::MeV_2261) {
+            beam_energy_str = "2_261";
+        } else if (beam_energy == BeamEnergy::MeV_4461) {
+            beam_energy_str = "4_461";
+        }
+
+        return std::unique_ptr<TFile>(TFile::Open(
+            ("original/e2a_maps/e2a_maps_" + target_str + "_E_" + beam_energy_str + ending + ".root").c_str(), "READ"));
+    };
 };
 
 #endif
