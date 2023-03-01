@@ -73,7 +73,7 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
     // Extensions to automatic TH1Fs
     map<string, AutoProperty> m_new_known_properties{
         {"el_phi",
-         {"Out electron phi [degree]",
+         {"Out electron phi [°]",
           {720, -30, 330},
           [this]() {
               double phi_deg{m_smeared_el_V3.Phi() * TMath::RadToDeg()};
