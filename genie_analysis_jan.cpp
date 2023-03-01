@@ -48,11 +48,8 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
   public:
     GenieAnalysis1Pion(const char *filename, const char *output_filename, const Target &target,
                        const BeamEnergy &beam_energy, const vector<string> &stages, const vector<string> &properties,
-                       const vector<string> &types, const bool &do_precuts = true,
-                       const bool &do_electron_fiducials = true, const bool &do_sectors = false,
-                       const char *gst_ttree_name = "gst")
-        : GenieAnalysisOriginalCuts(filename, output_filename, target, beam_energy, stages, properties, types,
-                                    do_precuts, do_electron_fiducials, do_sectors) {
+                       const vector<string> &types, const char *gst_ttree_name = "gst")
+        : GenieAnalysisOriginalCuts(filename, output_filename, target, beam_energy, stages, properties, types) {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
         /* m_known_types.insert(m_new_known_types.begin(), m_new_known_types.end()); */
     }
@@ -90,17 +87,14 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
 };
 
 int main(int argc, char *argv[]) {
-    /* GenieAnalysis1Pion ga{gst_path_jan, */
-    /*                       "output_jan.root", */
-    /*                       GenieAnalysisOriginalCuts::Target::C12, */
-    /*                       GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261, */
-    /*                       {"nocut", "PIP", "PIM"}, */
-    /*                       {"W", "wght", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_phi", */
-    /*                        "pi_cos_theta", "pi_p", "pi_E", "pi_acceptance"}, */
-    /*                       {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}, */
-    /*                       true, */
-    /*                       true, */
-    /*                       false}; */
+    GenieAnalysis1Pion ga{gst_path_jan,
+                          "output_jan.root",
+                          GenieAnalysisOriginalCuts::Target::C12,
+                          GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261,
+                          {"nocut", "PIP", "PIM"},
+                          {"W", "wght", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_phi",
+                           "pi_cos_theta", "pi_p", "pi_E", "pi_acceptance"},
+                          {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}};
     /* "PIP", "QE_PIP", "RES_ALL_PIP", "DELTA1232_PIP", "DIS_PIP", */
     /* "PIM", "QE_PIM", "RES_ALL_PIM", "DELTA1232_PIM", "DIS_PIM"}, true, true, false}; */
 
@@ -112,14 +106,14 @@ int main(int argc, char *argv[]) {
     /*                              {"W", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance"}, */
     /*                              {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}, false, true, false}; */
 
-    GenieAnalysis1Pion ga{genie_machine_path,
-                          "output_jan_full.root",
-                          GenieAnalysisOriginalCuts::Target::C12,
-                          GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261,
-                          {"PIP", "PIM"},
-                          {"W", "wght", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_phi",
-                           "pi_cos_theta", "pi_p", "pi_E", "pi_acceptance"},
-                          {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}};
+    /* GenieAnalysis1Pion ga{genie_machine_path, */
+    /*                       "output_jan_full.root", */
+    /*                       GenieAnalysisOriginalCuts::Target::C12, */
+    /*                       GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261, */
+    /*                       {"PIP", "PIM"}, */
+    /*                       {"W", "wght", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_phi", */
+    /*                        "pi_cos_theta", "pi_p", "pi_E", "pi_acceptance"}, */
+    /*                       {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}}; */
 
     ga.runAnalysis();
 

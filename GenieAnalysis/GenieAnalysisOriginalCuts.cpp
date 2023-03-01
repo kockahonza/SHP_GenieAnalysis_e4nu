@@ -80,7 +80,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
         // pi-
         if (m_ge.pdgf[i] == -211) {
             // required momentum for detection
-            if (m_ge.pf[i] < 0.15) {
+            if (m_ge.pf[i] < m_p_pion_momentum_threshold) {
                 continue;
             }
             smeared_p = gRandom->Gaus(m_ge.pf[i], m_smearing_reso_pi * m_ge.pf[i]);
@@ -104,7 +104,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
         // pi+
         if (m_ge.pdgf[i] == 211) {
             // required momentum for detection
-            if (m_ge.pf[i] < 0.15) {
+            if (m_ge.pf[i] < m_p_pion_momentum_threshold) {
                 continue;
             }
             smeared_p = gRandom->Gaus(m_ge.pf[i], m_smearing_reso_pi * m_ge.pf[i]);
@@ -128,7 +128,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
         // photons
         if (m_ge.pdgf[i] == 22) {
             // required momentum for detection
-            if (m_ge.pf[i] < 0.3) {
+            if (m_ge.pf[i] < m_p_photon_momentum_threshold) {
                 continue;
             }
 
@@ -145,8 +145,8 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
             // fixing a clear(ish) bug For the second condition there's a phi angle difference the +2pi is to bring
             // it to the 0 to 4pi range adn then mod 2pi and compare to
             positive_phi_difference = TMath::Abs(V3.Phi() - m_smeared_el_V3.Phi()) * TMath::RadToDeg();
-            if ((V3.Angle(m_smeared_el_V3) < 40) &&
-                ((positive_phi_difference < 30) || (positive_phi_difference > 330))) {
+            if ((V3.Angle(m_smeared_el_V3) < m_p_radiation_photon_angle) &&
+                ((positive_phi_difference < m_p_radiation_photon_phi_diff) || (positive_phi_difference > (360 - m_p_radiation_photon_phi_diff)))) {
                 return 0;
             }
 

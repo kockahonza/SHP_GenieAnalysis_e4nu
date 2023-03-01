@@ -25,12 +25,21 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
     const Target m_target;
     const BeamEnergy m_beam_energy;
 
-    const bool m_do_precuts;
-    const bool m_do_electron_fiducials;
-    const bool m_do_sectors;
+  public:
+    // Some parameters to be set by directly accessing them, otherwise the constructor would be massive,
+    // the values here are used for the CLAS6 C12 2GeV GENIE data.
+    bool m_do_precuts{true};
+    bool m_do_electron_fiducials{true};
+    bool m_do_sectors{false};
+    bool m_do_radiation_check{false};
+
+    double m_p_pion_momentum_threshold{0.15};
+    double m_p_photon_momentum_threshold{0.3};
+    double m_p_radiation_photon_angle{40};
+    double m_p_radiation_photon_phi_diff{30};
 
   protected:
-    // Parameters -- should be essentially const, but leaving mutable for easy initialization and maybe someone would
+    // Automatically determined parameters -- should be essentially const, but leaving mutable for easy initialization and maybe someone would
     // like to change them
     double m_smearing_reso_el; // smearing for the electrons
     double m_smearing_reso_pi; // smearing for pions, executive decision by Larry (28.08.19)
@@ -92,9 +101,6 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
                               // Specify the analysis - which stages, properties and types to do histograms for
                               const vector<string> &stages, const vector<string> &properties,
                               const vector<string> &types,
-                              // Some flags about which cuts to use
-                              const bool &do_precuts = true, const bool &do_electron_fiducials = true,
-                              const bool &do_sectors = false,
                               // Smearing parameters
                               const double &smearing_reso_el = 0.005, const double &smearing_reso_pi = 0.007,
                               const double &smearing_reso_p = 0.01,
@@ -103,7 +109,6 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
         : GenieAnalysisAutoTH1Fs(filename, output_filename, stages, properties, types, gst_ttree_name),
           m_target{target}, m_beam_energy{beam_energy},
 
-          m_do_precuts{do_precuts}, m_do_electron_fiducials{do_electron_fiducials}, m_do_sectors{do_sectors},
           m_smearing_reso_el{smearing_reso_el}, m_smearing_reso_pi{smearing_reso_pi},
           m_smearing_reso_p{smearing_reso_p},
 
