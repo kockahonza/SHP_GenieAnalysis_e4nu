@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
                           "output_jan_full.root",
                           GenieAnalysisOriginalCuts::Target::C12,
                           GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261,
-                          {},
+                          {"PIP", "PIM"},
                           {"W", "wght", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_phi",
                            "pi_cos_theta", "pi_p", "pi_E", "pi_acceptance"},
                           {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}};
