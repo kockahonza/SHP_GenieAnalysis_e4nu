@@ -29,12 +29,13 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
         {"pi_acceptance", {"Pion acceptance weight", {100, 0, 1}, [this]() { return m_pion_acceptance; }}}};
 
   public:
-    GenieAnalysis1Pion(const char *filename, const char *output_filename, const Target &target, const BeamEnergy &beam_energy,
-                       const vector<string> &stages, const vector<string> &properties, const vector<string> &types,
-                       const bool &do_precuts = true, const bool &do_electron_fiducials = true, const bool &do_sectors = false,
+    GenieAnalysis1Pion(const char *filename, const char *output_filename, const Target &target,
+                       const BeamEnergy &beam_energy, const vector<string> &stages, const vector<string> &properties,
+                       const vector<string> &types, const bool &do_precuts = true,
+                       const bool &do_electron_fiducials = true, const bool &do_sectors = false,
                        const char *gst_ttree_name = "gst")
-        : GenieAnalysisOriginalCuts(filename, output_filename, target, beam_energy, stages, properties, types, do_precuts,
-                                    do_electron_fiducials, do_sectors) {
+        : GenieAnalysisOriginalCuts(filename, output_filename, target, beam_energy, stages, properties, types,
+                                    do_precuts, do_electron_fiducials, do_sectors) {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
 
@@ -70,8 +71,8 @@ int main(int argc, char *argv[]) {
                           GenieAnalysisOriginalCuts::Target::C12,
                           GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261,
                           {"nocut"},
-                          {"W", "wght", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_phi", "pi_cos_theta",
-                           "pi_p", "pi_E", "pi_acceptance"},
+                          {"W", "wght", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_phi",
+                           "pi_cos_theta", "pi_p", "pi_E", "pi_acceptance"},
                           {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}};
 
     /* GenieAnalysisOriginalCuts ga{gst_path_jan, */

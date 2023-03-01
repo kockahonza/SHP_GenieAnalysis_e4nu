@@ -7,10 +7,12 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
     // Do electron smearing
     const double smeared_pl{gRandom->Gaus(m_ge.pl, m_smearing_reso_el * m_ge.pl)};
     const double smeared_El{sqrt(smeared_pl * smeared_pl + e_mass * e_mass)};
-    m_smeared_el_V3.SetXYZ(smeared_pl / m_ge.pl * m_ge.pxl, smeared_pl / m_ge.pl * m_ge.pyl, smeared_pl / m_ge.pl * m_ge.pzl);
+    m_smeared_el_V3.SetXYZ(smeared_pl / m_ge.pl * m_ge.pxl, smeared_pl / m_ge.pl * m_ge.pyl,
+                           smeared_pl / m_ge.pl * m_ge.pzl);
     m_smeared_el_V4.SetPxPyPzE(m_smeared_el_V3.X(), m_smeared_el_V3.Y(), m_smeared_el_V3.Z(), smeared_El);
 
-    // GENIE coordinate system flipped with respect to CLAS, all the 4momentas phis are added pi to -- blindly taken from original
+    // GENIE coordinate system flipped with respect to CLAS, all the 4momentas phis are added pi to -- blindly taken
+    // from original
     m_smeared_el_V3.SetPhi(m_smeared_el_V3.Phi() + TMath::Pi());
 
     // Electron theta and momentum fiducial (essentially I think) cut, the values are specifically for C12 2.261GeV
@@ -145,7 +147,8 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
             // fixing a clear(ish) bug For the second condition there's a phi angle difference the +2pi is to bring
             // it to the 0 to 4pi range adn then mod 2pi and compare to
             positive_phi_difference = TMath::Abs(V3.Phi() - m_smeared_el_V3.Phi()) * TMath::RadToDeg();
-            if ((V3.Angle(m_smeared_el_V3) < 40) && ((positive_phi_difference < 30) || (positive_phi_difference > 330))) {
+            if ((V3.Angle(m_smeared_el_V3) < 40) &&
+                ((positive_phi_difference < 30) || (positive_phi_difference > 330))) {
                 return 0;
             }
 
