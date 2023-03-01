@@ -15,7 +15,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
     // from original
     m_smeared_el_V3.SetPhi(m_smeared_el_V3.Phi() + TMath::Pi());
 
-    // Electron theta and momentum fiducial (essentially I think) cut, the values are specifically for C12 2.261GeV
+    // Electron theta and momentum precuts (essentially fiducials I think), the values are specifically for C12 2.261GeV
     // set by inspecting
     // https://docs.google.com/presentation/d/1ghG08JfCYXRXh6O8hcXKrhJOFxkAs_9i5ZfoIkiiEHU/edit?usp=sharing and
     // previous values
