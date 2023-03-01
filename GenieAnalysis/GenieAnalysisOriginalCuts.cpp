@@ -22,7 +22,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
     if (m_do_precuts) {
         const double theta_min{TMath::DegToRad() * (m_precut_parameter1 + m_precut_parameter2 / m_smeared_el_V3.Mag())};
         if ((m_smeared_el_V3.Theta() < theta_min) || (m_smeared_el_V3.Theta() < 0 * TMath::DegToRad()) ||
-            (m_smeared_el_V3.Theta() > 60 * TMath::DegToRad())) {
+            (m_smeared_el_V3.Theta() > 80 * TMath::DegToRad())) {
             return 0;
         }
         useEntryAtStage("p_gdoc", m_ge.wght);
@@ -61,8 +61,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
 
     // Get the electron acceptance weight from the e2a map
     m_electron_acceptance_weight =
-        electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(),
-                           m_smeared_el_V3.Phi() + TMath::Pi()); // could be issue here - angles and CoTheta
+        electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(), m_smeared_el_V3.Phi());
     if (m_electron_acceptance_weight != TMath::Abs(m_electron_acceptance_weight)) {
         throw "Electron acceptance not reasonable";
     }
@@ -162,9 +161,14 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
 double GenieAnalysisOriginalCuts::acceptanceJoined(const double &p, const double &cos_theta, double phi,
                                                    const std::unique_ptr<TH3D> &generated,
                                                    const std::unique_ptr<TH3D> &accepted) {
-    // map 330 till 360 to [-30:0] for the acceptance map histogram
-    if (phi > (2 * TMath::Pi() - TMath::Pi() / 6.)) {
-        phi -= 2 * TMath::Pi();
+    // first map -pi, pi to [0, 2pi
+    if (phi < 0) {
+        phi += 2 * TMath::Pi();
+    }
+    phi *= TMath::RadToDeg();
+    // map 330 till 360 to [-30:0] but in radians for the acceptance map histogram
+    if (phi > (330)) {
+        phi -= 360;
     }
 
     int redef = 0; // or -30 I think, it was this way in the original
@@ -172,13 +176,13 @@ double GenieAnalysisOriginalCuts::acceptanceJoined(const double &p, const double
     // Find number of generated events
     double pbin_gen = generated->GetXaxis()->FindBin(p);
     double tbin_gen = generated->GetYaxis()->FindBin(cos_theta);
-    double phibin_gen = generated->GetZaxis()->FindBin(phi * 180 / TMath::Pi() + redef);
+    double phibin_gen = generated->GetZaxis()->FindBin(phi + redef);
     double num_gen = generated->GetBinContent(pbin_gen, tbin_gen, phibin_gen);
 
     // Find number of accepted events
     double pbin_acc = accepted->GetXaxis()->FindBin(p);
     double tbin_acc = accepted->GetYaxis()->FindBin(cos_theta);
-    double phibin_acc = accepted->GetZaxis()->FindBin(phi * 180 / TMath::Pi() + redef);
+    double phibin_acc = accepted->GetZaxis()->FindBin(phi + redef);
     double num_acc = accepted->GetBinContent(pbin_acc, tbin_acc, phibin_acc);
 
     double acc_ratio = num_acc / num_gen;
