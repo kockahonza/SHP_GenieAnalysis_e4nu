@@ -146,7 +146,8 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
             // it to the 0 to 4pi range adn then mod 2pi and compare to
             positive_phi_difference = TMath::Abs(V3.Phi() - m_smeared_el_V3.Phi()) * TMath::RadToDeg();
             if ((V3.Angle(m_smeared_el_V3) < m_p_radiation_photon_angle) &&
-                ((positive_phi_difference < m_p_radiation_photon_phi_diff) || (positive_phi_difference > (360 - m_p_radiation_photon_phi_diff)))) {
+                ((positive_phi_difference < m_p_radiation_photon_phi_diff) ||
+                 (positive_phi_difference > (360 - m_p_radiation_photon_phi_diff)))) {
                 return 0;
             }
 

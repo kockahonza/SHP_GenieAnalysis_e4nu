@@ -39,8 +39,8 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
     double m_p_radiation_photon_phi_diff{30};
 
   protected:
-    // Automatically determined parameters -- should be essentially const, but leaving mutable for easy initialization and maybe someone would
-    // like to change them
+    // Automatically determined parameters -- should be essentially const, but leaving mutable for easy initialization
+    // and maybe someone would like to change them
     double m_smearing_reso_el; // smearing for the electrons
     double m_smearing_reso_pi; // smearing for pions, executive decision by Larry (28.08.19)
     double m_smearing_reso_p;  // smearing for the proton -- comments from original
@@ -82,7 +82,7 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
     // Extensions to automatic TH1Fs
     map<string, AutoProperty> m_new_known_properties{
         {"el_phi",
-         {"Out electron phi [degree]",
+         {"Out electron phi [°]",
           {720, -30, 330},
           [this]() {
               double phi_deg{m_smeared_el_V3.Phi() * TMath::RadToDeg()};

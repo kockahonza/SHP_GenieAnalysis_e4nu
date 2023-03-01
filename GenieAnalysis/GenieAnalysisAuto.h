@@ -123,7 +123,7 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
         for (string stage : m_stages) {
             for (string property : m_properties) {
                 THStack hist_stack{(stage + "_" + property).c_str(),
-                                   (m_known_properties[property].title + " - at " + stage).c_str()};
+                                   (m_known_properties[property].title + " - " + stage).c_str()};
                 TLegend stack_legend{33, 16, "By interaction types"};
                 stack_legend.SetName((stage + "_" + property + "_legend").c_str());
 

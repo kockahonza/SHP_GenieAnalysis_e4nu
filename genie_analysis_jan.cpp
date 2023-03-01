@@ -19,7 +19,7 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
   protected:
     map<string, AutoProperty> m_new_known_properties{
         {"pi_phi",
-         {"Pion phi [degree]",
+         {"Pion phi [°]",
           {720, -30, 330},
           [this]() {
               double phi_deg{m_pion_V3.Phi() * TMath::RadToDeg()};
@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
                           "output_jan.root",
                           GenieAnalysisOriginalCuts::Target::C12,
                           GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261,
-                          {"nocut", "PIP", "PIM"},
+                          {"nocut", "π+", "π-"},
                           {"W", "wght", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_phi",
                            "pi_cos_theta", "pi_p", "pi_E", "pi_acceptance"},
                           {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}};
