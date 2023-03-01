@@ -75,22 +75,22 @@ int main(int argc, char *argv[]) {
     /*                        "pi_cos_theta", "pi_p", "pi_E", "pi_acceptance"}, */
     /*                       {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}, true, true, false}; */
 
-    GenieAnalysisOriginalCuts ga{gst_path_jan,
-                                 "output_jan.root",
-                                 GenieAnalysisOriginalCuts::Target::C12,
-                                 GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261,
-                                 {"nocut", "p_gdoc", "p_efid"},
-                                 {"W", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance"},
-                                 {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}, true, true, false};
+    /* GenieAnalysisOriginalCuts ga{gst_path_jan, */
+    /*                              "output_jan.root", */
+    /*                              GenieAnalysisOriginalCuts::Target::C12, */
+    /*                              GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261, */
+    /*                              {"nocut", "p_gdoc", "p_efid"}, */
+    /*                              {"W", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance"}, */
+    /*                              {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}, false, true, false}; */
 
-    /* GenieAnalysis1Pion ga{genie_machine_path, */
-    /*                       "output_jan_full.root", */
-    /*                       GenieAnalysisOriginalCuts::Target::C12, */
-    /*                       GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261, */
-    /*                       {}, */
-    /*                       {"W", "wght", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_phi", */
-    /*                        "pi_cos_theta", "pi_p", "pi_E", "pi_acceptance"}, */
-    /*                       {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}}; */
+    GenieAnalysis1Pion ga{genie_machine_path,
+                          "output_jan_full.root",
+                          GenieAnalysisOriginalCuts::Target::C12,
+                          GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261,
+                          {},
+                          {"W", "wght", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_phi",
+                           "pi_cos_theta", "pi_p", "pi_E", "pi_acceptance"},
+                          {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}};
 
     ga.runAnalysis();
 
