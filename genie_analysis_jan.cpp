@@ -69,13 +69,13 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
                 /* m_pion_plus = false; */
                 /* m_pion_minus = true; */
                 std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_minus[0];
-                useEntryAtStage("PIP", weight * m_pion_acceptance);
+                useEntryAtStage("PIP", 1);
             } else if (num_pi_plus == 1) {
                 m_pion_charge = +1;
                 /* m_pion_plus = true; */
                 /* m_pion_minus = false; */
                 std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_plus[0];
-                useEntryAtStage("PIM", weight * m_pion_acceptance);
+                useEntryAtStage("PIM", 1);
             }
 
             /* std::cout << weight << ", " << m_pion_acceptance << ", " << m_pion_charge << std::endl; */
@@ -114,6 +114,13 @@ int main(int argc, char *argv[]) {
     /*                       {"W", "wght", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_phi", */
     /*                        "pi_cos_theta", "pi_p", "pi_E", "pi_acceptance"}, */
     /*                       {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}}; */
+
+    ga.m_do_precuts = false;
+    ga.m_do_electron_fiducials = false;
+    ga.m_do_pion_fiducials = false;
+    ga.m_do_photon_fiducials = false;
+
+    ga.m_p_pion_momentum_threshold = 0;
 
     ga.runAnalysis();
 

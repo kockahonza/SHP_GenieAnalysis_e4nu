@@ -30,6 +30,8 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
     // the values here are used for the CLAS6 C12 2GeV GENIE data.
     bool m_do_precuts{true};
     bool m_do_electron_fiducials{true};
+    bool m_do_pion_fiducials{true};
+    bool m_do_photon_fiducials{true};
     bool m_do_sectors{false};
     bool m_do_radiation_check{false};
 

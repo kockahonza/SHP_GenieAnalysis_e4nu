@@ -90,8 +90,10 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
                       smeared_p / m_ge.pf[i] * m_ge.pzf[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
-            if (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Minus)) {
-                continue;
+            if (m_do_pion_fiducials) {
+                if (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Minus)) {
+                    continue;
+                }
             }
 
             // And only use pirns with reasonable acceptance, quite often they are negative or so on, this is kindof a
@@ -114,8 +116,10 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
                       smeared_p / m_ge.pf[i] * m_ge.pzf[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
-            if (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Plus)) {
-                continue;
+            if (m_do_pion_fiducials) {
+                if (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Plus)) {
+                    continue;
+                }
             }
 
             // And only use pirns with reasonable acceptance, quite often they are negative or so on, this is kindof a
@@ -136,19 +140,23 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
             V3.SetXYZ(m_ge.pxf[i], m_ge.pyf[i], m_ge.pzf[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
-            if (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Photon)) {
-                continue;
+            if (m_do_photon_fiducials) {
+                if (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Photon)) {
+                    continue;
+                }
             }
 
             // TODO: The following should cut on presence of radiation electrons but it's worth reviewing, a comment
             // in original says "within 40 degrees in theta and 30 in phi" but that's not what it did, even after
             // fixing a clear(ish) bug For the second condition there's a phi angle difference the +2pi is to bring
             // it to the 0 to 4pi range adn then mod 2pi and compare to
-            positive_phi_difference = TMath::Abs(V3.Phi() - m_smeared_el_V3.Phi()) * TMath::RadToDeg();
-            if ((V3.Angle(m_smeared_el_V3) < m_p_radiation_photon_angle) &&
-                ((positive_phi_difference < m_p_radiation_photon_phi_diff) ||
-                 (positive_phi_difference > (360 - m_p_radiation_photon_phi_diff)))) {
-                return 0;
+            if (m_do_radiation_check) {
+                positive_phi_difference = TMath::Abs(V3.Phi() - m_smeared_el_V3.Phi()) * TMath::RadToDeg();
+                if ((V3.Angle(m_smeared_el_V3) < m_p_radiation_photon_angle) &&
+                    ((positive_phi_difference < m_p_radiation_photon_phi_diff) ||
+                     (positive_phi_difference > (360 - m_p_radiation_photon_phi_diff)))) {
+                    return 0;
+                }
             }
 
             m_passed_photons.push_back({{V3, m_ge.Ef[i]}, V3, photonAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});
