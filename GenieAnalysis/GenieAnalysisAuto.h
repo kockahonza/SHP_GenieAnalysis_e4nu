@@ -43,9 +43,8 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     map<string, map<string, map<string, TH1F>>> m_staged_hists;
 
   protected:
-    map<string, AutoProperty> m_known_properties{
-        {"W", {"W from gst", {1000, 0, 4}, [this]() { return m_ge.W; }}},
-        {"wght", {"wght from gst", {100, 0, 2}, [this]() { return m_ge.wght; }}}};
+    map<string, AutoProperty> m_known_properties{{"W", {"W from gst", {1000, 0, 4}, [this]() { return m_ge.W; }}},
+                                                 {"wght", {"wght from gst", {100, 0, 2}, [this]() { return m_ge.wght; }}}};
 
     map<string, AutoType> m_known_types{
         {"ALL", {"All events", [this]() { return true; }}},
@@ -60,11 +59,9 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     std::array<Color_t, m_number_colors> m_colors{kBlack, kRed, kGreen, kBlue, kMagenta, kCyan, kOrange};
 
     GenieAnalysisAutoTH1Fs(const char *filename, const char *output_filename, const vector<string> &stages,
-                           const vector<string> &properties, const vector<string> &types,
-                           const char *gst_ttree_name = "gst")
+                           const vector<string> &properties, const vector<string> &types, const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name),
-          m_output_file(TFile::Open(output_filename, "RECREATE")), m_stages{stages},
-          m_properties{properties}, m_types{types} {}
+          m_output_file(TFile::Open(output_filename, "RECREATE")), m_stages{stages}, m_properties{properties}, m_types{types} {}
 
     void createTH1Fs() {
         string name;

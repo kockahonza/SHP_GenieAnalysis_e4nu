@@ -15,7 +15,7 @@ class FiducialWrapper;
 using std::unique_ptr;
 
 // So far I'm only focusing on exactly the stuff used with the command line arguments in the README,
-// specifically this means 2.261GeV beam on C12 target and more.
+// specifically this means 2.261GeV beam on C12 target and more -- not quite anymore
 class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
   public:
     // Configuration options for the major target/energy runs
@@ -25,6 +25,8 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
     const Target m_target;
     const BeamEnergy m_beam_energy;
 
+    const bool m_do_precuts;
+    const bool m_do_electron_fiducials;
     const bool m_do_sectors;
 
   private:
@@ -39,14 +41,17 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
     const unique_ptr<TFile> m_pim_acceptance_file;
     // It seems to be necessary for I suppose performance reason? that these are found beforehand and not at each call
     // to acceptanceJoined
-    const unique_ptr<TH3D> m_acc_el_gen, m_acc_el_acc, m_acc_p_gen, m_acc_p_acc, m_acc_pip_gen, m_acc_pip_acc,
-        m_acc_pim_gen, m_acc_pim_acc;
+    const unique_ptr<TH3D> m_acc_el_gen, m_acc_el_acc, m_acc_p_gen, m_acc_p_acc, m_acc_pip_gen, m_acc_pip_acc, m_acc_pim_gen,
+        m_acc_pim_acc;
 
   protected:
     // Parameters
     static constexpr double m_smearing_reso_p{0.01};   // smearing for the proton
     static constexpr double m_smearing_reso_el{0.005}; // smearing for the electrons
     static constexpr double m_smearing_reso_pi{0.007}; // smearing for pions, executive decision by Larry (28.08.19)
+
+    double m_precut_parameter1;
+    double m_precut_parameter2;
 
     // Properties of the loaded event to be set and used in passesCuts and new properties
     // electron
@@ -75,34 +80,52 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
         {"el_cos_theta", {"Out electron cos theta", {720, -1, 1}, [this]() { return m_smeared_el_V3.CosTheta(); }}},
         {"el_p", {"Out electron momentum", {720, 0, 3}, [this]() { return m_smeared_el_V4.P(); }}},
         {"el_E", {"Out electron energy", {720, 0, 3}, [this]() { return m_smeared_el_V4.Energy(); }}},
-        {"el_acceptance",
-         {"Out electron acceptance weight", {100, 0, 1}, [this]() { return m_electron_acceptance_weight; }}}};
+        {"el_acceptance", {"Out electron acceptance weight", {100, 0, 1}, [this]() { return m_electron_acceptance_weight; }}}};
 
   public:
-    GenieAnalysisOriginalCuts(const char *filename, const char *output_filename, const Target &target,
-                              const BeamEnergy &beam_energy, const vector<string> &stages,
-                              const vector<string> &properties, const vector<string> &types,
-                              const bool &do_sectors = false, const char *gst_ttree_name = "gst")
-        : GenieAnalysisAutoTH1Fs(filename, output_filename, stages, properties, types, gst_ttree_name),
-          m_target{target}, m_beam_energy{beam_energy}, m_do_sectors{do_sectors},
+    GenieAnalysisOriginalCuts(const char *filename, const char *output_filename,
+                              // Select run
+                              const Target &target, const BeamEnergy &beam_energy,
+                              // Specify the analysis - which stages, properties and types to do histograms for
+                              const vector<string> &stages, const vector<string> &properties, const vector<string> &types,
+                              // Some flags about which cuts to use
+                              const bool &do_precuts = true, const bool &do_electron_fiducials = true,
+                              const bool &do_sectors = false,
+                              // Pass this to GenieAnalysis
+                              const char *gst_ttree_name = "gst")
+        : GenieAnalysisAutoTH1Fs(filename, output_filename, stages, properties, types, gst_ttree_name), m_target{target},
+          m_beam_energy{beam_energy},
+
+          m_do_precuts{do_precuts}, m_do_electron_fiducials{do_electron_fiducials}, m_do_sectors{do_sectors},
 
           m_fiducials{std::make_unique<FiducialWrapper>(m_target, m_beam_energy)},
           // Initializing acceptance map files and TH3Ds
           m_el_acceptance_file{getAcceptanceMapFile(m_target, m_beam_energy, "")},
-          m_p_acceptance_file{getAcceptanceMapFile(m_target, m_beam_energy, "_p")},
-          m_pip_acceptance_file{getAcceptanceMapFile(m_target, m_beam_energy, "_pip")},
+          m_p_acceptance_file{getAcceptanceMapFile(m_target, m_beam_energy, "_p")}, m_pip_acceptance_file{getAcceptanceMapFile(
+                                                                                        m_target, m_beam_energy, "_pip")},
           m_pim_acceptance_file{getAcceptanceMapFile(m_target, m_beam_energy, "_pim")},
           m_acc_el_gen{(TH3D *)m_el_acceptance_file->Get("Generated Particles")},
-          m_acc_el_acc{(TH3D *)m_el_acceptance_file->Get("Accepted Particles")},
-          m_acc_p_gen{(TH3D *)m_p_acceptance_file->Get("Generated Particles")},
-          m_acc_p_acc{(TH3D *)m_p_acceptance_file->Get("Accepted Particles")},
-          m_acc_pip_gen{(TH3D *)m_pip_acceptance_file->Get("Generated Particles")},
+          m_acc_el_acc{(TH3D *)m_el_acceptance_file->Get("Accepted Particles")}, m_acc_p_gen{(TH3D *)m_p_acceptance_file->Get(
+                                                                                     "Generated Particles")},
+          m_acc_p_acc{(TH3D *)m_p_acceptance_file->Get("Accepted Particles")}, m_acc_pip_gen{(TH3D *)m_pip_acceptance_file->Get(
+                                                                                   "Generated Particles")},
           m_acc_pip_acc{(TH3D *)m_pip_acceptance_file->Get("Accepted Particles")},
           m_acc_pim_gen{(TH3D *)m_pim_acceptance_file->Get("Generated Particles")},
           m_acc_pim_acc{(TH3D *)m_pim_acceptance_file->Get("Accepted Particles")}
 
     {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
+
+        if (beam_energy == BeamEnergy::MeV_1161) {
+            m_precut_parameter1 = 17;
+            m_precut_parameter2 = 7;
+        } else if (beam_energy == BeamEnergy::MeV_2261) {
+            m_precut_parameter1 = 16;
+            m_precut_parameter2 = 10.5;
+        } else if (beam_energy == BeamEnergy::MeV_4461) {
+            m_precut_parameter1 = 13.5;
+            m_precut_parameter2 = 15;
+        }
     }
 
     Double_t passesCuts();
@@ -126,8 +149,7 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
         return acceptanceJoined(p, cos_theta, phi, m_acc_pim_gen, m_acc_pim_acc);
     }
 
-    static unique_ptr<TFile> getAcceptanceMapFile(const Target &target, const BeamEnergy &beam_energy,
-                                                  const string &ending) {
+    static unique_ptr<TFile> getAcceptanceMapFile(const Target &target, const BeamEnergy &beam_energy, const string &ending) {
         string target_str, beam_energy_str;
         if (target == Target::C12) {
             target_str = "12C";
@@ -163,17 +185,16 @@ class FiducialWrapper {
     Fiducial m_fiducial;
 
   public:
-    FiducialWrapper(const GenieAnalysisOriginalCuts::Target &target,
-                    const GenieAnalysisOriginalCuts::BeamEnergy &beam_energy)
+    FiducialWrapper(const GenieAnalysisOriginalCuts::Target &target, const GenieAnalysisOriginalCuts::BeamEnergy &beam_energy)
         : m_target(target), m_beam_energy(beam_energy), m_target_str{targetStr(m_target)},
           m_beam_energy_str{beamEnergyStr(m_beam_energy)}, m_fiducial{} {
 
-        // Set up fiducial for 2.261Gev and carbon 12 target
         m_fiducial.InitPiMinusFit(m_beam_energy_str);
         m_fiducial.InitEClimits();
 
-        m_fiducial.SetConstants(m_beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_1161 ? 750 : 2250,
-                                m_target_str, {{"1161", 1.161}, {"2261", 2.261}, {"4461", 4.461}});
+        // The first value is torusCurrent, values taken from original
+        m_fiducial.SetConstants(m_beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_1161 ? 750 : 2250, m_target_str,
+                                {{"1161", 1.161}, {"2261", 2.261}, {"4461", 4.461}});
         m_fiducial.SetFiducialCutParameters(m_beam_energy_str);
     }
 

@@ -4,44 +4,49 @@
 Double_t GenieAnalysisOriginalCuts::passesCuts() {
     useEntryAtStage("nocut", m_ge.wght);
 
+    // Do electron smearing
     const double smeared_pl{gRandom->Gaus(m_ge.pl, m_smearing_reso_el * m_ge.pl)};
     const double smeared_El{sqrt(smeared_pl * smeared_pl + e_mass * e_mass)};
-
-    m_smeared_el_V3.SetXYZ(smeared_pl / m_ge.pl * m_ge.pxl, smeared_pl / m_ge.pl * m_ge.pyl,
-                           smeared_pl / m_ge.pl * m_ge.pzl);
+    m_smeared_el_V3.SetXYZ(smeared_pl / m_ge.pl * m_ge.pxl, smeared_pl / m_ge.pl * m_ge.pyl, smeared_pl / m_ge.pl * m_ge.pzl);
     m_smeared_el_V4.SetPxPyPzE(m_smeared_el_V3.X(), m_smeared_el_V3.Y(), m_smeared_el_V3.Z(), smeared_El);
 
-    // GENIE coordinate system flipped with respect to CLAS -- blindly taken from original
+    // GENIE coordinate system flipped with respect to CLAS, all the 4momentas phis are added pi to -- blindly taken from original
     m_smeared_el_V3.SetPhi(m_smeared_el_V3.Phi() + TMath::Pi());
 
     // Electron theta and momentum fiducial (essentially I think) cut, the values are specifically for C12 2.261GeV
     // set by inspecting
     // https://docs.google.com/presentation/d/1ghG08JfCYXRXh6O8hcXKrhJOFxkAs_9i5ZfoIkiiEHU/edit?usp=sharing and
     // previous values
-    const double theta_min{TMath::DegToRad() * (16 + 10.5 / m_smeared_el_V3.Mag())};
-    if ((m_smeared_el_V3.Theta() < theta_min) || (m_smeared_el_V3.Theta() < 0 * TMath::DegToRad()) ||
-        (m_smeared_el_V3.Theta() > 60 * TMath::DegToRad())) {
-        return 0;
+    if (m_do_precuts) {
+        const double theta_min{TMath::DegToRad() * (m_precut_parameter1 + m_precut_parameter2 / m_smeared_el_V3.Mag())};
+        if ((m_smeared_el_V3.Theta() < theta_min) || (m_smeared_el_V3.Theta() < 0 * TMath::DegToRad()) ||
+            (m_smeared_el_V3.Theta() > 60 * TMath::DegToRad())) {
+            return 0;
+        }
+        useEntryAtStage("p_gdoc", m_ge.wght);
     }
-    useEntryAtStage("p_gdoc", m_ge.wght);
 
     // This was originally later on but I think it makes more sense here
-    if (!m_fiducials->electronCut(m_smeared_el_V3)) {
-        return 0;
+    if (m_do_electron_fiducials) {
+        if (!m_fiducials->electronCut(m_smeared_el_V3)) {
+            return 0;
+        }
+        useEntryAtStage("p_efid", m_ge.wght);
     }
-    useEntryAtStage("p_efid", m_ge.wght);
 
     // Filter some specific sectors, this was enabled and probably makes some sense, essentially only
-    // use sectors 0, 1 and 5
+    // use sectors 0, 1 and 5, o this only if m_do_sectors is true
     // Sectors are a bit weird, the first goes from -30 to 30 and the rest go as expected to 330
-    /* double temp{(m_smeared_el_V3.Phi() + TMath::Pi() / 6)}; */
-    /* if (temp < 0) { */
-    /*     temp += 2 * TMath::Pi(); */
-    /* } */
-    /* const int ElectronSector = temp / (TMath::Pi() / 3); */
-    /* if ((ElectronSector >= 2) && (ElectronSector <= 4)) { */
-    /*     return 0; */
-    /* } */
+    if (m_do_sectors) {
+        double temp{(m_smeared_el_V3.Phi() + TMath::Pi() / 6)};
+        if (temp < 0) {
+            temp += 2 * TMath::Pi();
+        }
+        const int ElectronSector = temp / (TMath::Pi() / 3);
+        if ((ElectronSector >= 2) && (ElectronSector <= 4)) {
+            return 0;
+        }
+    }
 
     // Calculation of kinematic quantities (nu, Q2, x bjorken, q and W) -- mostly taken from original though
     // specific to 2.261Gev beam
@@ -140,8 +145,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
             // fixing a clear(ish) bug For the second condition there's a phi angle difference the +2pi is to bring
             // it to the 0 to 4pi range adn then mod 2pi and compare to
             positive_phi_difference = TMath::Abs(V3.Phi() - m_smeared_el_V3.Phi()) * TMath::RadToDeg();
-            if ((V3.Angle(m_smeared_el_V3) < 40) &&
-                ((positive_phi_difference < 30) || (positive_phi_difference > 330))) {
+            if ((V3.Angle(m_smeared_el_V3) < 40) && ((positive_phi_difference < 30) || (positive_phi_difference > 330))) {
                 return 0;
             }
 

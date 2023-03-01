@@ -123,8 +123,7 @@ class GenieAnalysis {
 
   public:
     GenieAnalysis(const char *filename, const char *gst_ttree_name = "gst")
-        : m_genie_data_file(TFile::Open(filename, "READ")),
-          m_genie_data((TTree *)m_genie_data_file->Get(gst_ttree_name)){};
+        : m_genie_data_file(TFile::Open(filename, "READ")), m_genie_data((TTree *)m_genie_data_file->Get(gst_ttree_name)){};
 
     void runAnalysis(Long64_t number_of_entries = std::numeric_limits<Long64_t>::max()) {
         runPreAnalysis();
