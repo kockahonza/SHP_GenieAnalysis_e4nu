@@ -60,8 +60,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
     /* const double x_bjk = reco_Q2 / (2 * m_prot * nu); */
 
     // Get the electron acceptance weight from the e2a map
-    m_electron_acceptance_weight =
-        electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(), m_smeared_el_V3.Phi());
+    m_electron_acceptance_weight = electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(), m_smeared_el_V3.Phi());
     if (m_electron_acceptance_weight != TMath::Abs(m_electron_acceptance_weight)) {
         throw "Electron acceptance not reasonable";
     }
