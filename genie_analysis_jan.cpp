@@ -69,13 +69,13 @@ class GenieAnalysis1Pion : public GenieAnalysisOriginalCuts {
                 /* m_pion_plus = false; */
                 /* m_pion_minus = true; */
                 std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_minus[0];
-                useEntryAtStage("PIP", 1);
+                useEntryAtStage("π+", weight * m_pion_acceptance);
             } else if (num_pi_plus == 1) {
                 m_pion_charge = +1;
                 /* m_pion_plus = true; */
                 /* m_pion_minus = false; */
                 std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_plus[0];
-                useEntryAtStage("PIM", 1);
+                useEntryAtStage("π-", weight * m_pion_acceptance);
             }
 
             /* std::cout << weight << ", " << m_pion_acceptance << ", " << m_pion_charge << std::endl; */
