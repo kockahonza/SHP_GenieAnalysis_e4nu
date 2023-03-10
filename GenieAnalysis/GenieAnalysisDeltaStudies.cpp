@@ -69,6 +69,8 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
     m_passed_pi_minus.clear();
     m_passed_pi_plus.clear();
     m_passed_photons.clear();
+    m_number_of_protons = 0;
+    m_number_of_neutrons = 0;
 
     // Temp variables for the loop, declared here for performance
     double smeared_p;
@@ -77,8 +79,11 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
     TVector3 V3;
     double positive_phi_difference;
     for (int i{0}; i < m_ge.nf; i++) {
-        // pi-
-        if (m_ge.pdgf[i] == -211) {
+        if (m_ge.pdgf[i] == 2212) { // proton
+            m_number_of_protons += 1;
+        } else if (m_ge.pdgf[i] == 2112) { // neutron
+            m_number_of_neutrons += 1;
+        } else if (m_ge.pdgf[i] == -211) { // pi-
             // required momentum for detection
             if (m_ge.pf[i] < m_p_pion_momentum_threshold) {
                 continue;
@@ -102,9 +107,7 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
             if (pi_acceptance == TMath::Abs(pi_acceptance)) {
                 m_passed_pi_minus.push_back({{V3, smeared_E}, V3, pi_acceptance});
             }
-        }
-        // pi+
-        if (m_ge.pdgf[i] == 211) {
+        } else if (m_ge.pdgf[i] == 211) { // pi+
             // required momentum for detection
             if (m_ge.pf[i] < m_p_pion_momentum_threshold) {
                 continue;
@@ -129,8 +132,7 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
                 m_passed_pi_plus.push_back({{V3, smeared_E}, V3, piPlusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});
             }
         }
-        // photons
-        if (m_ge.pdgf[i] == 22) {
+        if (m_ge.pdgf[i] == 22) { // photon
             // required momentum for detection
             if (m_ge.pf[i] < m_p_photon_momentum_threshold) {
                 continue;

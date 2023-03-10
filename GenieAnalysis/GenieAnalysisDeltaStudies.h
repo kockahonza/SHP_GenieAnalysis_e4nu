@@ -24,8 +24,10 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
   public:
     // Configuration options for the major target/energy runs
     enum class Target { C12, Fe56 };
+    // If the ~1GeV energy is to be added, smearing resolutions were tripled!, do't forget to add that
     enum class BeamEnergy { MeV_1161, MeV_2261, MeV_4461 };
 
+    // These should not be changed once initialized
     const Target m_target;
     const BeamEnergy m_beam_energy;
 
@@ -44,13 +46,14 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
     double m_p_radiation_photon_angle{40};
     double m_p_radiation_photon_phi_diff{30};
 
+    // Electron, pion and photon smearing
+    double m_smearing_reso_el{0.005};
+    double m_smearing_reso_pi{0.007};
+    double m_smearing_reso_p{0.01};
+
   protected:
     // Automatically determined parameters -- should be essentially const, but leaving mutable for easy initialization
     // and maybe someone would like to change them
-    double m_smearing_reso_el; // smearing for the electrons
-    double m_smearing_reso_pi; // smearing for pions, executive decision by Larry (28.08.19)
-    double m_smearing_reso_p;  // smearing for the proton -- comments from original
-
     double m_precut_parameter1;
     double m_precut_parameter2;
 
@@ -100,7 +103,9 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
         {"el_p", {"Out electron momentum [GeV/c]", {720, 0, 3}, [this]() { return m_smeared_el_V4.P(); }}},
         {"el_E", {"Out electron energy [GeV]", {720, 0, 3}, [this]() { return m_smeared_el_V4.Energy(); }}},
         {"el_acceptance",
-         {"Out electron acceptance weight", {100, 0, 1}, [this]() { return m_electron_acceptance_weight; }}}};
+         {"Out electron acceptance weight", {100, 0, 1}, [this]() { return m_electron_acceptance_weight; }}},
+        {"num_protons", {"Number of protons", {6, 0, 5}, [this]() { return m_number_of_protons; }}},
+        {"num_neutrons", {"Number of neutrons", {6, 0, 5}, [this]() { return m_number_of_neutrons; }}}};
 
   public:
     GenieAnalysisDeltaStudies(const char *filename, const char *output_filename,
@@ -109,16 +114,10 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
                               // Specify the analysis - which stages, properties and types to do histograms for
                               const vector<string> &stages, const vector<string> &properties,
                               const vector<string> &types,
-                              // Smearing parameters
-                              const double &smearing_reso_el = 0.005, const double &smearing_reso_pi = 0.007,
-                              const double &smearing_reso_p = 0.01,
                               // Pass this to GenieAnalysis
                               const char *gst_ttree_name = "gst")
         : GenieAnalysisAutoTH1Fs(filename, output_filename, stages, properties, types, gst_ttree_name),
           m_target{target}, m_beam_energy{beam_energy},
-
-          m_smearing_reso_el{smearing_reso_el}, m_smearing_reso_pi{smearing_reso_pi},
-          m_smearing_reso_p{smearing_reso_p},
 
           m_fiducials{std::make_unique<FiducialWrapper>(m_target, m_beam_energy)},
 
@@ -139,14 +138,10 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
     {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
 
-        // Initialize precut parameters and also multiply smearing resos by 3 for the ~1GeV as it was in the original
+        // Initialize precut parameters
         if (beam_energy == BeamEnergy::MeV_1161) {
             m_precut_parameter1 = 17;
             m_precut_parameter2 = 7;
-
-            m_smearing_reso_el *= 3;
-            m_smearing_reso_pi *= 3;
-            m_smearing_reso_p *= 3;
         } else if (beam_energy == BeamEnergy::MeV_2261) {
             m_precut_parameter1 = 16;
             m_precut_parameter2 = 10.5;
@@ -257,7 +252,68 @@ class FiducialWrapper {
     }
 };
 
-/** 
+class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
+  public:
+    enum class PionType { Minus, Plus };
+
+  private:
+    int m_pion_charge;
+    TLorentzVector m_pion_V4;
+    TVector3 m_pion_V3;
+    Double_t m_pion_acceptance;
+
+  protected:
+    map<string, AutoProperty> m_new_known_properties{
+        {"pi_phi",
+         {"Pion phi [°]",
+          {720, -30, 330},
+          [this]() {
+              double phi_deg{m_pion_V3.Phi() * TMath::RadToDeg()};
+              return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
+          }}},
+        {"pi_cos_theta", {"Pion cos theta", {720, -1, 1}, [this]() { return m_pion_V3.CosTheta(); }}},
+        {"pi_p", {"Pion momentum [GeV/c]", {720, 0, 3}, [this]() { return m_pion_V4.P(); }}},
+        {"pi_E", {"Pion energy [GeV]", {720, 0, 3}, [this]() { return m_pion_V4.E(); }}},
+        {"pi_acceptance", {"Pion acceptance weight", {100, 0, 1}, [this]() { return m_pion_acceptance; }}}};
+
+  public:
+    GenieAnalysis1Pion(const char *filename, const char *output_filename, const Target &target,
+                       const BeamEnergy &beam_energy, const vector<string> &stages, const vector<string> &properties,
+                       const vector<string> &types)
+        : GenieAnalysisDeltaStudies(filename, output_filename, target, beam_energy, stages, properties, types) {
+        m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
+        /* m_known_types.insert(m_new_known_types.begin(), m_new_known_types.end()); */
+    }
+
+    Double_t passesCuts() override {
+        Double_t weight{GenieAnalysisDeltaStudies::passesCuts()};
+        if (weight == 0) {
+            return 0;
+        }
+
+        const size_t num_pi_minus{m_passed_pi_minus.size()};
+        const size_t num_pi_plus{m_passed_pi_plus.size()};
+
+        if ((num_pi_minus + num_pi_plus) == 1) {
+            if (num_pi_minus == 1) {
+                m_pion_charge = -1;
+                std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_minus[0];
+                useEntryAtStage("π+", weight);
+            } else if (num_pi_plus == 1) {
+                m_pion_charge = +1;
+                std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_plus[0];
+                useEntryAtStage("π-", weight);
+            }
+
+            /* std::cout << weight << ", " << m_pion_acceptance << ", " << m_pion_charge << std::endl; */
+            return weight * m_pion_acceptance;
+        } else {
+            return 0;
+        }
+    }
+};
+
+/**
  * Imitates the analysis done in original, only uses events that have exactly 1 pion and any number of nucleons.
  * It uses both pions for the main analysis and "π+" and "π-" stages are available for data of only one pion charge.
  * I mainly keep this as a backup.
@@ -301,8 +357,7 @@ class GenieAnalysis1PionStaged : public GenieAnalysisDeltaStudies {
   public:
     GenieAnalysis1PionStaged(const char *filename, const char *output_filename, const Target &target,
                              const BeamEnergy &beam_energy, const vector<string> &stages,
-                             const vector<string> &properties, const vector<string> &types,
-                             const char *gst_ttree_name = "gst")
+                             const vector<string> &properties, const vector<string> &types)
         : GenieAnalysisDeltaStudies(filename, output_filename, target, beam_energy, stages, properties, types) {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
         /* m_known_types.insert(m_new_known_types.begin(), m_new_known_types.end()); */
