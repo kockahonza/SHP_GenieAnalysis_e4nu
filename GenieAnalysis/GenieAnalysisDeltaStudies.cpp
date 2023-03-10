@@ -1,7 +1,7 @@
-#include "GenieAnalysisOriginalCuts.h"
+#include "GenieAnalysisDeltaStudies.h"
 #include <TMath.h>
 
-Double_t GenieAnalysisOriginalCuts::passesCuts() {
+Double_t GenieAnalysisDeltaStudies::passesCuts() {
     useEntryAtStage("nocut", m_ge.wght);
 
     // Do electron smearing
@@ -166,7 +166,7 @@ Double_t GenieAnalysisOriginalCuts::passesCuts() {
     return m_electron_acceptance_weight * m_ge.wght; // I'm pretty sure all the events have wght=1
 }
 
-double GenieAnalysisOriginalCuts::acceptanceJoined(const double &p, const double &cos_theta, double phi,
+double GenieAnalysisDeltaStudies::acceptanceJoined(const double &p, const double &cos_theta, double phi,
                                                    const std::unique_ptr<TH3D> &generated,
                                                    const std::unique_ptr<TH3D> &accepted) {
     // first map -pi, pi to [0, 2pi

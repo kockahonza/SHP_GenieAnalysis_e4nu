@@ -3,7 +3,7 @@ ROOTLDFLAGS := $(shell root-config --ldflags)
 ROOTLIBS    := $(shell root-config --libs) -lEG
 ROOTGLIBS   := $(shell root-config --glibs)
 
-GA_LIB_OBJECTS := GenieAnalysis/GenieAnalysis.o GenieAnalysis/misc.o GenieAnalysis/GenieAnalysisAuto.o GenieAnalysis/Fiducial.o GenieAnalysis/GenieAnalysisOriginalCuts.o
+GA_LIB_OBJECTS := GenieAnalysis/GenieAnalysis.o GenieAnalysis/misc.o GenieAnalysis/GenieAnalysisAuto.o GenieAnalysis/Fiducial.o GenieAnalysis/GenieAnalysisDeltaStudies.o
 
 CXX       := g++
 CXXFLAGS  += -std=c++17 -Wall -Wshadow -Warray-bounds -Wmissing-field-initializers -fPIC $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -O3

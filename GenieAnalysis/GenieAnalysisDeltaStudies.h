@@ -16,7 +16,7 @@ using std::unique_ptr;
 
 // So far I'm only focusing on exactly the stuff used with the command line arguments in the README,
 // specifically this means 2.261GeV beam on C12 target and more -- not quite anymore
-class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
+class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
   public:
     // Configuration options for the major target/energy runs
     enum class Target { C12, Fe56 };
@@ -97,7 +97,7 @@ class GenieAnalysisOriginalCuts : public GenieAnalysisAutoTH1Fs {
          {"Out electron acceptance weight", {100, 0, 1}, [this]() { return m_electron_acceptance_weight; }}}};
 
   public:
-    GenieAnalysisOriginalCuts(const char *filename, const char *output_filename,
+    GenieAnalysisDeltaStudies(const char *filename, const char *output_filename,
                               // Select run
                               const Target &target, const BeamEnergy &beam_energy,
                               // Specify the analysis - which stages, properties and types to do histograms for
@@ -199,8 +199,8 @@ class FiducialWrapper {
   public:
     enum class PiPhotonId : int { Minus = -1, Photon = 0, Plus = 1 };
 
-    const GenieAnalysisOriginalCuts::Target m_target;
-    const GenieAnalysisOriginalCuts::BeamEnergy m_beam_energy;
+    const GenieAnalysisDeltaStudies::Target m_target;
+    const GenieAnalysisDeltaStudies::BeamEnergy m_beam_energy;
     const string m_target_str;
     const string m_beam_energy_str;
 
@@ -208,8 +208,8 @@ class FiducialWrapper {
     Fiducial m_fiducial;
 
   public:
-    FiducialWrapper(const GenieAnalysisOriginalCuts::Target &target,
-                    const GenieAnalysisOriginalCuts::BeamEnergy &beam_energy)
+    FiducialWrapper(const GenieAnalysisDeltaStudies::Target &target,
+                    const GenieAnalysisDeltaStudies::BeamEnergy &beam_energy)
         : m_target(target), m_beam_energy(beam_energy), m_target_str{targetStr(m_target)},
           m_beam_energy_str{beamEnergyStr(m_beam_energy)}, m_fiducial{} {
 
@@ -217,7 +217,7 @@ class FiducialWrapper {
         m_fiducial.InitEClimits();
 
         // The first value is torusCurrent, values taken from original
-        m_fiducial.SetConstants(m_beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_1161 ? 750 : 2250,
+        m_fiducial.SetConstants(m_beam_energy == GenieAnalysisDeltaStudies::BeamEnergy::MeV_1161 ? 750 : 2250,
                                 m_target_str, {{"1161", 1.161}, {"2261", 2.261}, {"4461", 4.461}});
         m_fiducial.SetFiducialCutParameters(m_beam_energy_str);
     }
@@ -228,21 +228,21 @@ class FiducialWrapper {
         return m_fiducial.Pi_phot_fid_united(m_beam_energy_str, momentum_V3, static_cast<int>(which_particle));
     }
 
-    static string targetStr(const GenieAnalysisOriginalCuts::Target &target) {
-        if (target == GenieAnalysisOriginalCuts::Target::C12) {
+    static string targetStr(const GenieAnalysisDeltaStudies::Target &target) {
+        if (target == GenieAnalysisDeltaStudies::Target::C12) {
             return "12C";
-        } else if (target == GenieAnalysisOriginalCuts::Target::Fe56) {
+        } else if (target == GenieAnalysisDeltaStudies::Target::Fe56) {
             return "12C"; // There's no dedicated Fe file and original used 12C for anything except He
         }
         throw "This should not happen";
     }
 
-    static string beamEnergyStr(const GenieAnalysisOriginalCuts::BeamEnergy &beam_energy) {
-        if (beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_1161) {
+    static string beamEnergyStr(const GenieAnalysisDeltaStudies::BeamEnergy &beam_energy) {
+        if (beam_energy == GenieAnalysisDeltaStudies::BeamEnergy::MeV_1161) {
             return "1161";
-        } else if (beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_2261) {
+        } else if (beam_energy == GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261) {
             return "2261";
-        } else if (beam_energy == GenieAnalysisOriginalCuts::BeamEnergy::MeV_4461) {
+        } else if (beam_energy == GenieAnalysisDeltaStudies::BeamEnergy::MeV_4461) {
             return "4461";
         }
         throw "This should not happen";
