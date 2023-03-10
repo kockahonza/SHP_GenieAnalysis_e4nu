@@ -19,18 +19,19 @@ int main(int argc, char *argv[]) {
             output_file = "output_full.root";
         }
     } else {
-        std::cout << "Needs an argument to specify which way to run (should be \"local\" or \"full\"), check the code" << std::endl;
+        std::cout << "Needs an argument to specify which way to run (should be \"local\" or \"full\"), check the code"
+                  << std::endl;
         return -1;
     }
 
-    GenieAnalysis1Pion ga{input_file.c_str(),
-                          output_file.c_str(),
-                          GenieAnalysisDeltaStudies::Target::C12,
-                          GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261,
-                          {"nocut", "π+", "π-"},
-                          {"W", "wght", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_phi",
-                           "pi_cos_theta", "pi_p", "pi_E", "pi_acceptance"},
-                          {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}};
+    GenieAnalysis1PionStaged ga{input_file.c_str(),
+                                output_file.c_str(),
+                                GenieAnalysisDeltaStudies::Target::C12,
+                                GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261,
+                                {"nocut", "π+", "π-"},
+                                {"W", "wght", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_phi",
+                                 "pi_cos_theta", "pi_p", "pi_E", "pi_acceptance"},
+                                {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}};
 
     ga.m_do_precuts = false;
     ga.m_do_electron_fiducials = false;

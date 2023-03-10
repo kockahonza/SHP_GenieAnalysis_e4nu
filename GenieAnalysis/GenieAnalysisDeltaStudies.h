@@ -13,8 +13,13 @@ class FiducialWrapper;
 
 using std::unique_ptr;
 
-// So far I'm only focusing on exactly the stuff used with the command line arguments in the README,
-// specifically this means 2.261GeV beam on C12 target and more -- not quite anymore
+/**
+ * Base class for Delta studies analysis, mainly tailored for Genie data tuned for the CLAS6 runs.
+ * It takes care of the electron smearing, cuts and so on. It also gathers all pions, get the
+ * number of protons and neutrons and possibly detects radiation photons.
+ * The electron properties are made available here any pion properties dhoul be done in
+ * inheriting classes.
+ */
 class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
   public:
     // Configuration options for the major target/energy runs
@@ -194,8 +199,10 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
     };
 };
 
-// A very simple wrapper around the Fiducial class, taken exactly as in original, so that it can be referred to in a
-// more modern way
+/**
+ * A very simple wrapper around the Fiducial class, which is taken exactly as in original, so that it can be referred
+ * to in a more modern way. No need to pas strings to specify what is to be done in each call.
+ */
 class FiducialWrapper {
   public:
     enum class PiPhotonId : int { Minus = -1, Photon = 0, Plus = 1 };
@@ -250,8 +257,12 @@ class FiducialWrapper {
     }
 };
 
-// And specifically only pi- and pi+ for now, same as original code
-class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
+/** 
+ * Imitates the analysis done in original, only uses events that have exactly 1 pion and any number of nucleons.
+ * It uses both pions for the main analysis and "π+" and "π-" stages are available for data of only one pion charge.
+ * I mainly keep this as a backup.
+ */
+class GenieAnalysis1PionStaged : public GenieAnalysisDeltaStudies {
   private:
     int m_pion_charge;
     TLorentzVector m_pion_V4;
@@ -288,9 +299,10 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
     /* }; */
 
   public:
-    GenieAnalysis1Pion(const char *filename, const char *output_filename, const Target &target,
-                       const BeamEnergy &beam_energy, const vector<string> &stages, const vector<string> &properties,
-                       const vector<string> &types, const char *gst_ttree_name = "gst")
+    GenieAnalysis1PionStaged(const char *filename, const char *output_filename, const Target &target,
+                             const BeamEnergy &beam_energy, const vector<string> &stages,
+                             const vector<string> &properties, const vector<string> &types,
+                             const char *gst_ttree_name = "gst")
         : GenieAnalysisDeltaStudies(filename, output_filename, target, beam_energy, stages, properties, types) {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
         /* m_known_types.insert(m_new_known_types.begin(), m_new_known_types.end()); */
