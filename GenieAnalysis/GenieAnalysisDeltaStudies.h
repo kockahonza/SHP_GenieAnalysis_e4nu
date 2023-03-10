@@ -249,4 +249,84 @@ class FiducialWrapper {
     }
 };
 
+// And specifically only pi- and pi+ for now, same as original code
+class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
+  private:
+    int m_pion_charge;
+    /* bool m_pion_plus; */
+    /* bool m_pion_minus; */
+    TLorentzVector m_pion_V4;
+    TVector3 m_pion_V3;
+    Double_t m_pion_acceptance;
+
+  protected:
+    map<string, AutoProperty> m_new_known_properties{
+        {"pi_phi",
+         {"Pion phi [°]",
+          {720, -30, 330},
+          [this]() {
+              double phi_deg{m_pion_V3.Phi() * TMath::RadToDeg()};
+              return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
+          }}},
+        {"pi_cos_theta", {"Pion cos theta", {720, -1, 1}, [this]() { return m_pion_V3.CosTheta(); }}},
+        {"pi_p", {"Pion momentum [GeV/c]", {720, 0, 3}, [this]() { return m_pion_V4.P(); }}},
+        {"pi_E", {"Pion energy [GeV]", {720, 0, 3}, [this]() { return m_pion_V4.E(); }}},
+        {"pi_acceptance", {"Pion acceptance weight", {100, 0, 1}, [this]() { return m_pion_acceptance; }}}};
+
+    /* map<string, AutoType> m_new_known_types{ */
+    /*     {"PIP", {"All events", [this]() { return m_pion_plus; }}}, */
+    /*     {"QE_PIP", {"Quasi-Elastic events", [this]() { return m_ge.qel && m_pion_plus; }}}, */
+    /*     {"RES_ALL_PIP", {"Resonant events", [this]() { return m_ge.res && m_pion_plus; }}}, */
+    /*     {"DELTA1232_PIP", {"Resonant events with a Delta1232", [this]() { return (m_ge.res && (m_ge.resid == 0) &&
+     * m_pion_plus); }}}, */
+    /*     {"DIS_PIP", {"Deep-inelastic events", [this]() { return m_ge.dis && m_pion_plus; }}}, */
+    /*     {"PIM", {"All events", [this]() { return m_pion_minus; }}}, */
+    /*     {"QE_PIM", {"Quasi-Elastic events", [this]() { return m_ge.qel && m_pion_minus; }}}, */
+    /*     {"RES_ALL_PIM", {"Resonant events", [this]() { return m_ge.res && m_pion_minus; }}}, */
+    /*     {"DELTA1232_PIM", {"Resonant events with a Delta1232", [this]() { return (m_ge.res && (m_ge.resid == 0) &&
+     * m_pion_minus); }}}, */
+    /*     {"DIS_PIM", {"Deep-inelastic events", [this]() { return m_ge.dis && m_pion_minus; }}}, */
+    /* }; */
+
+  public:
+    GenieAnalysis1Pion(const char *filename, const char *output_filename, const Target &target,
+                       const BeamEnergy &beam_energy, const vector<string> &stages, const vector<string> &properties,
+                       const vector<string> &types, const char *gst_ttree_name = "gst")
+        : GenieAnalysisDeltaStudies(filename, output_filename, target, beam_energy, stages, properties, types) {
+        m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
+        /* m_known_types.insert(m_new_known_types.begin(), m_new_known_types.end()); */
+    }
+
+    Double_t passesCuts() override {
+        Double_t weight{GenieAnalysisDeltaStudies::passesCuts()};
+        if (weight == 0) {
+            return 0;
+        }
+
+        const size_t num_pi_minus{m_passed_pi_minus.size()};
+        const size_t num_pi_plus{m_passed_pi_plus.size()};
+
+        if ((num_pi_minus + num_pi_plus) == 1) {
+            if (num_pi_minus == 1) {
+                m_pion_charge = -1;
+                /* m_pion_plus = false; */
+                /* m_pion_minus = true; */
+                std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_minus[0];
+                useEntryAtStage("π+", weight);
+            } else if (num_pi_plus == 1) {
+                m_pion_charge = +1;
+                /* m_pion_plus = true; */
+                /* m_pion_minus = false; */
+                std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_plus[0];
+                useEntryAtStage("π-", weight);
+            }
+
+            /* std::cout << weight << ", " << m_pion_acceptance << ", " << m_pion_charge << std::endl; */
+            return weight * m_pion_acceptance;
+        } else {
+            return 0;
+        }
+    }
+};
+
 #endif

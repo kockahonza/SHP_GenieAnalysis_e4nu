@@ -11,7 +11,7 @@ LDFLAGS   += -std=c++17 $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
 
 # Executables
-genie_analysis_jan: genie_analysis_jan.cpp $(GA_LIB_OBJECTS)
+genie_analysis_jan: genie_analysis_deltas.cpp $(GA_LIB_OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 genie_analysis_lucass_cuts: genie_analysis_lucass_cuts.cpp $(GA_LIB_OBJECTS)
@@ -21,7 +21,7 @@ genie_analysis_demo: genie_analysis_demo.cpp $(GA_LIB_OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 
-ALL: genie_analysis_demo genie_analysis_lucass_cuts genie_analysis_jan
+ALL: genie_analysis_demo genie_analysis_lucass_cuts genie_analysis_deltas
 
 # GenieAnalysis "library"
 #
@@ -34,4 +34,4 @@ GenieAnalysis/%.o: GenieAnalysis/%.cpp GenieAnalysis/%.h
 
 
 clean:
-	@rm -rf GenieAnalysis/*.o *.o genie_analysis_demo genie_analysis_lucass_cuts
+	@rm -rf GenieAnalysis/*.o *.o genie_analysis_demo genie_analysis_lucass_cuts genie_analysis_deltas
