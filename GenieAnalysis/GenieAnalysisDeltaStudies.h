@@ -1,6 +1,8 @@
 #ifndef GENIE_ANALYSIS_ORIGINAL_CUTS_H
 #define GENIE_ANALYSIS_ORIGINAL_CUTS_H
 
+#include <optional>
+
 #include <TH3D.h>
 #include <TLorentzVector.h>
 #include <TMath.h>
@@ -73,11 +75,17 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
         m_acc_pim_gen, m_acc_pim_acc;
 
   protected:
-    // Properties of the loaded event to be set and used in passesCuts and new properties
-    // electron
+    // Mostly physical properties of the event and system to be used in passesCuts and fot
+    // various properties
+    // will be set in constructor and then const
+    Double_t m_beam_energy_val;
+
     TVector3 m_smeared_el_V3; // Smeared and rotated by pi
     TLorentzVector m_smeared_el_V4;
     Double_t m_electron_acceptance_weight;
+
+    Double_t m_reconstructed_W;
+    Double_t m_bjorken_x;
 
     // hadrons -- all of these only contain information on particles passing relevant cuts (pions need momentum above
     // 0.15 for example)
@@ -104,16 +112,18 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
         {"el_E", {"Out electron energy [GeV]", {720, 0, 3}, [this]() { return m_smeared_el_V4.Energy(); }}},
         {"el_acceptance",
          {"Out electron acceptance weight", {100, 0, 1}, [this]() { return m_electron_acceptance_weight; }}},
+        {"reco_W", {"Reconstructed W [GeV]", {1000, 0, 4}, [this]() { return m_reconstructed_W; }}},
+        {"bjorken_x", {"Bjorken x", {1000, 0, 4}, [this]() { return m_bjorken_x; }}},
         {"num_protons", {"Number of protons", {6, 0, 5}, [this]() { return m_number_of_protons; }}},
         {"num_neutrons", {"Number of neutrons", {6, 0, 5}, [this]() { return m_number_of_neutrons; }}}};
 
   public:
     GenieAnalysisDeltaStudies(const char *filename, const char *output_filename,
-                              // Select run
-                              const Target &target, const BeamEnergy &beam_energy,
                               // Specify the analysis - which stages, properties and types to do histograms for
                               const vector<string> &stages, const vector<string> &properties,
                               const vector<string> &types,
+                              // Select run
+                              const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
                               // Pass this to GenieAnalysis
                               const char *gst_ttree_name = "gst")
         : GenieAnalysisAutoTH1Fs(filename, output_filename, stages, properties, types, gst_ttree_name),
@@ -142,12 +152,15 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
         if (beam_energy == BeamEnergy::MeV_1161) {
             m_precut_parameter1 = 17;
             m_precut_parameter2 = 7;
+            m_beam_energy_val = 1.161;
         } else if (beam_energy == BeamEnergy::MeV_2261) {
             m_precut_parameter1 = 16;
             m_precut_parameter2 = 10.5;
+            m_beam_energy_val = 2.261;
         } else if (beam_energy == BeamEnergy::MeV_4461) {
             m_precut_parameter1 = 13.5;
             m_precut_parameter2 = 15;
+            m_beam_energy_val = 4.461;
         }
     }
 
@@ -252,12 +265,17 @@ class FiducialWrapper {
     }
 };
 
+using std::optional;
+
 class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
   public:
-    enum class PionType { Minus, Plus };
+    enum class PionType { Minus, Plus, Either };
 
   private:
-    int m_pion_charge;
+    const PionType m_pion_type;
+    const optional<int> m_proton_count;
+    const optional<int> m_neutron_count;
+
     TLorentzVector m_pion_V4;
     TVector3 m_pion_V3;
     Double_t m_pion_acceptance;
@@ -277,12 +295,15 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
         {"pi_acceptance", {"Pion acceptance weight", {100, 0, 1}, [this]() { return m_pion_acceptance; }}}};
 
   public:
-    GenieAnalysis1Pion(const char *filename, const char *output_filename, const Target &target,
-                       const BeamEnergy &beam_energy, const vector<string> &stages, const vector<string> &properties,
-                       const vector<string> &types)
-        : GenieAnalysisDeltaStudies(filename, output_filename, target, beam_energy, stages, properties, types) {
+    GenieAnalysis1Pion(const char *filename, const char *output_filename, const vector<string> &stages,
+                       const vector<string> &properties, const vector<string> &types,
+                       PionType pion_type = PionType::Either, optional<int> proton_count = {},
+                       optional<int> neutron_count = {}, const Target &target = GenieAnalysisDeltaStudies::Target::C12,
+                       const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
+
+        : GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, target, beam_energy),
+          m_pion_type{pion_type}, m_proton_count{proton_count}, m_neutron_count{neutron_count} {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
-        /* m_known_types.insert(m_new_known_types.begin(), m_new_known_types.end()); */
     }
 
     Double_t passesCuts() override {
@@ -291,32 +312,23 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
             return 0;
         }
 
-        const size_t num_pi_minus{m_passed_pi_minus.size()};
-        const size_t num_pi_plus{m_passed_pi_plus.size()};
-
-        if ((num_pi_minus + num_pi_plus) == 1) {
-            if (num_pi_minus == 1) {
-                m_pion_charge = -1;
-                std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_minus[0];
-                useEntryAtStage("π+", weight * m_pion_acceptance);
-            } else if (num_pi_plus == 1) {
-                m_pion_charge = +1;
-                std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_plus[0];
-                useEntryAtStage("π-", weight * m_pion_acceptance);
-            }
-
-            /* std::cout << weight << ", " << m_pion_acceptance << ", " << m_pion_charge << std::endl; */
-            return weight * m_pion_acceptance;
+        if ((m_pion_type != PionType::Plus) && (m_passed_pi_plus.size() == 0) && (m_passed_pi_minus.size() == 1)) {
+            std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_minus[0];
+        } else if ((m_pion_type != PionType::Minus) && (m_passed_pi_minus.size() == 0) &&
+                   (m_passed_pi_plus.size() == 1)) {
+            std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_plus[0];
         } else {
             return 0;
         }
+
+        return weight * m_pion_acceptance;
     }
 };
 
 /**
  * Imitates the analysis done in original, only uses events that have exactly 1 pion and any number of nucleons.
  * It uses both pions for the main analysis and "π+" and "π-" stages are available for data of only one pion charge.
- * I mainly keep this as a backup.
+ * I mainly keep this as a backup, GenieAnalysis1Pion should be better I think.
  */
 class GenieAnalysis1PionStaged : public GenieAnalysisDeltaStudies {
   private:
@@ -355,12 +367,12 @@ class GenieAnalysis1PionStaged : public GenieAnalysisDeltaStudies {
     /* }; */
 
   public:
-    GenieAnalysis1PionStaged(const char *filename, const char *output_filename, const Target &target,
-                             const BeamEnergy &beam_energy, const vector<string> &stages,
-                             const vector<string> &properties, const vector<string> &types)
-        : GenieAnalysisDeltaStudies(filename, output_filename, target, beam_energy, stages, properties, types) {
+    GenieAnalysis1PionStaged(const char *filename, const char *output_filename, const vector<string> &stages,
+                             const vector<string> &properties, const vector<string> &types,
+                             const Target &target = GenieAnalysisDeltaStudies::Target::C12,
+                             const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
+        : GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, target, beam_energy) {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
-        /* m_known_types.insert(m_new_known_types.begin(), m_new_known_types.end()); */
     }
 
     Double_t passesCuts() override {

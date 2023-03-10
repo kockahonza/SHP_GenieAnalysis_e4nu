@@ -8,6 +8,7 @@
 // Constants used within GenieAnalysis
 constexpr double m_pion{0.139570};
 constexpr double e_mass{0.000510998};
+constexpr double proton_mass{0.9382720813};
 
 // Parameters for Fiducial I expect, they are all used in Fiducial.cpp
 constexpr double PhiOpeningAngleEl = 6;

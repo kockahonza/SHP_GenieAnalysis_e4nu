@@ -14,6 +14,7 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
     // GENIE coordinate system flipped with respect to CLAS, all the 4momentas phis are added pi to -- blindly taken
     // from original
     m_smeared_el_V3.SetPhi(m_smeared_el_V3.Phi() + TMath::Pi());
+    m_smeared_el_V4.SetPhi(m_smeared_el_V3.Phi());
 
     // Electron theta and momentum fiducial (essentially I think) cut, the values are specifically for C12 2.261GeV
     // set by inspecting
@@ -50,14 +51,14 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
         }
     }
 
-    // Calculation of kinematic quantities (nu, Q2, x bjorken, q and W) -- mostly taken from original though
-    // specific to 2.261Gev beam
-    // TODO: Unusued now, delete or use
-    /* const TLorentzVector el_change{m_smeared_el_V4 - TLorentzVector{0, 0, 2.261, 2.261}}; */
-    /* const double reco_Q2 = -el_change.Mag2(); */
+    // Calculation of kinematic quantities (nu, Q2, x bjorken, q and W) -- literally taken from original though
+    const TLorentzVector el_change{m_smeared_el_V4 - TLorentzVector{0, 0, m_beam_energy_val, m_beam_energy_val}};
+    const double Q2 = -el_change.Mag2();
 
-    /* const double nu = -el_change.E(); */
-    /* const double x_bjk = reco_Q2 / (2 * m_prot * nu); */
+    const double nu = m_beam_energy_val - m_smeared_el_V4.E();
+    m_bjorken_x = Q2 / (2 * proton_mass * nu);
+
+    m_reconstructed_W = TMath::Sqrt((proton_mass + nu) * (proton_mass + nu) - el_change.Vect().Mag2());
 
     // Get the electron acceptance weight from the e2a map
     m_electron_acceptance_weight = electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(), m_smeared_el_V3.Phi());

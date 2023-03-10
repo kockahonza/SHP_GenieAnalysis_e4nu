@@ -44,7 +44,7 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
 
   protected:
     map<string, AutoProperty> m_known_properties{
-        {"W", {"W from gst", {1000, 0, 4}, [this]() { return m_ge.W; }}},
+        {"W", {"W from gst [GeV]", {1000, 0, 4}, [this]() { return m_ge.W; }}},
         {"wght", {"wght from gst", {100, 0, 2}, [this]() { return m_ge.wght; }}}};
 
     map<string, AutoType> m_known_types{
