@@ -298,11 +298,11 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
             if (num_pi_minus == 1) {
                 m_pion_charge = -1;
                 std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_minus[0];
-                useEntryAtStage("π+", weight);
+                useEntryAtStage("π+", weight * m_pion_acceptance);
             } else if (num_pi_plus == 1) {
                 m_pion_charge = +1;
                 std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_plus[0];
-                useEntryAtStage("π-", weight);
+                useEntryAtStage("π-", weight * m_pion_acceptance);
             }
 
             /* std::cout << weight << ", " << m_pion_acceptance << ", " << m_pion_charge << std::endl; */
@@ -376,11 +376,11 @@ class GenieAnalysis1PionStaged : public GenieAnalysisDeltaStudies {
             if (num_pi_minus == 1) {
                 m_pion_charge = -1;
                 std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_minus[0];
-                useEntryAtStage("π+", weight);
+                useEntryAtStage("π+", weight * m_pion_acceptance);
             } else if (num_pi_plus == 1) {
                 m_pion_charge = +1;
                 std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_plus[0];
-                useEntryAtStage("π-", weight);
+                useEntryAtStage("π-", weight * m_pion_acceptance);
             }
 
             /* std::cout << weight << ", " << m_pion_acceptance << ", " << m_pion_charge << std::endl; */
