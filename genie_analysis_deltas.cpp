@@ -7,33 +7,30 @@
 #include "GenieAnalysis/misc.h"
 
 int main(int argc, char *argv[]) {
-    GenieAnalysis1Pion ga{gst_path_jan,
-                          "output_jan.root",
+    string input_file, output_file;
+    if (argc == 2) {
+        std::string arg{argv[1]};
+        if (arg == "local") {
+            input_file = "/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root";
+            output_file = "output_local.root";
+        } else if (arg == "full") {
+            input_file = "/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/C12_2261GeV/"
+                         "apapadop_SuSav2_C12_2261GeV_master.root";
+            output_file = "output_full.root";
+        }
+    } else {
+        std::cout << "Needs an argument to specify which way to run (should be \"local\" or \"full\"), check the code" << std::endl;
+        return -1;
+    }
+
+    GenieAnalysis1Pion ga{input_file.c_str(),
+                          output_file.c_str(),
                           GenieAnalysisDeltaStudies::Target::C12,
                           GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261,
                           {"nocut", "π+", "π-"},
                           {"W", "wght", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_phi",
                            "pi_cos_theta", "pi_p", "pi_E", "pi_acceptance"},
                           {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}};
-    /* "PIP", "QE_PIP", "RES_ALL_PIP", "DELTA1232_PIP", "DIS_PIP", */
-    /* "PIM", "QE_PIM", "RES_ALL_PIM", "DELTA1232_PIM", "DIS_PIM"}, true, true, false}; */
-
-    /* GenieAnalysisDeltaStudies ga{gst_path_jan, */
-    /*                              "output_jan.root", */
-    /*                              GenieAnalysisDeltaStudies::Target::C12, */
-    /*                              GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261, */
-    /*                              {"nocut", "p_gdoc", "p_efid"}, */
-    /*                              {"W", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance"}, */
-    /*                              {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}, false, true, false}; */
-
-    /* GenieAnalysis1Pion ga{genie_machine_path, */
-    /*                       "output_jan_full.root", */
-    /*                       GenieAnalysisDeltaStudies::Target::C12, */
-    /*                       GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261, */
-    /*                       {"PIP", "PIM"}, */
-    /*                       {"W", "wght", "el_phi", "el_cos_theta", "el_p", "el_E", "el_acceptance", "pi_phi", */
-    /*                        "pi_cos_theta", "pi_p", "pi_E", "pi_acceptance"}, */
-    /*                       {"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"}}; */
 
     ga.m_do_precuts = false;
     ga.m_do_electron_fiducials = false;

@@ -5,7 +5,6 @@
 #include <TLorentzVector.h>
 #include <TMath.h>
 #include <TRandom.h>
-#include <memory>
 
 #include "GenieAnalysisAuto.h"
 #include "misc.h"

@@ -21,7 +21,7 @@ genie_analysis_demo: genie_analysis_demo.cpp $(GA_LIB_OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 
-ALL: genie_analysis_demo genie_analysis_lucass_cuts genie_analysis_deltas
+all: genie_analysis_demo genie_analysis_lucass_cuts genie_analysis_deltas
 
 # GenieAnalysis "library"
 #
@@ -35,3 +35,7 @@ GenieAnalysis/%.o: GenieAnalysis/%.cpp GenieAnalysis/%.h
 
 clean:
 	@rm -rf GenieAnalysis/*.o *.o genie_analysis_demo genie_analysis_lucass_cuts genie_analysis_deltas
+
+debug: CXXFLAGS += -pg
+debug: LDFLAGS += -pg
+debug: all
