@@ -11,7 +11,7 @@ LDFLAGS   += -std=c++17 $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
 
 
 # Executables
-genie_analysis_jan: genie_analysis_deltas.cpp $(GA_LIB_OBJECTS)
+genie_analysis_deltas: genie_analysis_deltas.cpp $(GA_LIB_OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 genie_analysis_lucass_cuts: genie_analysis_lucass_cuts.cpp $(GA_LIB_OBJECTS)

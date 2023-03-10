@@ -6,7 +6,6 @@
 #include "GenieAnalysis/GenieAnalysisDeltaStudies.h"
 #include "GenieAnalysis/misc.h"
 
-
 int main(int argc, char *argv[]) {
     GenieAnalysis1Pion ga{gst_path_jan,
                           "output_jan.root",

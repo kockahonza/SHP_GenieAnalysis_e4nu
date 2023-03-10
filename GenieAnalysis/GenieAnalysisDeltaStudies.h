@@ -70,7 +70,7 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
     // electron
     TVector3 m_smeared_el_V3; // Smeared and rotated by pi
     TLorentzVector m_smeared_el_V4;
-    double m_electron_acceptance_weight;
+    Double_t m_electron_acceptance_weight;
 
     // hadrons -- all of these only contain information on particles passing relevant cuts (pions need momentum above
     // 0.15 for example)
@@ -80,6 +80,8 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
         m_passed_pi_minus; // tuple has the smeared 4 momentum, smeared 3 momentum and the pions calculated acceptance
     vector<tuple<TLorentzVector, TVector3, double>>
         m_passed_photons; // tuple has the smeared 4 momentum, smeared 3 momentum and the pions calculated acceptance
+    Int_t m_number_of_protons;
+    Int_t m_number_of_neutrons;
 
     // Extensions to automatic TH1Fs
     map<string, AutoProperty> m_new_known_properties{
@@ -253,8 +255,6 @@ class FiducialWrapper {
 class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
   private:
     int m_pion_charge;
-    /* bool m_pion_plus; */
-    /* bool m_pion_minus; */
     TLorentzVector m_pion_V4;
     TVector3 m_pion_V3;
     Double_t m_pion_acceptance;
@@ -309,14 +309,10 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
         if ((num_pi_minus + num_pi_plus) == 1) {
             if (num_pi_minus == 1) {
                 m_pion_charge = -1;
-                /* m_pion_plus = false; */
-                /* m_pion_minus = true; */
                 std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_minus[0];
                 useEntryAtStage("π+", weight);
             } else if (num_pi_plus == 1) {
                 m_pion_charge = +1;
-                /* m_pion_plus = true; */
-                /* m_pion_minus = false; */
                 std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_plus[0];
                 useEntryAtStage("π-", weight);
             }
