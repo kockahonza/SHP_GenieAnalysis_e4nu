@@ -271,11 +271,13 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
   public:
     enum class PionType { Minus, Plus, Either };
 
-  private:
     const PionType m_pion_type;
     const optional<int> m_proton_count;
     const optional<int> m_neutron_count;
 
+    bool m_do_pion_acceptance{true};
+
+  protected:
     TLorentzVector m_pion_V4;
     TVector3 m_pion_V3;
     Double_t m_pion_acceptance;
@@ -321,7 +323,11 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
             return 0;
         }
 
-        return weight * m_pion_acceptance;
+        if (m_do_pion_acceptance) {
+            return weight * m_pion_acceptance;
+        } else {
+            return weight;
+        }
     }
 };
 

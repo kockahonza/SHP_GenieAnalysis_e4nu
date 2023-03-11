@@ -35,10 +35,12 @@ int main(int argc, char *argv[]) {
 
             GenieAnalysis1Pion gap{
                 input_file.c_str(), "output_full_pip.root", {}, properties, types, GenieAnalysis1Pion::PionType::Plus};
+            gap.m_do_pion_acceptance = false;
             gap.runAnalysis();
 
             GenieAnalysis1Pion gam{
                 input_file.c_str(), "output_full_pim.root", {}, properties, types, GenieAnalysis1Pion::PionType::Minus};
+            gam.m_do_pion_acceptance = false;
             gam.runAnalysis();
 
             GenieAnalysis1Pion gae{input_file.c_str(),
@@ -47,6 +49,7 @@ int main(int argc, char *argv[]) {
                                    properties,
                                    types,
                                    GenieAnalysis1Pion::PionType::Either};
+            gae.m_do_pion_acceptance = false;
             gae.runAnalysis();
         }
     } else {
