@@ -35,13 +35,31 @@ int main(int argc, char *argv[]) {
             input_file = "/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root";
 
             GenieAnalysis1Pion ga{input_file.c_str(),
-                                  "output_local.root",
+                                  "output_local_pip.root",
                                   {"nocut"},
                                   properties,
                                   types,
                                   GenieAnalysis1Pion::PionType::Plus};
-            ga.m_do_pion_acceptance = false;
+            /* ga.m_do_pion_acceptance = false; */
             ga.runAnalysis();
+
+            GenieAnalysis1Pion ga2{input_file.c_str(),
+                                  "output_local_pim.root",
+                                  {"nocut"},
+                                  properties,
+                                  types,
+                                  GenieAnalysis1Pion::PionType::Minus};
+            /* ga2.m_do_pion_acceptance = false; */
+            ga2.runAnalysis();
+
+            GenieAnalysis1Pion ga3{input_file.c_str(),
+                                  "output_local_pie.root",
+                                  {"nocut"},
+                                  properties,
+                                  types,
+                                  GenieAnalysis1Pion::PionType::Either};
+            /* ga3.m_do_pion_acceptance = false; */
+            ga3.runAnalysis();
 
         } else if (arg == "full") {
             input_file = "/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/C12_2261GeV/"
