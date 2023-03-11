@@ -7,10 +7,24 @@
 #include "GenieAnalysis/misc.h"
 
 int main(int argc, char *argv[]) {
-    vector<string> properties{"W",           "wght",          "el_phi", "el_cos_theta", "el_p",
-                              "el_E",        "el_acceptance", "pi_phi", "pi_cos_theta", "pi_p",
-                              "pi_E",        "pi_acceptance", "reco_W", "bjorken_x",    "num_protons",
-                              "num_neutrons"};
+    vector<string> properties{"W",
+                              "wght",
+                              "el_phi",
+                              "el_cos_theta",
+                              "el_p",
+                              "el_E",
+                              "el_acceptance",
+                              "pi_phi",
+                              "pi_cos_theta",
+                              "pi_p",
+                              "pi_E",
+                              "pi_acceptance",
+                              "reco_W",
+                              "bjorken_x",
+                              "tnum_protons",
+                              "tnum_neutrons",
+                              "tnum_pip",
+                              "tnum_pim"};
     vector<string> types{"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"};
 
     string input_file, output_file;
@@ -26,7 +40,7 @@ int main(int argc, char *argv[]) {
                                   properties,
                                   types,
                                   GenieAnalysis1Pion::PionType::Plus};
-
+            ga.m_do_pion_acceptance = false;
             ga.runAnalysis();
 
         } else if (arg == "full") {
@@ -35,12 +49,10 @@ int main(int argc, char *argv[]) {
 
             GenieAnalysis1Pion gap{
                 input_file.c_str(), "output_full_pip.root", {}, properties, types, GenieAnalysis1Pion::PionType::Plus};
-            gap.m_do_pion_acceptance = false;
             gap.runAnalysis();
 
             GenieAnalysis1Pion gam{
                 input_file.c_str(), "output_full_pim.root", {}, properties, types, GenieAnalysis1Pion::PionType::Minus};
-            gam.m_do_pion_acceptance = false;
             gam.runAnalysis();
 
             GenieAnalysis1Pion gae{input_file.c_str(),
@@ -49,7 +61,6 @@ int main(int argc, char *argv[]) {
                                    properties,
                                    types,
                                    GenieAnalysis1Pion::PionType::Either};
-            gae.m_do_pion_acceptance = false;
             gae.runAnalysis();
         }
     } else {

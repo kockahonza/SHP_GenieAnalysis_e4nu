@@ -42,6 +42,7 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
     bool m_do_photon_fiducials{true};
     bool m_do_sectors{false};
     bool m_do_radiation_check{false};
+    bool m_do_pion_acceptance{true};
 
     double m_p_pion_momentum_threshold{0.15};
     double m_p_photon_momentum_threshold{0.3};
@@ -95,8 +96,10 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
         m_passed_pi_minus; // tuple has the smeared 4 momentum, smeared 3 momentum and the pions calculated acceptance
     vector<tuple<TLorentzVector, TVector3, double>>
         m_passed_photons; // tuple has the smeared 4 momentum, smeared 3 momentum and the pions calculated acceptance
-    Int_t m_number_of_protons;
-    Int_t m_number_of_neutrons;
+    Int_t m_t_number_of_pi_plus;
+    Int_t m_t_number_of_pi_minus;
+    Int_t m_t_number_of_protons;
+    Int_t m_t_number_of_neutrons;
 
     // Extensions to automatic TH1Fs
     map<string, AutoProperty> m_new_known_properties{
@@ -113,9 +116,11 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
         {"el_acceptance",
          {"Out electron acceptance weight", {100, 0, 1}, [this]() { return m_electron_acceptance_weight; }}},
         {"reco_W", {"Reconstructed W [GeV]", {1000, 0, 4}, [this]() { return m_reconstructed_W; }}},
-        {"bjorken_x", {"Bjorken x", {1000, 0, 4}, [this]() { return m_bjorken_x; }}},
-        {"num_protons", {"Number of protons", {6, 0, 5}, [this]() { return m_number_of_protons; }}},
-        {"num_neutrons", {"Number of neutrons", {6, 0, 5}, [this]() { return m_number_of_neutrons; }}}};
+        {"bjorken_x", {"Bjorken x", {1000, 0, 1.01}, [this]() { return m_bjorken_x; }}},
+        {"tnum_protons", {"True number of protons", {6, 0, 5}, [this]() { return m_t_number_of_protons; }}},
+        {"tnum_neutrons", {"True number of neutrons", {6, 0, 5}, [this]() { return m_t_number_of_neutrons; }}},
+        {"tnum_pip", {"True number of pi plus", {6, 0, 5}, [this]() { return m_t_number_of_pi_plus; }}},
+        {"tnum_pim", {"True number of pi minus", {6, 0, 5}, [this]() { return m_t_number_of_pi_minus; }}}};
 
   public:
     GenieAnalysisDeltaStudies(const char *filename, const char *output_filename,
@@ -274,8 +279,6 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
     const PionType m_pion_type;
     const optional<int> m_proton_count;
     const optional<int> m_neutron_count;
-
-    bool m_do_pion_acceptance{true};
 
   protected:
     TLorentzVector m_pion_V4;

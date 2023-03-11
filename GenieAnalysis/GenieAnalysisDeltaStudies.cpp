@@ -70,8 +70,10 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
     m_passed_pi_minus.clear();
     m_passed_pi_plus.clear();
     m_passed_photons.clear();
-    m_number_of_protons = 0;
-    m_number_of_neutrons = 0;
+    m_t_number_of_protons = 0;
+    m_t_number_of_neutrons = 0;
+    m_t_number_of_pi_plus = 0;
+    m_t_number_of_pi_minus = 0;
 
     // Temp variables for the loop, declared here for performance
     double smeared_p;
@@ -81,10 +83,11 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
     double positive_phi_difference;
     for (int i{0}; i < m_ge.nf; i++) {
         if (m_ge.pdgf[i] == 2212) { // proton
-            m_number_of_protons += 1;
+            m_t_number_of_protons += 1;
         } else if (m_ge.pdgf[i] == 2112) { // neutron
-            m_number_of_neutrons += 1;
+            m_t_number_of_neutrons += 1;
         } else if (m_ge.pdgf[i] == -211) { // pi-
+            m_t_number_of_pi_minus += 1;
             // required momentum for detection
             if (m_ge.pf[i] < m_p_pion_momentum_threshold) {
                 continue;
@@ -102,13 +105,14 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
                 }
             }
 
-            // And only use pirns with reasonable acceptance, quite often they are negative or so on, this is kindof a
-            // workaround
+            // And only use pions with reasonable acceptance, quite often they are negative or so on, this is kindof a
+            // workaround, if pion acceptance is turned off use them regardless
             pi_acceptance = piMinusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi());
-            if (pi_acceptance == TMath::Abs(pi_acceptance)) {
+            if ((!m_do_pion_acceptance) || (pi_acceptance == TMath::Abs(pi_acceptance))) {
                 m_passed_pi_minus.push_back({{V3, smeared_E}, V3, pi_acceptance});
             }
         } else if (m_ge.pdgf[i] == 211) { // pi+
+            m_t_number_of_pi_plus += 1;
             // required momentum for detection
             if (m_ge.pf[i] < m_p_pion_momentum_threshold) {
                 continue;
@@ -126,11 +130,11 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
                 }
             }
 
-            // And only use pirns with reasonable acceptance, quite often they are negative or so on, this is kindof a
-            // workaround
-            pi_acceptance = piMinusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi());
-            if (pi_acceptance == TMath::Abs(pi_acceptance)) {
-                m_passed_pi_plus.push_back({{V3, smeared_E}, V3, piPlusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});
+            // And only use pions with reasonable acceptance, quite often they are negative or so on, this is kindof a
+            // workaround, if pion acceptance is turned off use them regardless
+            pi_acceptance = piPlusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi());
+            if ((!m_do_pion_acceptance) || (pi_acceptance == TMath::Abs(pi_acceptance))) {
+                m_passed_pi_plus.push_back({{V3, smeared_E}, V3, pi_acceptance});
             }
         }
         if (m_ge.pdgf[i] == 22) { // photon
