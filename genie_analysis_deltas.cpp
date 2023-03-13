@@ -40,26 +40,23 @@ int main(int argc, char *argv[]) {
                                   properties,
                                   types,
                                   GenieAnalysis1Pion::PionType::Plus};
-            /* ga.m_do_pion_acceptance = false; */
             ga.runAnalysis();
 
             GenieAnalysis1Pion ga2{input_file.c_str(),
-                                  "output_local_pim.root",
-                                  {"nocut"},
-                                  properties,
-                                  types,
-                                  GenieAnalysis1Pion::PionType::Minus};
-            /* ga2.m_do_pion_acceptance = false; */
+                                   "output_local_pim.root",
+                                   {"nocut"},
+                                   properties,
+                                   types,
+                                   GenieAnalysis1Pion::PionType::Minus};
             ga2.runAnalysis();
 
-            GenieAnalysis1Pion ga3{input_file.c_str(),
-                                  "output_local_pie.root",
-                                  {"nocut"},
-                                  properties,
-                                  types,
-                                  GenieAnalysis1Pion::PionType::Either};
-            /* ga3.m_do_pion_acceptance = false; */
-            ga3.runAnalysis();
+            /* GenieAnalysis1Pion ga3{input_file.c_str(), */
+            /*                        "output_local_pie.root", */
+            /*                        {"nocut"}, */
+            /*                        properties, */
+            /*                        types, */
+            /*                        GenieAnalysis1Pion::PionType::Either}; */
+            /* ga3.runAnalysis(); */
 
         } else if (arg == "full") {
             input_file = "/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/C12_2261GeV/"
@@ -73,13 +70,13 @@ int main(int argc, char *argv[]) {
                 input_file.c_str(), "output_full_pim.root", {}, properties, types, GenieAnalysis1Pion::PionType::Minus};
             gam.runAnalysis();
 
-            GenieAnalysis1Pion gae{input_file.c_str(),
-                                   "output_full_pie.root",
-                                   {},
-                                   properties,
-                                   types,
-                                   GenieAnalysis1Pion::PionType::Either};
-            gae.runAnalysis();
+            /* GenieAnalysis1Pion gae{input_file.c_str(), */
+            /*                        "output_full_pie.root", */
+            /*                        {}, */
+            /*                        properties, */
+            /*                        types, */
+            /*                        GenieAnalysis1Pion::PionType::Either}; */
+            /* gae.runAnalysis(); */
         }
     } else {
         std::cout << "Needs an argument to specify which way to run (should be \"local\" or \"full\"), check the code"
