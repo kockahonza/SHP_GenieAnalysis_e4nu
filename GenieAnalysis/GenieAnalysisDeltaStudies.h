@@ -88,21 +88,31 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
     Double_t m_reconstructed_W;
     Double_t m_bjorken_x;
 
-    // hadrons -- all of these only contain information on particles passing relevant cuts (pions need momentum above
-    // 0.15 for example)
+    // hadrons -- all of these only contain information on final state particles passing relevant cuts (pions
+    // need momentum above 0.15 for example)
     vector<tuple<TLorentzVector, TVector3, double>>
         m_passed_pi_plus; // tuple has the smeared 4 momentum, smeared 3 momentum and the pions calculated acceptance
-    vector<tuple<TLorentzVector, TVector3, double>>
-        m_passed_pi_minus; // tuple has the smeared 4 momentum, smeared 3 momentum and the pions calculated acceptance
-    vector<tuple<TLorentzVector, TVector3, double>>
-        m_passed_photons; // tuple has the smeared 4 momentum, smeared 3 momentum and the pions calculated acceptance
+    vector<tuple<TLorentzVector, TVector3, double>> m_passed_pi_minus;
+    vector<tuple<TLorentzVector, TVector3, double>> m_passed_photons;
+
+    // "Primary" state properties, used as in the gst documentation, these are particles after interaction but before
+    // FSI
+    Int_t m_ps_number_of_pi_plus;
+    Int_t m_ps_number_of_pi_minus;
+    Int_t m_ps_number_of_protons;
+    Int_t m_ps_number_of_neutrons;
+    Int_t m_ps_number_of_photons;
+
+    // truth properties coming directly from gst
     Int_t m_t_number_of_pi_plus;
     Int_t m_t_number_of_pi_minus;
     Int_t m_t_number_of_protons;
     Int_t m_t_number_of_neutrons;
+    Int_t m_t_number_of_photons;
 
     // Extensions to automatic TH1Fs
     map<string, AutoProperty> m_new_known_properties{
+        // Electrons properties
         {"el_phi",
          {"Out electron phi [°]",
           {720, -30, 330},
@@ -115,12 +125,25 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
         {"el_E", {"Out electron energy [GeV]", {720, 0, 3}, [this]() { return m_smeared_el_V4.Energy(); }}},
         {"el_acceptance",
          {"Out electron acceptance weight", {100, 0, 1}, [this]() { return m_electron_acceptance_weight; }}},
+
+        // Physical properties of the event itself
         {"reco_W", {"Reconstructed W [GeV]", {1000, 0, 4}, [this]() { return m_reconstructed_W; }}},
         {"bjorken_x", {"Bjorken x", {1000, 0, 1.01}, [this]() { return m_bjorken_x; }}},
-        {"tnum_protons", {"True number of protons", {6, 0, 5}, [this]() { return m_t_number_of_protons; }}},
-        {"tnum_neutrons", {"True number of neutrons", {6, 0, 5}, [this]() { return m_t_number_of_neutrons; }}},
-        {"tnum_pip", {"True number of pi plus", {6, 0, 5}, [this]() { return m_t_number_of_pi_plus; }}},
-        {"tnum_pim", {"True number of pi minus", {6, 0, 5}, [this]() { return m_t_number_of_pi_minus; }}}};
+
+        // Primary state (pre FSI) data
+        {"ps_num_pip", {"True number of pi plus", {6, 0, 5}, [this]() { return m_ps_number_of_pi_plus; }}},
+        {"ps_num_pim", {"True number of pi minus", {6, 0, 5}, [this]() { return m_ps_number_of_pi_minus; }}},
+        {"ps_num_protons", {"True number of protons", {6, 0, 5}, [this]() { return m_ps_number_of_protons; }}},
+        {"ps_num_neutrons", {"True number of neutrons", {6, 0, 5}, [this]() { return m_ps_number_of_neutrons; }}},
+        {"ps_num_photons", {"True number of photons", {6, 0, 5}, [this]() { return m_ps_number_of_photons; }}},
+
+        // Truth data
+        {"t_num_pip", {"True number of pi plus", {6, 0, 5}, [this]() { return m_t_number_of_pi_plus; }}},
+        {"t_num_pim", {"True number of pi minus", {6, 0, 5}, [this]() { return m_t_number_of_pi_minus; }}},
+        {"t_num_protons", {"True number of protons", {6, 0, 5}, [this]() { return m_t_number_of_protons; }}},
+        {"t_num_neutrons", {"True number of neutrons", {6, 0, 5}, [this]() { return m_t_number_of_neutrons; }}},
+        {"t_num_photons", {"True number of photons", {6, 0, 5}, [this]() { return m_t_number_of_photons; }}},
+    };
 
   public:
     GenieAnalysisDeltaStudies(const char *filename, const char *output_filename,

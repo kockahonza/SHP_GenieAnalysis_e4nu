@@ -66,16 +66,25 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
         throw "Electron acceptance not reasonable";
     }
 
-    // Hadron loop, first clear the vectors though
+    // Hadron loops, first clear the vectors though
     m_passed_pi_minus.clear();
     m_passed_pi_plus.clear();
     m_passed_photons.clear();
-    m_t_number_of_protons = 0;
-    m_t_number_of_neutrons = 0;
+
+    m_ps_number_of_pi_plus = 0;
+    m_ps_number_of_pi_minus = 0;
+    m_ps_number_of_protons = 0;
+    m_ps_number_of_neutrons = 0;
+    m_ps_number_of_photons = 0;
+
     m_t_number_of_pi_plus = 0;
     m_t_number_of_pi_minus = 0;
+    m_t_number_of_protons = 0;
+    m_t_number_of_neutrons = 0;
+    m_t_number_of_photons = 0;
 
-    // Temp variables for the loop, declared here for performance
+    // Temp variables for the final state hadrons loop, declared here for performance, these are the most interesting
+    // hadrons for comparison to experiment
     double smeared_p;
     double smeared_E;
     double pi_acceptance;
@@ -136,8 +145,8 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
             if ((!m_do_pion_acceptance) || (pi_acceptance == TMath::Abs(pi_acceptance))) {
                 m_passed_pi_plus.push_back({{V3, smeared_E}, V3, pi_acceptance});
             }
-        }
-        if (m_ge.pdgf[i] == 22) { // photon
+        } else if (m_ge.pdgf[i] == 22) { // photon
+            m_t_number_of_photons += 1;
             // required momentum for detection
             if (m_ge.pf[i] < m_p_photon_momentum_threshold) {
                 continue;
@@ -167,6 +176,25 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
             }
 
             m_passed_photons.push_back({{V3, m_ge.Ef[i]}, V3, photonAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});
+        } else {
+            std::cout << "extra FS particle -- " << m_ge.pdgf[i] << std::endl;
+        }
+    }
+
+    // Primary state hadron loop, just counters now but more could be added
+    for (int i{0}; i < m_ge.ni; i++) {
+        if (m_ge.pdgi[i] == 2212) { // proton
+            m_ps_number_of_protons += 1;
+        } else if (m_ge.pdgi[i] == 2112) { // neutron
+            m_ps_number_of_neutrons += 1;
+        } else if (m_ge.pdgi[i] == -211) { // pi-
+            m_ps_number_of_pi_minus += 1;
+        } else if (m_ge.pdgi[i] == 211) { // pi+
+            m_ps_number_of_pi_plus += 1;
+        } else if (m_ge.pdgi[i] == 22) { // photon
+            m_ps_number_of_photons += 1;
+        } else {
+            std::cout << "extra PS particle -- " << m_ge.pdgf[i] << std::endl;
         }
     }
 
