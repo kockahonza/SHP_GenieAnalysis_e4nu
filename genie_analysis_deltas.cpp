@@ -36,18 +36,18 @@ int main(int argc, char *argv[]) {
 
             GenieAnalysis1Pion ga{input_file.c_str(),
                                   "output_local_pip.root",
+                                  GenieAnalysis1Pion::PionType::Plus,
                                   {"nocut"},
                                   properties,
-                                  types,
-                                  GenieAnalysis1Pion::PionType::Plus};
+                                  types};
             ga.runAnalysis();
 
             GenieAnalysis1Pion ga2{input_file.c_str(),
                                    "output_local_pim.root",
+                                   GenieAnalysis1Pion::PionType::Minus,
                                    {"nocut"},
                                    properties,
-                                   types,
-                                   GenieAnalysis1Pion::PionType::Minus};
+                                   types};
             ga2.runAnalysis();
 
             /* GenieAnalysis1Pion ga3{input_file.c_str(), */
@@ -62,13 +62,13 @@ int main(int argc, char *argv[]) {
             input_file = "/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/C12_2261GeV/"
                          "apapadop_SuSav2_C12_2261GeV_master.root";
 
-            GenieAnalysis1Pion gap{
-                input_file.c_str(), "output_full_pip.root", {}, properties, types, GenieAnalysis1Pion::PionType::Plus};
-            gap.runAnalysis();
+            /* GenieAnalysis1Pion gap{ */
+            /*     input_file.c_str(), "output_full_pip.root", {}, properties, types, GenieAnalysis1Pion::PionType::Plus}; */
+            /* gap.runAnalysis(); */
 
-            GenieAnalysis1Pion gam{
-                input_file.c_str(), "output_full_pim.root", {}, properties, types, GenieAnalysis1Pion::PionType::Minus};
-            gam.runAnalysis();
+            /* GenieAnalysis1Pion gam{ */
+            /*     input_file.c_str(), "output_full_pim.root", {}, properties, types, GenieAnalysis1Pion::PionType::Minus}; */
+            /* gam.runAnalysis(); */
 
             /* GenieAnalysis1Pion gae{input_file.c_str(), */
             /*                        "output_full_pie.root", */

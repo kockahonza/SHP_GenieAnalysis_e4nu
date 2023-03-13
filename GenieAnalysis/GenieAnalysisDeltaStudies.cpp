@@ -198,7 +198,11 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
         }
     }
 
-    return m_electron_acceptance_weight * m_ge.wght; // I'm pretty sure all the events have wght=1
+    if (m_do_electron_acceptance) {
+        return m_electron_acceptance_weight * m_ge.wght; // I'm pretty sure all the events have wght=1
+    } else {
+        return m_ge.wght;
+    }
 }
 
 double GenieAnalysisDeltaStudies::acceptanceJoined(const double &p, const double &cos_theta, double phi,

@@ -37,11 +37,14 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
     // Some parameters to be set by directly accessing them, otherwise the constructor would be massive,
     // the values here are used for the CLAS6 C12 2GeV GENIE data.
     bool m_do_precuts{true};
+    bool m_do_sectors{false};
+    bool m_do_radiation_check{false};
+
     bool m_do_electron_fiducials{true};
     bool m_do_pion_fiducials{true};
     bool m_do_photon_fiducials{true};
-    bool m_do_sectors{false};
-    bool m_do_radiation_check{false};
+
+    bool m_do_electron_acceptance{true};
     bool m_do_pion_acceptance{true};
 
     double m_p_pion_momentum_threshold{0.15};
@@ -356,6 +359,14 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
                    (m_passed_pi_plus.size() == 1)) {
             std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_plus[0];
         } else {
+            return 0;
+        }
+
+        if (m_proton_count && (m_proton_count != m_fs_number_of_protons)) {
+            return 0;
+        }
+
+        if (m_neutron_count && (m_neutron_count != m_fs_number_of_neutrons)) {
             return 0;
         }
 

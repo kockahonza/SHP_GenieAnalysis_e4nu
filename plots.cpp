@@ -46,12 +46,13 @@ void draw_rebinned(TFile *tf, string name, Int_t rebin = 2) {
 /* auto
  * napimf{TFile::Open("/home/honza/Sync/University/CurrentCourses/SHP/data/230310/full_piacceptance_test/nopiacceptance/output_full_pim.root",
  * "READ")}; */
-auto pipf{TFile::Open("output_local_pip.root", "READ")};
-auto pimf{TFile::Open("output_local_pim.root", "READ")};
-auto exf{TFile::Open("output_local_e.root", "READ")};
+auto fstpip{TFile::Open("output_local_FSt_pip.root", "READ")};
+auto fstpim{TFile::Open("output_local_FSt_pim.root", "READ")};
+auto fstex{TFile::Open("output_local_FSt_e.root", "READ")};
+auto fstex_noa{TFile::Open("output_local_FSt_e_noa.root", "READ")};
 
 void fs_ps_p_n(TFile *dataf) {
-    TCanvas *tc{new TCanvas("pi_fs_ps_p_n", "ps,fs vs p,n", canvas_ww, canvas_wh)};
+    TCanvas *tc{new TCanvas("fs_ps_p_n", "ps,fs vs p,n", canvas_ww, canvas_wh)};
     tc->Divide(2, 2);
 
     THStack *hs;
@@ -76,8 +77,38 @@ void fs_ps_p_n(TFile *dataf) {
     hs->Draw("nostack");
     dataf->Get<TLegend>("fs_num_neutrons_legend")->Draw();
 
-    /* tc.Print("draft_plots/pi_p_both.pdf"); */
+    /* tc->Print("draft_plots/pions_ps_to_fs.pdf"); */
 }
+
+void pions_ps_to_fs(TFile *dataf) {
+    TCanvas *tc{new TCanvas("pion_ps_to_fs", "pion_ps_to_fs", canvas_ww, canvas_wh)};
+    tc->Divide(2, 2);
+
+    THStack *hs;
+
+    tc->cd(1);
+    hs = dataf->Get<THStack>("ps_num_pip");
+    hs->Draw("nostack");
+    dataf->Get<TLegend>("ps_num_pip_legend")->Draw();
+
+    tc->cd(2);
+    hs = dataf->Get<THStack>("ps_num_pim");
+    hs->Draw("nostack");
+    dataf->Get<TLegend>("ps_num_pim_legend")->Draw();
+
+    tc->cd(3);
+    hs = dataf->Get<THStack>("fs_num_pip");
+    hs->Draw("nostack");
+    dataf->Get<TLegend>("fs_num_pip_legend")->Draw();
+
+    tc->cd(4);
+    hs = dataf->Get<THStack>("fs_num_pim");
+    hs->Draw("nostack");
+    dataf->Get<TLegend>("fs_num_pim_legend")->Draw();
+
+    /* tc->Print("../plotting/draft_plots/pions_ps_to_fs.pdf"); */
+}
+
 
 void plots() { /* gStyle->SetOptStat(""); */
 }

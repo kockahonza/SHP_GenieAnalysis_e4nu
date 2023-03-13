@@ -7,15 +7,6 @@
 #include "GenieAnalysis/misc.h"
 
 int main(int argc, char *argv[]) {
-    vector<string> properties{
-        "W",          "wght",           "el_phi",          "el_cos_theta",   "el_p",
-        "el_E",       "el_acceptance",  "pi_phi",          "pi_cos_theta",   "pi_p",
-        "pi_E",       "pi_acceptance",  "reco_W",          "bjorken_x",      "fs_num_pip",
-        "fs_num_pim", "fs_num_protons", "fs_num_neutrons", "fs_num_photons", "ps_num_pip",
-        "ps_num_pim", "ps_num_protons", "ps_num_neutrons", "ps_num_photons",
-    };
-    vector<string> types{"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"};
-
     string input_file, output_file;
 
     if (argc == 2) {
@@ -24,14 +15,20 @@ int main(int argc, char *argv[]) {
             input_file = "/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root";
 
             GenieAnalysis1Pion ga{
-                input_file.c_str(), "output_local_pip.root", GenieAnalysis1Pion::PionType::Plus, {"nocut"}};
-            /* ga.m_do_pion_acceptance = false; */
+                input_file.c_str(), "output_local_FSt_pip.root", GenieAnalysis1Pion::PionType::Plus, {"nocut"}};
             ga.runAnalysis();
 
             GenieAnalysis1Pion ga2{
-                input_file.c_str(), "output_local_pim.root", GenieAnalysis1Pion::PionType::Minus, {"nocut"}};
-            /* ga2.m_do_pion_acceptance = false; */
+                input_file.c_str(), "output_local_FSt_pim.root", GenieAnalysis1Pion::PionType::Minus, {"nocut"}};
             ga2.runAnalysis();
+
+            GenieAnalysisDeltaStudies ga3{input_file.c_str(), "output_local_FSt_e.root"};
+            ga3.runAnalysis();
+
+            GenieAnalysisDeltaStudies ga4{input_file.c_str(), "output_local_FSt_e_noa.root"};
+            ga4.m_do_electron_acceptance = false;
+            ga4.m_do_pion_acceptance = false;
+            ga4.runAnalysis();
         } else if (arg == "full") {
             input_file = "/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/C12_2261GeV/"
                          "apapadop_SuSav2_C12_2261GeV_master.root";
