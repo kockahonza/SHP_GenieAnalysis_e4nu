@@ -103,12 +103,12 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
     Int_t m_ps_number_of_neutrons;
     Int_t m_ps_number_of_photons;
 
-    // truth properties coming directly from gst
-    Int_t m_t_number_of_pi_plus;
-    Int_t m_t_number_of_pi_minus;
-    Int_t m_t_number_of_protons;
-    Int_t m_t_number_of_neutrons;
-    Int_t m_t_number_of_photons;
+    // The genie final state particle counters, I think this is often referred to as truth
+    Int_t m_fs_number_of_pi_plus;
+    Int_t m_fs_number_of_pi_minus;
+    Int_t m_fs_number_of_protons;
+    Int_t m_fs_number_of_neutrons;
+    Int_t m_fs_number_of_photons;
 
     // Extensions to automatic TH1Fs
     map<string, AutoProperty> m_new_known_properties{
@@ -138,11 +138,11 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
         {"ps_num_photons", {"True number of photons", {6, 0, 5}, [this]() { return m_ps_number_of_photons; }}},
 
         // Truth data
-        {"t_num_pip", {"True number of pi plus", {6, 0, 5}, [this]() { return m_t_number_of_pi_plus; }}},
-        {"t_num_pim", {"True number of pi minus", {6, 0, 5}, [this]() { return m_t_number_of_pi_minus; }}},
-        {"t_num_protons", {"True number of protons", {6, 0, 5}, [this]() { return m_t_number_of_protons; }}},
-        {"t_num_neutrons", {"True number of neutrons", {6, 0, 5}, [this]() { return m_t_number_of_neutrons; }}},
-        {"t_num_photons", {"True number of photons", {6, 0, 5}, [this]() { return m_t_number_of_photons; }}},
+        {"fs_num_pip", {"True number of pi plus", {6, 0, 5}, [this]() { return m_fs_number_of_pi_plus; }}},
+        {"fs_num_pim", {"True number of pi minus", {6, 0, 5}, [this]() { return m_fs_number_of_pi_minus; }}},
+        {"fs_num_protons", {"True number of protons", {6, 0, 5}, [this]() { return m_fs_number_of_protons; }}},
+        {"fs_num_neutrons", {"True number of neutrons", {6, 0, 5}, [this]() { return m_fs_number_of_neutrons; }}},
+        {"fs_num_photons", {"True number of photons", {6, 0, 5}, [this]() { return m_fs_number_of_photons; }}},
     };
 
   public:

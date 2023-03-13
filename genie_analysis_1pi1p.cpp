@@ -10,8 +10,8 @@ int main(int argc, char *argv[]) {
     vector<string> properties{
         "W",          "wght",           "el_phi",          "el_cos_theta",   "el_p",
         "el_E",       "el_acceptance",  "pi_phi",          "pi_cos_theta",   "pi_p",
-        "pi_E",       "pi_acceptance",  "reco_W",          "bjorken_x",      "t_num_pip",
-        "t_num_pim",  "t_num_protons",  "t_num_neutrons",  "t_num_photons",  "ps_num_pip",
+        "pi_E",       "pi_acceptance",  "reco_W",          "bjorken_x",      "fs_num_pip",
+        "fs_num_pim", "fs_num_protons", "fs_num_neutrons", "fs_num_photons", "ps_num_pip",
         "ps_num_pim", "ps_num_protons", "ps_num_neutrons", "ps_num_photons",
     };
     vector<string> types{"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"};

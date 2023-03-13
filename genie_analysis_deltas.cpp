@@ -21,10 +21,10 @@ int main(int argc, char *argv[]) {
                               "pi_acceptance",
                               "reco_W",
                               "bjorken_x",
-                              "t_num_protons",
-                              "t_num_neutrons",
-                              "t_num_pip",
-                              "t_num_pim"};
+                              "fs_num_protons",
+                              "fs_num_neutrons",
+                              "fs_num_pip",
+                              "fs_num_pim"};
     vector<string> types{"ALL", "QE", "RES_ALL", "DELTA1232", "DIS"};
 
     string input_file, output_file;

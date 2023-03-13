@@ -49,4 +49,5 @@ void draw_rebinned(TFile *tf, string name, Int_t rebin = 2) {
 auto pipf{TFile::Open("output_local_pip.root", "READ")};
 auto pimf{TFile::Open("output_local_pim.root", "READ")};
 
-void plots() { /* gStyle->SetOptStat(""); */ }
+void plots() { /* gStyle->SetOptStat(""); */
+}
