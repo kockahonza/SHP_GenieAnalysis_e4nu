@@ -131,25 +131,35 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
         {"bjorken_x", {"Bjorken x", {1000, 0, 1.01}, [this]() { return m_bjorken_x; }}},
 
         // Primary state (pre FSI) data
-        {"ps_num_pip", {"True number of pi plus", {6, 0, 5}, [this]() { return m_ps_number_of_pi_plus; }}},
-        {"ps_num_pim", {"True number of pi minus", {6, 0, 5}, [this]() { return m_ps_number_of_pi_minus; }}},
-        {"ps_num_protons", {"True number of protons", {6, 0, 5}, [this]() { return m_ps_number_of_protons; }}},
-        {"ps_num_neutrons", {"True number of neutrons", {6, 0, 5}, [this]() { return m_ps_number_of_neutrons; }}},
-        {"ps_num_photons", {"True number of photons", {6, 0, 5}, [this]() { return m_ps_number_of_photons; }}},
+        {"ps_num_pip",
+         {"Number of pi plus in the primary state", {6, 0, 5}, [this]() { return m_ps_number_of_pi_plus; }}},
+        {"ps_num_pim",
+         {"Number of pi minus in the primary state", {6, 0, 5}, [this]() { return m_ps_number_of_pi_minus; }}},
+        {"ps_num_protons",
+         {"Number of protons in the primary state", {6, 0, 5}, [this]() { return m_ps_number_of_protons; }}},
+        {"ps_num_neutrons",
+         {"Number of neutrons in the primary state", {6, 0, 5}, [this]() { return m_ps_number_of_neutrons; }}},
+        {"ps_num_photons",
+         {"Number of photons in the primary state", {6, 0, 5}, [this]() { return m_ps_number_of_photons; }}},
 
         // Truth data
-        {"fs_num_pip", {"True number of pi plus", {6, 0, 5}, [this]() { return m_fs_number_of_pi_plus; }}},
-        {"fs_num_pim", {"True number of pi minus", {6, 0, 5}, [this]() { return m_fs_number_of_pi_minus; }}},
-        {"fs_num_protons", {"True number of protons", {6, 0, 5}, [this]() { return m_fs_number_of_protons; }}},
-        {"fs_num_neutrons", {"True number of neutrons", {6, 0, 5}, [this]() { return m_fs_number_of_neutrons; }}},
-        {"fs_num_photons", {"True number of photons", {6, 0, 5}, [this]() { return m_fs_number_of_photons; }}},
+        {"fs_num_pip",
+         {"Number of pi plus in the final state", {6, 0, 5}, [this]() { return m_fs_number_of_pi_plus; }}},
+        {"fs_num_pim",
+         {"Number of pi minus in the final state", {6, 0, 5}, [this]() { return m_fs_number_of_pi_minus; }}},
+        {"fs_num_protons",
+         {"Number of protons in the final state", {6, 0, 5}, [this]() { return m_fs_number_of_protons; }}},
+        {"fs_num_neutrons",
+         {"Number of neutrons in the final state", {6, 0, 5}, [this]() { return m_fs_number_of_neutrons; }}},
+        {"fs_num_photons",
+         {"Number of photons in the final state", {6, 0, 5}, [this]() { return m_fs_number_of_photons; }}},
     };
 
   public:
     GenieAnalysisDeltaStudies(const char *filename, const char *output_filename,
                               // Specify the analysis - which stages, properties and types to do histograms for
-                              const vector<string> &stages, const vector<string> &properties,
-                              const vector<string> &types,
+                              const vector<string> &stages = {}, const vector<string> &properties = {},
+                              const vector<string> &types = {},
                               // Select run
                               const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
                               // Pass this to GenieAnalysis
@@ -323,9 +333,9 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
         {"pi_acceptance", {"Pion acceptance weight", {100, 0, 1}, [this]() { return m_pion_acceptance; }}}};
 
   public:
-    GenieAnalysis1Pion(const char *filename, const char *output_filename, const vector<string> &stages,
-                       const vector<string> &properties, const vector<string> &types,
-                       PionType pion_type = PionType::Either, optional<int> proton_count = {},
+    GenieAnalysis1Pion(const char *filename, const char *output_filename, PionType pion_type = PionType::Either,
+                       const vector<string> &stages = {}, const vector<string> &properties = {},
+                       const vector<string> &types = {}, optional<int> proton_count = {},
                        optional<int> neutron_count = {}, const Target &target = GenieAnalysisDeltaStudies::Target::C12,
                        const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
 
@@ -399,8 +409,8 @@ class GenieAnalysis1PionStaged : public GenieAnalysisDeltaStudies {
     /* }; */
 
   public:
-    GenieAnalysis1PionStaged(const char *filename, const char *output_filename, const vector<string> &stages,
-                             const vector<string> &properties, const vector<string> &types,
+    GenieAnalysis1PionStaged(const char *filename, const char *output_filename, const vector<string> &stages = {},
+                             const vector<string> &properties = {}, const vector<string> &types = {},
                              const Target &target = GenieAnalysisDeltaStudies::Target::C12,
                              const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
         : GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, target, beam_energy) {

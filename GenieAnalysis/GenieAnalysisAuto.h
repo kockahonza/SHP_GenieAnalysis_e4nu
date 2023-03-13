@@ -34,9 +34,9 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
   private:
     const std::unique_ptr<TFile> m_output_file;
 
-    const vector<string> m_stages;
-    const vector<string> m_properties;
-    const vector<string> m_types;
+    vector<string> m_stages;
+    vector<string> m_properties;
+    vector<string> m_types;
 
     bool m_hists_initialized{false};
     map<string, map<string, TH1F>> m_hists;
@@ -60,22 +60,34 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     constexpr static size_t m_number_colors{7};
     std::array<Color_t, m_number_colors> m_colors{kBlack, kRed, kGreen, kBlue, kMagenta, kCyan, kOrange};
 
-    GenieAnalysisAutoTH1Fs(const char *filename, const char *output_filename, const vector<string> &stages,
-                           const vector<string> &properties, const vector<string> &types,
+    GenieAnalysisAutoTH1Fs(const char *filename, const char *output_filename, const vector<string> &stages = {},
+                           const vector<string> &properties = {}, const vector<string> &types = {},
                            const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name),
           m_output_file(TFile::Open(output_filename, "RECREATE")), m_stages{stages},
           m_properties{properties}, m_types{types} {}
 
-    void createTH1Fs() {
+    void prepareAutoHists() {
         string name;
         string title;
         Int_t nbinsx, xlow, xup;
 
+        if (m_properties.empty()) {
+            for (const auto &known_property_keyval : m_known_properties) {
+                m_properties.push_back(known_property_keyval.first);
+            }
+        }
+
+        if (m_types.empty()) {
+            for (const auto &known_type_keyval : m_known_types) {
+                m_types.push_back(known_type_keyval.first);
+            }
+        }
+
         m_output_file->cd();
         // Create "final" stage (post all cuts) hists
-        for (string property : m_properties) {
-            for (string type : m_types) {
+        for (const string &property : m_properties) {
+            for (const string &type : m_types) {
                 name = makeName(property, type);
                 title = makeTitle(property, type);
                 std::tie(nbinsx, xlow, xup) = m_known_properties[property].bin_params;
@@ -84,9 +96,9 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
         }
 
         // Create hists for possible other stages
-        for (string stage : m_stages) {
-            for (string property : m_properties) {
-                for (string type : m_types) {
+        for (const string &stage : m_stages) {
+            for (const string &property : m_properties) {
+                for (const string &type : m_types) {
                     name = makeName(stage, property, type);
                     title = makeTitle(stage, property, type);
                     std::tie(nbinsx, xlow, xup) = m_known_properties[property].bin_params;
@@ -98,19 +110,19 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
 
     void runPreAnalysis() override {
         if (!m_hists_initialized) {
-            createTH1Fs();
+            prepareAutoHists();
         }
     }
 
     void runPostAnalysis() override {
         int color_i;
-        for (string property : m_properties) {
+        for (const string &property : m_properties) {
             THStack hist_stack{property.c_str(), m_known_properties[property].title.c_str()};
             TLegend stack_legend{33, 16, "By interaction types"};
             stack_legend.SetName((property + "_legend").c_str());
 
             color_i = 0;
-            for (string type : m_types) {
+            for (const string &type : m_types) {
                 m_hists[property][type].SetLineColor(m_colors[color_i++ % m_number_colors]);
                 m_hists[property][type].Write();
                 hist_stack.Add(&m_hists[property][type]);
@@ -121,7 +133,7 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
             stack_legend.Write();
         }
 
-        for (string stage : m_stages) {
+        for (const string &stage : m_stages) {
             for (string property : m_properties) {
                 THStack hist_stack{(stage + "_" + property).c_str(),
                                    (m_known_properties[property].title + " - " + stage).c_str()};
@@ -129,7 +141,7 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
                 stack_legend.SetName((stage + "_" + property + "_legend").c_str());
 
                 color_i = 0;
-                for (string type : m_types) {
+                for (const string &type : m_types) {
                     m_staged_hists[stage][property][type].SetLineColor(m_colors[color_i++ % m_number_colors]);
                     m_staged_hists[stage][property][type].Write();
                     hist_stack.Add(&m_staged_hists[stage][property][type]);
@@ -144,8 +156,8 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
 
     void useEntryAtStage(const string &stage, const Double_t &weight = 1) {
         if (auto stage_hists{m_staged_hists.find(stage)}; stage_hists != m_staged_hists.end()) {
-            for (string property : m_properties) {
-                for (string type : m_types) {
+            for (const string &property : m_properties) {
+                for (const string &type : m_types) {
                     if (m_known_types[type].is_type()) {
                         (stage_hists->second)[property][type].Fill(m_known_properties[property].get_property(), weight);
                     }
@@ -155,8 +167,8 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     }
 
     void useEntry(const Double_t &weight) override {
-        for (string property : m_properties) {
-            for (string type : m_types) {
+        for (const string &property : m_properties) {
+            for (const string &type : m_types) {
                 if (m_known_types[type].is_type()) {
                     m_hists[property][type].Fill(m_known_properties[property].get_property(), weight);
                 }

@@ -13,7 +13,7 @@ const char *default_hstack_opt{"nostack,hist"};
 const Int_t canvas_ww{1000};
 const Int_t canvas_wh{618};
 
-TCanvas cc{"canvas_i", "Interactive canvas"};
+/* TCanvas cc{"canvas_i", "Interactive canvas"}; */
 
 // Some basic plotting used throughout
 void draw_stack(TFile *tf, string name) {
@@ -48,6 +48,36 @@ void draw_rebinned(TFile *tf, string name, Int_t rebin = 2) {
  * "READ")}; */
 auto pipf{TFile::Open("output_local_pip.root", "READ")};
 auto pimf{TFile::Open("output_local_pim.root", "READ")};
+auto exf{TFile::Open("output_local_e.root", "READ")};
+
+void fs_ps_p_n(TFile *dataf) {
+    TCanvas *tc{new TCanvas("pi_fs_ps_p_n", "ps,fs vs p,n", canvas_ww, canvas_wh)};
+    tc->Divide(2, 2);
+
+    THStack *hs;
+
+    tc->cd(1);
+    hs = dataf->Get<THStack>("ps_num_protons");
+    hs->Draw("nostack");
+    dataf->Get<TLegend>("ps_num_protons_legend")->Draw();
+
+    tc->cd(2);
+    hs = dataf->Get<THStack>("ps_num_neutrons");
+    hs->Draw("nostack");
+    dataf->Get<TLegend>("ps_num_neutrons_legend")->Draw();
+
+    tc->cd(3);
+    hs = dataf->Get<THStack>("fs_num_protons");
+    hs->Draw("nostack");
+    dataf->Get<TLegend>("fs_num_protons_legend")->Draw();
+
+    tc->cd(4);
+    hs = dataf->Get<THStack>("fs_num_neutrons");
+    hs->Draw("nostack");
+    dataf->Get<TLegend>("fs_num_neutrons_legend")->Draw();
+
+    /* tc.Print("draft_plots/pi_p_both.pdf"); */
+}
 
 void plots() { /* gStyle->SetOptStat(""); */
 }
