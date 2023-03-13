@@ -51,7 +51,7 @@ auto fstpim{TFile::Open("output_local_FSt_pim.root", "READ")};
 auto fstex{TFile::Open("output_local_FSt_e.root", "READ")};
 auto fstex_noa{TFile::Open("output_local_FSt_e_noa.root", "READ")};
 
-void fs_ps_p_n(TFile *dataf) {
+TCanvas* fs_ps_p_n(TFile *dataf) {
     TCanvas *tc{new TCanvas("fs_ps_p_n", "ps,fs vs p,n", canvas_ww, canvas_wh)};
     tc->Divide(2, 2);
 
@@ -77,10 +77,10 @@ void fs_ps_p_n(TFile *dataf) {
     hs->Draw("nostack");
     dataf->Get<TLegend>("fs_num_neutrons_legend")->Draw();
 
-    /* tc->Print("draft_plots/pions_ps_to_fs.pdf"); */
+    return tc;
 }
 
-void pions_ps_to_fs(TFile *dataf) {
+TCanvas* pions_ps_to_fs(TFile *dataf) {
     TCanvas *tc{new TCanvas("pion_ps_to_fs", "pion_ps_to_fs", canvas_ww, canvas_wh)};
     tc->Divide(2, 2);
 
@@ -106,9 +106,12 @@ void pions_ps_to_fs(TFile *dataf) {
     hs->Draw("nostack");
     dataf->Get<TLegend>("fs_num_pim_legend")->Draw();
 
-    /* tc->Print("../plotting/draft_plots/pions_ps_to_fs.pdf"); */
+    return tc;
 }
 
 
-void plots() { /* gStyle->SetOptStat(""); */
+void plots() {
+    pions_ps_to_fs(fstex_noa)->Print("../plotting/draft_plots/fst_pions_ps_to_fs.pdf");
+    fs_ps_p_n(fstpip)->Print("../plotting/draft_plots/fst_pip_psfs_pn.pdf");
+    fs_ps_p_n(fstpim)->Print("../plotting/draft_plots/fst_pim_psfs_pn.pdf");
 }
