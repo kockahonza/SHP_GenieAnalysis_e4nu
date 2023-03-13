@@ -337,9 +337,9 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
 
   public:
     GenieAnalysis1Pion(const char *filename, const char *output_filename, PionType pion_type = PionType::Either,
+                       optional<int> proton_count = {}, optional<int> neutron_count = {},
                        const vector<string> &stages = {}, const vector<string> &properties = {},
-                       const vector<string> &types = {}, optional<int> proton_count = {},
-                       optional<int> neutron_count = {}, const Target &target = GenieAnalysisDeltaStudies::Target::C12,
+                       const vector<string> &types = {}, const Target &target = GenieAnalysisDeltaStudies::Target::C12,
                        const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
 
         : GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, target, beam_energy),

@@ -36,22 +36,13 @@ void draw_rebinned(TFile *tf, string name, Int_t rebin = 2) {
 
 // Specific data parts
 //
-// 1Pion data from 0313 either with or without using pion acceptance
-/* auto
- * napief{TFile::Open("/home/honza/Sync/University/CurrentCourses/SHP/data/230310/full_piacceptance_test/nopiacceptance/output_full_pie.root",
- * "READ")}; */
-/* auto
- * napipf{TFile::Open("/home/honza/Sync/University/CurrentCourses/SHP/data/230310/full_piacceptance_test/nopiacceptance/output_full_pip.root",
- * "READ")}; */
-/* auto
- * napimf{TFile::Open("/home/honza/Sync/University/CurrentCourses/SHP/data/230310/full_piacceptance_test/nopiacceptance/output_full_pim.root",
- * "READ")}; */
+// Final state transparency studies
 auto fstpip{TFile::Open("output_local_FSt_pip.root", "READ")};
 auto fstpim{TFile::Open("output_local_FSt_pim.root", "READ")};
 auto fstex{TFile::Open("output_local_FSt_e.root", "READ")};
 auto fstex_noa{TFile::Open("output_local_FSt_e_noa.root", "READ")};
 
-TCanvas* fs_ps_p_n(TFile *dataf) {
+TCanvas *fs_ps_p_n(TFile *dataf) {
     TCanvas *tc{new TCanvas("fs_ps_p_n", "ps,fs vs p,n", canvas_ww, canvas_wh)};
     tc->Divide(2, 2);
 
@@ -80,7 +71,7 @@ TCanvas* fs_ps_p_n(TFile *dataf) {
     return tc;
 }
 
-TCanvas* pions_ps_to_fs(TFile *dataf) {
+TCanvas *pions_ps_to_fs(TFile *dataf) {
     TCanvas *tc{new TCanvas("pion_ps_to_fs", "pion_ps_to_fs", canvas_ww, canvas_wh)};
     tc->Divide(2, 2);
 
@@ -109,6 +100,9 @@ TCanvas* pions_ps_to_fs(TFile *dataf) {
     return tc;
 }
 
+// 1Pion 1 nucleon studies, or the beginnings of
+auto opop_1pip0pim1p0n{TFile::Open("output_local_1pip0pim1p0n.root", "READ")};
+auto opop_0pip1pim1p0n{TFile::Open("output_local_0pip1pim1p0n.root", "READ")};
 
 void plots() {
     pions_ps_to_fs(fstex_noa)->Print("../plotting/draft_plots/fst_pions_ps_to_fs.pdf");

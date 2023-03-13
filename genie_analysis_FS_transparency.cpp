@@ -14,12 +14,11 @@ int main(int argc, char *argv[]) {
         if (arg == "local") {
             input_file = "/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root";
 
-            GenieAnalysis1Pion ga{
-                input_file.c_str(), "output_local_FSt_pip.root", GenieAnalysis1Pion::PionType::Plus, {"nocut"}};
+            GenieAnalysis1Pion ga{input_file.c_str(), "output_local_FSt_pip.root", GenieAnalysis1Pion::PionType::Plus};
             ga.runAnalysis();
 
-            GenieAnalysis1Pion ga2{
-                input_file.c_str(), "output_local_FSt_pim.root", GenieAnalysis1Pion::PionType::Minus, {"nocut"}};
+            GenieAnalysis1Pion ga2{input_file.c_str(), "output_local_FSt_pim.root",
+                                   GenieAnalysis1Pion::PionType::Minus};
             ga2.runAnalysis();
 
             GenieAnalysisDeltaStudies ga3{input_file.c_str(), "output_local_FSt_e.root"};
