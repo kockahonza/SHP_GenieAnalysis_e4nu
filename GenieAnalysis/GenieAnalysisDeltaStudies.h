@@ -13,13 +13,13 @@
 
 class FiducialWrapper;
 
-using std::unique_ptr;
+using std::unique_ptr, std::optional;
 
 /**
  * Base class for Delta studies analysis, mainly tailored for Genie data tuned for the CLAS6 runs.
  * It takes care of the electron smearing, cuts and so on. It also gathers all pions, get the
  * number of protons and neutrons and possibly detects radiation photons.
- * The electron properties are made available here any pion properties dhoul be done in
+ * The electron properties are made available here any pion properties should be done in
  * inheriting classes.
  */
 class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
@@ -311,8 +311,57 @@ class FiducialWrapper {
     }
 };
 
-using std::optional;
+/**
+ * Continues on from DeltaStudies, adds specific cuts for the number of protons, neutrons and charged pions
+ */
+class GenieAnalysisPiNucleonCounts : public GenieAnalysisDeltaStudies {
+  public:
+    const optional<int> m_pi_plus_count;
+    const optional<int> m_pi_minus_count;
+    const optional<int> m_proton_count;
+    const optional<int> m_neutron_count;
 
+  public:
+    GenieAnalysisPiNucleonCounts(const char *filename, const char *output_filename, optional<int> pi_plus_count = {},
+                                 optional<int> pi_minus_count = {}, optional<int> proton_count = {},
+                                 optional<int> neutron_count = {}, const vector<string> &stages = {},
+                                 const vector<string> &properties = {}, const vector<string> &types = {},
+                                 const Target &target = GenieAnalysisDeltaStudies::Target::C12,
+                                 const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
+
+        : GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, target, beam_energy),
+          m_pi_plus_count{pi_plus_count}, m_pi_minus_count{pi_minus_count}, m_proton_count{proton_count},
+          m_neutron_count{neutron_count} {
+        /* m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end()); */
+    }
+
+    Double_t passesCuts() override {
+        Double_t weight{GenieAnalysisDeltaStudies::passesCuts()};
+        if (weight == 0) {
+            return 0;
+        }
+
+        if (m_pi_plus_count && (m_pi_plus_count != m_passed_pi_plus.size())) {
+            return 0;
+        }
+        if (m_pi_minus_count && (m_pi_minus_count != m_passed_pi_minus.size())) {
+            return 0;
+        }
+        if (m_proton_count && (m_proton_count != m_fs_number_of_protons)) {
+            return 0;
+        }
+        if (m_neutron_count && (m_neutron_count != m_fs_number_of_neutrons)) {
+            return 0;
+        }
+
+        return weight;
+    }
+};
+
+/**
+ * This is for studies that have exactly one charged Pion, does all the stuff from DeltaStudies and add's the pion
+ * filter, can check for nucleon numbers and uses pion acceptance for the weight, also adds the pions properties
+ */
 class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
   public:
     enum class PionType { Minus, Plus, Either };
@@ -383,54 +432,10 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
     }
 };
 
-class GenieAnalysisPiNucleonCounts : public GenieAnalysisDeltaStudies {
-  public:
-    const optional<int> m_pi_plus_count;
-    const optional<int> m_pi_minus_count;
-    const optional<int> m_proton_count;
-    const optional<int> m_neutron_count;
-
-  public:
-    GenieAnalysisPiNucleonCounts(const char *filename, const char *output_filename, optional<int> pi_plus_count={},
-                                 optional<int> pi_minus_count={}, optional<int> proton_count = {},
-                                 optional<int> neutron_count = {}, const vector<string> &stages = {},
-                                 const vector<string> &properties = {}, const vector<string> &types = {},
-                                 const Target &target = GenieAnalysisDeltaStudies::Target::C12,
-                                 const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
-
-        : GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, target, beam_energy),
-          m_pi_plus_count{pi_plus_count}, m_pi_minus_count{pi_minus_count}, m_proton_count{proton_count},
-          m_neutron_count{neutron_count} {
-        /* m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end()); */
-    }
-
-    Double_t passesCuts() override {
-        Double_t weight{GenieAnalysisDeltaStudies::passesCuts()};
-        if (weight == 0) {
-            return 0;
-        }
-
-        if (m_pi_plus_count && (m_pi_plus_count != m_passed_pi_plus.size())) {
-            return 0;
-        }
-        if (m_pi_minus_count && (m_pi_minus_count != m_passed_pi_minus.size())) {
-            return 0;
-        }
-        if (m_proton_count && (m_proton_count != m_fs_number_of_protons)) {
-            return 0;
-        }
-        if (m_neutron_count && (m_neutron_count != m_fs_number_of_neutrons)) {
-            return 0;
-        }
-
-        return weight;
-    }
-};
-
 /**
  * Imitates the analysis done in original, only uses events that have exactly 1 pion and any number of nucleons.
  * It uses both pions for the main analysis and "π+" and "π-" stages are available for data of only one pion charge.
- * I mainly keep this as a backup, GenieAnalysis1Pion should be better I think.
+ * This is essenatially outdated and replaced by GenieAnalysis1Pion
  */
 class GenieAnalysis1PionStaged : public GenieAnalysisDeltaStudies {
   private:
