@@ -168,11 +168,13 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoHistograms {
                               // Specify the analysis - which stages, properties and types to do histograms for
                               const vector<string> &stages = {}, const vector<string> &properties = {},
                               const vector<string> &types = {},
+                              const vector<GenieAnalysisAutoHistograms::AutoVsPlot> &vs_property_plots = {},
                               // Select run
                               const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
                               // Pass this to GenieAnalysis
                               const char *gst_ttree_name = "gst")
-        : GenieAnalysisAutoHistograms(filename, output_filename, stages, properties, types, gst_ttree_name),
+        : GenieAnalysisAutoHistograms(filename, output_filename, stages, properties, types, vs_property_plots,
+                                      gst_ttree_name),
           m_target{target}, m_beam_energy{beam_energy},
 
           m_fiducials{std::make_unique<FiducialWrapper>(m_target, m_beam_energy)},
@@ -326,10 +328,12 @@ class GenieAnalysisPiNucleonCounts : public GenieAnalysisDeltaStudies {
                                  optional<int> pi_minus_count = {}, optional<int> proton_count = {},
                                  optional<int> neutron_count = {}, const vector<string> &stages = {},
                                  const vector<string> &properties = {}, const vector<string> &types = {},
+                                 const vector<GenieAnalysisAutoHistograms::AutoVsPlot> &vs_property_plots = {},
                                  const Target &target = GenieAnalysisDeltaStudies::Target::C12,
                                  const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
 
-        : GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, target, beam_energy),
+        : GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, vs_property_plots, target,
+                                    beam_energy),
           m_pi_plus_count{pi_plus_count}, m_pi_minus_count{pi_minus_count}, m_proton_count{proton_count},
           m_neutron_count{neutron_count} {
         /* m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end()); */
@@ -393,10 +397,13 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
     GenieAnalysis1Pion(const char *filename, const char *output_filename, PionType pion_type = PionType::Either,
                        optional<int> proton_count = {}, optional<int> neutron_count = {},
                        const vector<string> &stages = {}, const vector<string> &properties = {},
-                       const vector<string> &types = {}, const Target &target = GenieAnalysisDeltaStudies::Target::C12,
+                       const vector<string> &types = {},
+                       const vector<GenieAnalysisAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                       const Target &target = GenieAnalysisDeltaStudies::Target::C12,
                        const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
 
-        : GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, target, beam_energy),
+        : GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, vs_property_plots, target,
+                                    beam_energy),
           m_pion_type{pion_type}, m_proton_count{proton_count}, m_neutron_count{neutron_count} {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
@@ -437,77 +444,79 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
  * It uses both pions for the main analysis and "π+" and "π-" stages are available for data of only one pion charge.
  * This is essenatially outdated and replaced by GenieAnalysis1Pion
  */
-class GenieAnalysis1PionStaged : public GenieAnalysisDeltaStudies {
-  private:
-    int m_pion_charge;
-    TLorentzVector m_pion_V4;
-    TVector3 m_pion_V3;
-    Double_t m_pion_acceptance;
+/* class GenieAnalysis1PionStaged : public GenieAnalysisDeltaStudies { */
+/*   private: */
+/*     int m_pion_charge; */
+/*     TLorentzVector m_pion_V4; */
+/*     TVector3 m_pion_V3; */
+/*     Double_t m_pion_acceptance; */
 
-  protected:
-    map<string, AutoProperty> m_new_known_properties{
-        {"pi_phi",
-         {"Pion phi [°]",
-          {720, -30, 330},
-          [this]() {
-              double phi_deg{m_pion_V3.Phi() * TMath::RadToDeg()};
-              return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
-          }}},
-        {"pi_cos_theta", {"Pion cos theta", {720, -1, 1}, [this]() { return m_pion_V3.CosTheta(); }}},
-        {"pi_p", {"Pion momentum [GeV/c]", {720, 0, 3}, [this]() { return m_pion_V4.P(); }}},
-        {"pi_E", {"Pion energy [GeV]", {720, 0, 3}, [this]() { return m_pion_V4.E(); }}},
-        {"pi_acceptance", {"Pion acceptance weight", {100, 0, 1}, [this]() { return m_pion_acceptance; }}}};
+/*   protected: */
+/*     map<string, AutoProperty> m_new_known_properties{ */
+/*         {"pi_phi", */
+/*          {"Pion phi [°]", */
+/*           {720, -30, 330}, */
+/*           [this]() { */
+/*               double phi_deg{m_pion_V3.Phi() * TMath::RadToDeg()}; */
+/*               return (phi_deg < -30) ? phi_deg + 360 : phi_deg; */
+/*           }}}, */
+/*         {"pi_cos_theta", {"Pion cos theta", {720, -1, 1}, [this]() { return m_pion_V3.CosTheta(); }}}, */
+/*         {"pi_p", {"Pion momentum [GeV/c]", {720, 0, 3}, [this]() { return m_pion_V4.P(); }}}, */
+/*         {"pi_E", {"Pion energy [GeV]", {720, 0, 3}, [this]() { return m_pion_V4.E(); }}}, */
+/*         {"pi_acceptance", {"Pion acceptance weight", {100, 0, 1}, [this]() { return m_pion_acceptance; }}}}; */
 
-    /* map<string, AutoType> m_new_known_types{ */
-    /*     {"PIP", {"All events", [this]() { return m_pion_plus; }}}, */
-    /*     {"QE_PIP", {"Quasi-Elastic events", [this]() { return m_ge.qel && m_pion_plus; }}}, */
-    /*     {"RES_ALL_PIP", {"Resonant events", [this]() { return m_ge.res && m_pion_plus; }}}, */
-    /*     {"DELTA1232_PIP", {"Resonant events with a Delta1232", [this]() { return (m_ge.res && (m_ge.resid == 0) &&
-     * m_pion_plus); }}}, */
-    /*     {"DIS_PIP", {"Deep-inelastic events", [this]() { return m_ge.dis && m_pion_plus; }}}, */
-    /*     {"PIM", {"All events", [this]() { return m_pion_minus; }}}, */
-    /*     {"QE_PIM", {"Quasi-Elastic events", [this]() { return m_ge.qel && m_pion_minus; }}}, */
-    /*     {"RES_ALL_PIM", {"Resonant events", [this]() { return m_ge.res && m_pion_minus; }}}, */
-    /*     {"DELTA1232_PIM", {"Resonant events with a Delta1232", [this]() { return (m_ge.res && (m_ge.resid == 0) &&
-     * m_pion_minus); }}}, */
-    /*     {"DIS_PIM", {"Deep-inelastic events", [this]() { return m_ge.dis && m_pion_minus; }}}, */
-    /* }; */
+/*     /1* map<string, AutoType> m_new_known_types{ *1/ */
+/*     /1*     {"PIP", {"All events", [this]() { return m_pion_plus; }}}, *1/ */
+/*     /1*     {"QE_PIP", {"Quasi-Elastic events", [this]() { return m_ge.qel && m_pion_plus; }}}, *1/ */
+/*     /1*     {"RES_ALL_PIP", {"Resonant events", [this]() { return m_ge.res && m_pion_plus; }}}, *1/ */
+/*     /1*     {"DELTA1232_PIP", {"Resonant events with a Delta1232", [this]() { return (m_ge.res && (m_ge.resid == 0)
+ * && */
+/*      * m_pion_plus); }}}, *1/ */
+/*     /1*     {"DIS_PIP", {"Deep-inelastic events", [this]() { return m_ge.dis && m_pion_plus; }}}, *1/ */
+/*     /1*     {"PIM", {"All events", [this]() { return m_pion_minus; }}}, *1/ */
+/*     /1*     {"QE_PIM", {"Quasi-Elastic events", [this]() { return m_ge.qel && m_pion_minus; }}}, *1/ */
+/*     /1*     {"RES_ALL_PIM", {"Resonant events", [this]() { return m_ge.res && m_pion_minus; }}}, *1/ */
+/*     /1*     {"DELTA1232_PIM", {"Resonant events with a Delta1232", [this]() { return (m_ge.res && (m_ge.resid == 0)
+ * && */
+/*      * m_pion_minus); }}}, *1/ */
+/*     /1*     {"DIS_PIM", {"Deep-inelastic events", [this]() { return m_ge.dis && m_pion_minus; }}}, *1/ */
+/*     /1* }; *1/ */
 
-  public:
-    GenieAnalysis1PionStaged(const char *filename, const char *output_filename, const vector<string> &stages = {},
-                             const vector<string> &properties = {}, const vector<string> &types = {},
-                             const Target &target = GenieAnalysisDeltaStudies::Target::C12,
-                             const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
-        : GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, target, beam_energy) {
-        m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
-    }
+/*   public: */
+/*     GenieAnalysis1PionStaged(const char *filename, const char *output_filename, const vector<string> &stages = {}, */
+/*                              const vector<string> &properties = {}, const vector<string> &types = {}, */
+/*                              const Target &target = GenieAnalysisDeltaStudies::Target::C12, */
+/*                              const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261) */
+/*         : GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, target, beam_energy) { */
+/*         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end()); */
+/*     } */
 
-    Double_t passesCuts() override {
-        Double_t weight{GenieAnalysisDeltaStudies::passesCuts()};
-        if (weight == 0) {
-            return 0;
-        }
+/*     Double_t passesCuts() override { */
+/*         Double_t weight{GenieAnalysisDeltaStudies::passesCuts()}; */
+/*         if (weight == 0) { */
+/*             return 0; */
+/*         } */
 
-        const size_t num_pi_minus{m_passed_pi_minus.size()};
-        const size_t num_pi_plus{m_passed_pi_plus.size()};
+/*         const size_t num_pi_minus{m_passed_pi_minus.size()}; */
+/*         const size_t num_pi_plus{m_passed_pi_plus.size()}; */
 
-        if ((num_pi_minus + num_pi_plus) == 1) {
-            if (num_pi_minus == 1) {
-                m_pion_charge = -1;
-                std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_minus[0];
-                useEntryAtStage("π+", weight * m_pion_acceptance);
-            } else if (num_pi_plus == 1) {
-                m_pion_charge = +1;
-                std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_plus[0];
-                useEntryAtStage("π-", weight * m_pion_acceptance);
-            }
+/*         if ((num_pi_minus + num_pi_plus) == 1) { */
+/*             if (num_pi_minus == 1) { */
+/*                 m_pion_charge = -1; */
+/*                 std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_minus[0]; */
+/*                 useEntryAtStage("π+", weight * m_pion_acceptance); */
+/*             } else if (num_pi_plus == 1) { */
+/*                 m_pion_charge = +1; */
+/*                 std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_plus[0]; */
+/*                 useEntryAtStage("π-", weight * m_pion_acceptance); */
+/*             } */
 
-            /* std::cout << weight << ", " << m_pion_acceptance << ", " << m_pion_charge << std::endl; */
-            return weight * m_pion_acceptance;
-        } else {
-            return 0;
-        }
-    }
-};
+/*             /1* std::cout << weight << ", " << m_pion_acceptance << ", " << m_pion_charge << std::endl; *1/ */
+/*             return weight * m_pion_acceptance; */
+/*         } else { */
+/*             return 0; */
+/*         } */
+/*     } */
+/* }; */
 
 #endif

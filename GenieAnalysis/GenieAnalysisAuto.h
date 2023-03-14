@@ -53,6 +53,12 @@ class GenieAnalysisAutoHistograms : public GenieAnalysis {
         function<bool()> is_type;
     };
 
+    struct AutoVsPlot {
+        string property1;
+        string property2;
+        vector<string> types;
+    };
+
   private:
     const std::unique_ptr<TFile> m_output_file;
 
@@ -65,7 +71,7 @@ class GenieAnalysisAutoHistograms : public GenieAnalysis {
 
     // Specify what pairs of properties to make TH2Fs for, the first 2 strings specify the properties and the vector of
     // string specified for which types to make the TH2F for, if empty do for all
-    vector<tuple<string, string, vector<string>>> m_vs_property_plots;
+    vector<AutoVsPlot> m_vs_property_plots;
 
     bool m_hists_initialized{false};
     map<string, map<string, TH1F>> m_simple_property_hists; // The TH1F objects, map keys are property, type in order
@@ -95,10 +101,10 @@ class GenieAnalysisAutoHistograms : public GenieAnalysis {
 
     GenieAnalysisAutoHistograms(const char *filename, const char *output_filename, const vector<string> &stages = {},
                                 const vector<string> &properties = {}, const vector<string> &types = {},
-                                const char *gst_ttree_name = "gst")
+                                const vector<AutoVsPlot> vs_property_plots = {}, const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name),
           m_output_file(TFile::Open(output_filename, "RECREATE")), m_stages{stages},
-          m_properties{properties}, m_types{types} {}
+          m_properties{properties}, m_types{types}, m_vs_property_plots{vs_property_plots} {}
 
     void prepareAutoHists() {
         string name;
@@ -141,7 +147,12 @@ class GenieAnalysisAutoHistograms : public GenieAnalysis {
         }
 
         Int_t nbinsy, ylow, yup;
-        for (auto const &[property1, property2, types] : m_vs_property_plots) {
+        for (auto &[property1, property2, types] : m_vs_property_plots) {
+            if (types.empty()) {
+                for (const auto &known_type_keyval : m_known_types) {
+                    types.push_back(known_type_keyval.first);
+                }
+            }
             for (auto const &type : types) {
                 name = makeVsPlotName(property1, property2, type);
                 title = makeVsPlotTitle(property1, property2, type);
