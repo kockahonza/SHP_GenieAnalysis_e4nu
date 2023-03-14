@@ -44,7 +44,8 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
 
   protected:
     map<string, AutoProperty> m_known_properties{
-        {"W", {"W from gst [GeV]", {1000, 0, 4}, [this]() { return m_ge.W; }}},
+        {"Ws", {"Ws (generated in GENIE) from gst [GeV]", {1000, 0, 4}, [this]() { return m_ge.Ws; }}},
+        {"W", {"W (computed in GENIE) from gst [GeV]", {1000, 0, 4}, [this]() { return m_ge.W; }}},
         {"fspl", {"Final state lepton PDG from gst", {51, 0, 50}, [this]() { return m_ge.fspl; }}},
         {"wght", {"wght from gst", {100, 0, 2}, [this]() { return m_ge.wght; }}}};
 

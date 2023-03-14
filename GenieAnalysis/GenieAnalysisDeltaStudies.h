@@ -134,33 +134,33 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
         {"bjorken_x", {"Bjorken x", {1000, 0, 1.01}, [this]() { return m_bjorken_x; }}},
 
         // Passed particle properties, this mainly applies to pi+- and protons which there may be multiple of and we
-        // have acceptances for
-        {"passed_num_pip", {"Number of detected pi plus", {6, 0, 5}, [this]() { return m_passed_pi_plus.size(); }}},
-        {"passed_num_pim", {"Number of detected pi minus", {6, 0, 5}, [this]() { return m_passed_pi_minus.size(); }}},
+        // have acceptances fo5
+        {"passed_num_pip", {"Number of detected pi plus", {5, 0, 5}, [this]() { return m_passed_pi_plus.size(); }}},
+        {"passed_num_pim", {"Number of detected pi minus", {5, 0, 5}, [this]() { return m_passed_pi_minus.size(); }}},
 
         // "Truth" data follows, there's a lot of it and it's quite repetitive
         // Primary state (pre FSI) data
         {"ps_num_pip",
-         {"Number of pi plus in the primary state", {6, 0, 5}, [this]() { return m_ps_number_of_pi_plus; }}},
+         {"Number of pi plus in the primary state", {5, 0, 5}, [this]() { return m_ps_number_of_pi_plus; }}},
         {"ps_num_pim",
-         {"Number of pi minus in the primary state", {6, 0, 5}, [this]() { return m_ps_number_of_pi_minus; }}},
+         {"Number of pi minus in the primary state", {5, 0, 5}, [this]() { return m_ps_number_of_pi_minus; }}},
         {"ps_num_protons",
-         {"Number of protons in the primary state", {6, 0, 5}, [this]() { return m_ps_number_of_protons; }}},
+         {"Number of protons in the primary state", {5, 0, 5}, [this]() { return m_ps_number_of_protons; }}},
         {"ps_num_neutrons",
-         {"Number of neutrons in the primary state", {6, 0, 5}, [this]() { return m_ps_number_of_neutrons; }}},
+         {"Number of neutrons in the primary state", {5, 0, 5}, [this]() { return m_ps_number_of_neutrons; }}},
         {"ps_num_photons",
-         {"Number of photons in the primary state", {6, 0, 5}, [this]() { return m_ps_number_of_photons; }}},
+         {"Number of photons in the primary state", {5, 0, 5}, [this]() { return m_ps_number_of_photons; }}},
         // Final state (post FSI) data, truth - before accounting for detector with fiducials and acceptances
         {"fs_num_pip",
-         {"Number of pi plus in the final state", {6, 0, 5}, [this]() { return m_fs_number_of_pi_plus; }}},
+         {"Number of pi plus in the final state", {5, 0, 5}, [this]() { return m_fs_number_of_pi_plus; }}},
         {"fs_num_pim",
-         {"Number of pi minus in the final state", {6, 0, 5}, [this]() { return m_fs_number_of_pi_minus; }}},
+         {"Number of pi minus in the final state", {5, 0, 5}, [this]() { return m_fs_number_of_pi_minus; }}},
         {"fs_num_protons",
-         {"Number of protons in the final state", {6, 0, 5}, [this]() { return m_fs_number_of_protons; }}},
+         {"Number of protons in the final state", {5, 0, 5}, [this]() { return m_fs_number_of_protons; }}},
         {"fs_num_neutrons",
-         {"Number of neutrons in the final state", {6, 0, 5}, [this]() { return m_fs_number_of_neutrons; }}},
+         {"Number of neutrons in the final state", {5, 0, 5}, [this]() { return m_fs_number_of_neutrons; }}},
         {"fs_num_photons",
-         {"Number of photons in the final state", {6, 0, 5}, [this]() { return m_fs_number_of_photons; }}},
+         {"Number of photons in the final state", {5, 0, 5}, [this]() { return m_fs_number_of_photons; }}},
     };
 
   public:
