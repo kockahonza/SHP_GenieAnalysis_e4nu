@@ -55,7 +55,7 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
     const TLorentzVector el_change{m_smeared_el_V4 - TLorentzVector{0, 0, m_beam_energy_val, m_beam_energy_val}};
     const double Q2 = -el_change.Mag2();
 
-    const double nu = m_beam_energy_val - m_smeared_el_V4.E();
+    const double nu = -el_change.E();
     m_bjorken_x = Q2 / (2 * proton_mass * nu);
 
     m_reconstructed_W = TMath::Sqrt((proton_mass + nu) * (proton_mass + nu) - el_change.Vect().Mag2());

@@ -28,6 +28,16 @@ int main(int argc, char *argv[]) {
             ga4.m_do_electron_acceptance = false;
             ga4.m_do_pion_acceptance = false;
             ga4.runAnalysis();
+
+            GenieAnalysisDeltaStudies ga5{input_file.c_str(), "output_local_FSt_e_nocuts.root"};
+            ga5.m_do_precuts = false;
+            ga5.m_do_electron_fiducials = false;
+            ga5.m_do_pion_fiducials = false;
+            ga5.m_do_photon_fiducials = false;
+            ga5.m_p_pion_momentum_threshold = 0;
+            ga5.m_do_electron_acceptance = false;
+            ga5.m_do_pion_acceptance = false;
+            ga5.runAnalysis();
         } else if (arg == "full") {
             input_file = "/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/C12_2261GeV/"
                          "apapadop_SuSav2_C12_2261GeV_master.root";
