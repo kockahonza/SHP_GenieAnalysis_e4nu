@@ -129,10 +129,16 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
         {"el_acceptance",
          {"Out electron acceptance weight", {100, 0, 1}, [this]() { return m_electron_acceptance_weight; }}},
 
-        // Physical properties of the event itself
+        // Physical properties of the event as a whole
         {"reco_W", {"Reconstructed W [GeV]", {1000, 0, 4}, [this]() { return m_reconstructed_W; }}},
         {"bjorken_x", {"Bjorken x", {1000, 0, 1.01}, [this]() { return m_bjorken_x; }}},
 
+        // Passed particle properties, this mainly applies to pi+- and protons which there may be multiple of and we
+        // have acceptances for
+        {"passed_num_pip", {"Number of detected pi plus", {6, 0, 5}, [this]() { return m_passed_pi_plus.size(); }}},
+        {"passed_num_pim", {"Number of detected pi minus", {6, 0, 5}, [this]() { return m_passed_pi_minus.size(); }}},
+
+        // "Truth" data follows, there's a lot of it and it's quite repetitive
         // Primary state (pre FSI) data
         {"ps_num_pip",
          {"Number of pi plus in the primary state", {6, 0, 5}, [this]() { return m_ps_number_of_pi_plus; }}},
@@ -144,8 +150,7 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
          {"Number of neutrons in the primary state", {6, 0, 5}, [this]() { return m_ps_number_of_neutrons; }}},
         {"ps_num_photons",
          {"Number of photons in the primary state", {6, 0, 5}, [this]() { return m_ps_number_of_photons; }}},
-
-        // Truth data
+        // Final state (post FSI) data, truth - before accounting for detector with fiducials and acceptances
         {"fs_num_pip",
          {"Number of pi plus in the final state", {6, 0, 5}, [this]() { return m_fs_number_of_pi_plus; }}},
         {"fs_num_pim",
@@ -375,6 +380,50 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
         } else {
             return weight;
         }
+    }
+};
+
+class GenieAnalysisPiNucleonCounts : public GenieAnalysisDeltaStudies {
+  public:
+    const optional<int> m_pi_plus_count;
+    const optional<int> m_pi_minus_count;
+    const optional<int> m_proton_count;
+    const optional<int> m_neutron_count;
+
+  public:
+    GenieAnalysisPiNucleonCounts(const char *filename, const char *output_filename, optional<int> pi_plus_count={},
+                                 optional<int> pi_minus_count={}, optional<int> proton_count = {},
+                                 optional<int> neutron_count = {}, const vector<string> &stages = {},
+                                 const vector<string> &properties = {}, const vector<string> &types = {},
+                                 const Target &target = GenieAnalysisDeltaStudies::Target::C12,
+                                 const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
+
+        : GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, target, beam_energy),
+          m_pi_plus_count{pi_plus_count}, m_pi_minus_count{pi_minus_count}, m_proton_count{proton_count},
+          m_neutron_count{neutron_count} {
+        /* m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end()); */
+    }
+
+    Double_t passesCuts() override {
+        Double_t weight{GenieAnalysisDeltaStudies::passesCuts()};
+        if (weight == 0) {
+            return 0;
+        }
+
+        if (m_pi_plus_count && (m_pi_plus_count != m_passed_pi_plus.size())) {
+            return 0;
+        }
+        if (m_pi_minus_count && (m_pi_minus_count != m_passed_pi_minus.size())) {
+            return 0;
+        }
+        if (m_proton_count && (m_proton_count != m_fs_number_of_protons)) {
+            return 0;
+        }
+        if (m_neutron_count && (m_neutron_count != m_fs_number_of_neutrons)) {
+            return 0;
+        }
+
+        return weight;
     }
 };
 
