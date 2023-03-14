@@ -62,13 +62,15 @@ void GenieAnalysisAutoHistograms::runPostAnalysis() {
     int color_i;
     for (const string &property : m_properties) {
         THStack hist_stack{property.c_str(), m_known_properties[property].title.c_str()};
-        TLegend stack_legend{33, 16, "By interaction types"};
+        TLegend stack_legend{m_type_legend_w, m_type_legend_h, m_type_legend_label};
         stack_legend.SetName((property + "_legend").c_str());
 
         color_i = 0;
         for (const string &type : m_types) {
             m_simple_property_hists[property][type].SetLineColor(m_colors[color_i++ % m_number_colors]);
             m_simple_property_hists[property][type].Write();
+
+            m_simple_property_hists[property][type].SetTitle(m_known_types[type].title.c_str());
             hist_stack.Add(&m_simple_property_hists[property][type]);
             stack_legend.AddEntry(&m_simple_property_hists[property][type], m_known_types[type].title.c_str());
         }
@@ -81,13 +83,15 @@ void GenieAnalysisAutoHistograms::runPostAnalysis() {
         for (const string &property : m_properties) {
             THStack hist_stack{(stage + "_" + property).c_str(),
                                (m_known_properties[property].title + " - " + stage).c_str()};
-            TLegend stack_legend{33, 16, "By interaction types"};
+            TLegend stack_legend{m_type_legend_w, m_type_legend_h, m_type_legend_label};
             stack_legend.SetName((stage + "_" + property + "_legend").c_str());
 
             color_i = 0;
             for (const string &type : m_types) {
                 m_staged_hists[stage][property][type].SetLineColor(m_colors[color_i++ % m_number_colors]);
                 m_staged_hists[stage][property][type].Write();
+
+                m_staged_hists[stage][property][type].SetTitle(m_known_types[type].title.c_str());
                 hist_stack.Add(&m_staged_hists[stage][property][type]);
                 stack_legend.AddEntry(&m_simple_property_hists[property][type], m_known_types[type].title.c_str());
             }
@@ -98,8 +102,24 @@ void GenieAnalysisAutoHistograms::runPostAnalysis() {
     }
 
     for (auto const &[property1, property2, types] : m_vs_property_plots) {
+        THStack hist_stack{makeVsPlotName(property1, property2).c_str(), makeVsPlotTitle(property1, property2).c_str()};
+        TLegend stack_legend{m_type_legend_w, m_type_legend_h, m_type_legend_label};
+        stack_legend.SetName((makeVsPlotName(property1, property2) + "_legend").c_str());
+
+        color_i = 0;
         for (auto const &type : types) {
+            m_vs_property_hists[property1][property2][type].SetMarkerColor(m_colors[color_i++ % m_number_colors]);
+            m_vs_property_hists[property1][property2][type].GetXaxis()->SetTitle(
+                m_known_properties[property1].title.c_str());
+            m_vs_property_hists[property1][property2][type].GetYaxis()->SetTitle(
+                m_known_properties[property2].title.c_str());
             m_vs_property_hists[property1][property2][type].Write();
+
+            m_vs_property_hists[property1][property2][type].SetTitle(m_known_types[type].title.c_str());
+            hist_stack.Add(&m_vs_property_hists[property1][property2][type]);
+            stack_legend.AddEntry(&m_vs_property_hists[property1][property2][type], m_known_types[type].title.c_str());
         }
+        hist_stack.Write();
+        stack_legend.Write();
     }
 }

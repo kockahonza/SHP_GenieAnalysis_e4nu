@@ -79,6 +79,9 @@ class GenieAnalysisAutoHistograms : public GenieAnalysis {
                                                                 // map keys are stage, property and type in order
     map<string, map<string, map<string, TH2F>>> m_vs_property_hists; // The TH2F object to vs property plots, the map
                                                                      // keys are property1, property2 and type in order
+    static constexpr Double_t m_type_legend_w{28};
+    static constexpr Double_t m_type_legend_h{16};
+    static constexpr const char *m_type_legend_label{""};
 
   protected:
     map<string, AutoProperty> m_known_properties{
@@ -88,12 +91,12 @@ class GenieAnalysisAutoHistograms : public GenieAnalysis {
         {"wght", {"wght from gst", {100, 0, 2}, [this]() { return m_ge.wght; }}}};
 
     map<string, AutoType> m_known_types{
-        {"ALL", {"All events", [this]() { return true; }}},
-        {"QE", {"Quasi-Elastic events", [this]() { return m_ge.qel; }}},
-        {"MEC", {"Quasi-Elastic events", [this]() { return m_ge.mec; }}},
-        {"RES_ALL", {"Resonant events", [this]() { return m_ge.res; }}},
-        {"DELTA1232", {"Resonant events with a Delta1232", [this]() { return (m_ge.res && (m_ge.resid == 0)); }}},
-        {"DIS", {"Deep-inelastic events", [this]() { return m_ge.dis; }}},
+        {"ALL", {"All", [this]() { return true; }}},
+        {"QE", {"Quasi-Elastic", [this]() { return m_ge.qel; }}},
+        {"MEC", {"Meson-exchange", [this]() { return m_ge.mec; }}},
+        {"RES_ALL", {"Resonant", [this]() { return m_ge.res; }}},
+        {"DELTA1232", {"Delta1232", [this]() { return (m_ge.res && (m_ge.resid == 0)); }}},
+        {"DIS", {"Deep-inelastic", [this]() { return m_ge.dis; }}},
     };
 
   public:
@@ -162,12 +165,17 @@ class GenieAnalysisAutoHistograms : public GenieAnalysis {
         return makeSimplePropertyHistTitle(property, type) + " - at " + stage;
     }
 
+    virtual const string makeVsPlotName(const string &property1, const string &property2) {
+        return "vs_" + property1 + "_" + property2;
+    }
+    virtual const string makeVsPlotTitle(const string &property1, const string &property2) {
+        return m_known_properties[property1].title + " vs " + m_known_properties[property2].title;
+    }
     virtual const string makeVsPlotName(const string &property1, const string &property2, const string &type) {
-        return "vs_" + property1 + "_" + property2 + "_" + type;
+        return makeVsPlotName(property1, property2) + "_" + type;
     }
     virtual const string makeVsPlotTitle(const string &property1, const string &property2, const string &type) {
-        return m_known_properties[property1].title + " vs " + m_known_properties[property2].title + " - " +
-               m_known_types[type].title;
+        return makeVsPlotTitle(property1, property2) + " - " + m_known_types[type].title;
     }
 };
 
