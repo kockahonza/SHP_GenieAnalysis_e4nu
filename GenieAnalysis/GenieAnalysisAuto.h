@@ -17,7 +17,7 @@
 #include "GenieAnalysis.h"
 #include "misc.h"
 
-using std::vector, std::string, std::map, std::tuple, std::function;
+using std::vector, std::string, std::map, std::tuple, std::pair, std::function;
 
 struct AutoProperty {
     string title;
@@ -30,17 +30,44 @@ struct AutoType {
     function<bool()> is_type;
 };
 
-class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
+/**
+ * This implements some of the most important functionoality of the package, it takes care of the automatic histogram
+ * creation and filling. There are types which designate a type of interaction like QE, RES, DIS and so on, there are
+ * essentially defined by a string name and a function that returns a bool. Next there are properties and these describe
+ * the interesting properties of an event like the W, or the electron momentum (implemented later on).
+ *
+ * For each there is a map `m_known_types` and `m_known_properties` which each map a string name of a given type or
+ * property to a tuple of values that describe that type, property (different for each, see the code). These can also be
+ * added in inheriting classes. Then a user can specifies the lists `m_types` and `m_properties` of an instance to
+ * specify which of the known types and properties to use. Then TH1F histograms are created and filled for each
+ * combination of these types and properties showing a histogram of all passing events.
+ *
+ * There is also support for pairing up properties against each other to form 2D histograms of TH2F types, this is done
+ * through
+ *
+ *
+ * As an additional feature mainly useful for debugging as it is not foolproof are stages. In case, for each stage
+ * string passed to the constructor another set of all the TH1Fs is created and filled whenever `useEntryAtStage` is
+ * called with that particular stage string passed as an argument.
+ */
+class GenieAnalysisAutoHistograms : public GenieAnalysis {
   private:
     const std::unique_ptr<TFile> m_output_file;
 
     vector<string> m_stages;
+
+    // Which properties and types to make TH1Fs for, if they are empty (default) all known types or properties are used
     vector<string> m_properties;
     vector<string> m_types;
 
+    // Specify what pairs of properties to make TH2Fs for, the first 2 strings specify the properties and the vector of
+    // string specified for which types to make the TH2F for, if empty do for all
+    vector<tuple<string, string, vector<string>>> m_vs_property_plots;
+
     bool m_hists_initialized{false};
-    map<string, map<string, TH1F>> m_hists;
-    map<string, map<string, map<string, TH1F>>> m_staged_hists;
+    map<string, map<string, TH1F>> m_TH1Fs; // The 1D histograms for each property, type combination
+    map<string, map<string, TH1F>> m_TH2Fs; // The 2D histograms showing pairs of properties vs each other
+    map<string, map<string, map<string, TH1F>>> m_staged_hists; // same as m_TH1Fs but for the stages
 
   protected:
     map<string, AutoProperty> m_known_properties{
@@ -61,9 +88,9 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
     constexpr static size_t m_number_colors{7};
     std::array<Color_t, m_number_colors> m_colors{kBlack, kRed, kGreen, kBlue, kMagenta, kCyan, kOrange};
 
-    GenieAnalysisAutoTH1Fs(const char *filename, const char *output_filename, const vector<string> &stages = {},
-                           const vector<string> &properties = {}, const vector<string> &types = {},
-                           const char *gst_ttree_name = "gst")
+    GenieAnalysisAutoHistograms(const char *filename, const char *output_filename, const vector<string> &stages = {},
+                                const vector<string> &properties = {}, const vector<string> &types = {},
+                                const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name),
           m_output_file(TFile::Open(output_filename, "RECREATE")), m_stages{stages},
           m_properties{properties}, m_types{types} {}
@@ -89,10 +116,10 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
         // Create "final" stage (post all cuts) hists
         for (const string &property : m_properties) {
             for (const string &type : m_types) {
-                name = makeName(property, type);
-                title = makeTitle(property, type);
+                name = makeTH1FName(property, type);
+                title = makeTH1FTitle(property, type);
                 std::tie(nbinsx, xlow, xup) = m_known_properties[property].bin_params;
-                m_hists[property][type] = TH1F(name.c_str(), title.c_str(), nbinsx, xlow, xup);
+                m_TH1Fs[property][type] = TH1F(name.c_str(), title.c_str(), nbinsx, xlow, xup);
             }
         }
 
@@ -100,8 +127,8 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
         for (const string &stage : m_stages) {
             for (const string &property : m_properties) {
                 for (const string &type : m_types) {
-                    name = makeName(stage, property, type);
-                    title = makeTitle(stage, property, type);
+                    name = makeTH1FName(stage, property, type);
+                    title = makeTH1FTitle(stage, property, type);
                     std::tie(nbinsx, xlow, xup) = m_known_properties[property].bin_params;
                     m_staged_hists[stage][property][type] = TH1F(name.c_str(), title.c_str(), nbinsx, xlow, xup);
                 }
@@ -124,10 +151,10 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
 
             color_i = 0;
             for (const string &type : m_types) {
-                m_hists[property][type].SetLineColor(m_colors[color_i++ % m_number_colors]);
-                m_hists[property][type].Write();
-                hist_stack.Add(&m_hists[property][type]);
-                stack_legend.AddEntry(&m_hists[property][type], m_known_types[type].title.c_str());
+                m_TH1Fs[property][type].SetLineColor(m_colors[color_i++ % m_number_colors]);
+                m_TH1Fs[property][type].Write();
+                hist_stack.Add(&m_TH1Fs[property][type]);
+                stack_legend.AddEntry(&m_TH1Fs[property][type], m_known_types[type].title.c_str());
             }
 
             hist_stack.Write();
@@ -135,7 +162,7 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
         }
 
         for (const string &stage : m_stages) {
-            for (string property : m_properties) {
+            for (const string &property : m_properties) {
                 THStack hist_stack{(stage + "_" + property).c_str(),
                                    (m_known_properties[property].title + " - " + stage).c_str()};
                 TLegend stack_legend{33, 16, "By interaction types"};
@@ -146,7 +173,7 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
                     m_staged_hists[stage][property][type].SetLineColor(m_colors[color_i++ % m_number_colors]);
                     m_staged_hists[stage][property][type].Write();
                     hist_stack.Add(&m_staged_hists[stage][property][type]);
-                    stack_legend.AddEntry(&m_hists[property][type], m_known_types[type].title.c_str());
+                    stack_legend.AddEntry(&m_TH1Fs[property][type], m_known_types[type].title.c_str());
                 }
 
                 hist_stack.Write();
@@ -171,21 +198,21 @@ class GenieAnalysisAutoTH1Fs : public GenieAnalysis {
         for (const string &property : m_properties) {
             for (const string &type : m_types) {
                 if (m_known_types[type].is_type()) {
-                    m_hists[property][type].Fill(m_known_properties[property].get_property(), weight);
+                    m_TH1Fs[property][type].Fill(m_known_properties[property].get_property(), weight);
                 }
             }
         }
     }
 
-    virtual const string makeName(const string &property, const string &type) { return property + "_" + type; }
-    virtual const string makeName(const string &stage, const string &property, const string &type) {
-        return stage + "_" + makeName(property, type);
+    virtual const string makeTH1FName(const string &property, const string &type) { return property + "_" + type; }
+    virtual const string makeTH1FName(const string &stage, const string &property, const string &type) {
+        return stage + "_" + makeTH1FName(property, type);
     }
-    virtual const string makeTitle(const string &property, const string &type) {
+    virtual const string makeTH1FTitle(const string &property, const string &type) {
         return m_known_properties[property].title + " - " + m_known_types[type].title;
     }
-    virtual const string makeTitle(const string &stage, const string &property, const string &type) {
-        return makeTitle(property, type) + " - at " + stage;
+    virtual const string makeTH1FTitle(const string &stage, const string &property, const string &type) {
+        return makeTH1FTitle(property, type) + " - at " + stage;
     }
 };
 

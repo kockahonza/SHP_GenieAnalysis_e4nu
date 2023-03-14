@@ -22,7 +22,7 @@ using std::unique_ptr, std::optional;
  * The electron properties are made available here any pion properties should be done in
  * inheriting classes.
  */
-class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
+class GenieAnalysisDeltaStudies : public GenieAnalysisAutoHistograms {
   public:
     // Configuration options for the major target/energy runs
     enum class Target { C12, Fe56 };
@@ -172,7 +172,7 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoTH1Fs {
                               const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
                               // Pass this to GenieAnalysis
                               const char *gst_ttree_name = "gst")
-        : GenieAnalysisAutoTH1Fs(filename, output_filename, stages, properties, types, gst_ttree_name),
+        : GenieAnalysisAutoHistograms(filename, output_filename, stages, properties, types, gst_ttree_name),
           m_target{target}, m_beam_energy{beam_energy},
 
           m_fiducials{std::make_unique<FiducialWrapper>(m_target, m_beam_energy)},
