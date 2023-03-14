@@ -25,7 +25,8 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    GenieAnalysisPiNucleonCounts ga1{input_file.c_str(), (output_file + "_1p.root").c_str(), {}, {}, 1, {}};
+    GenieAnalysisPiNucleonCounts ga1{input_file.c_str(), (output_file + "_1p.root").c_str(), {}, {}, 1, {}, {}, {}, {},
+                                     {{"W", "Ws", {}}}};
     ga1.runAnalysis();
 
     return 0;
