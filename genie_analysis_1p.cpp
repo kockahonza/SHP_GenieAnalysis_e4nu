@@ -25,8 +25,32 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    GenieAnalysisPiNucleonCounts ga1{input_file.c_str(), (output_file + "_1p.root").c_str(), {}, {}, 1, {}, {}, {}, {},
-                                     {{"W", "Ws", {}}}};
+    GenieAnalysisPiNucleonCounts ga1{input_file.c_str(),
+                                     (output_file + "_1p.root").c_str(),
+                                     {},
+                                     {},
+                                     1,
+                                     {},
+                                     {},
+                                     {
+                                         "W",
+                                         "Ws",
+                                         "reco_W",
+                                         "bjorken_x",
+                                         "el_p",
+                                         "passed_num_pip",
+                                         "passed_num_pim",
+                                         "ps_num_pip",
+                                         "ps_num_pim",
+                                         "ps_num_protons",
+                                         "ps_num_neutrons",
+                                         "fs_num_pip",
+                                         "fs_num_pim",
+                                         "fs_num_protons",
+                                         "fs_num_neutrons",
+                                     },
+                                     {},
+                                     {{"W", "Ws", {}}, {"passed_num_pip", "passed_num_pim", {}}}};
     ga1.runAnalysis();
 
     return 0;
