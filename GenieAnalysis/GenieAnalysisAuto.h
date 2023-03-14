@@ -9,6 +9,7 @@
 
 #include <TFile.h>
 #include <TH1F.h>
+#include <TH2F.h>
 #include <THStack.h>
 #include <TLegend.h>
 #include <TTree.h>
@@ -18,17 +19,6 @@
 #include "misc.h"
 
 using std::vector, std::string, std::map, std::tuple, std::pair, std::function;
-
-struct AutoProperty {
-    string title;
-    tuple<Int_t, Int_t, Int_t> bin_params; // How to initialize the TH1F - nbinsx, xlow, xup in order
-    function<double()> get_property;
-};
-
-struct AutoType {
-    string title;
-    function<bool()> is_type;
-};
 
 /**
  * This implements some of the most important functionoality of the package, it takes care of the automatic histogram
@@ -51,12 +41,25 @@ struct AutoType {
  * called with that particular stage string passed as an argument.
  */
 class GenieAnalysisAutoHistograms : public GenieAnalysis {
+  public:
+    struct AutoProperty {
+        string title;
+        tuple<Int_t, Int_t, Int_t> bin_params; // How to initialize the TH1F - nbinsx, xlow, xup in order
+        function<double()> get_property;
+    };
+
+    struct AutoType {
+        string title;
+        function<bool()> is_type;
+    };
+
   private:
     const std::unique_ptr<TFile> m_output_file;
 
     vector<string> m_stages;
 
-    // Which properties and types to make TH1Fs for, if they are empty (default) all known types or properties are used
+    // Which properties and types to make simple property histograms for, if they are empty (default) all known types or
+    // properties are used
     vector<string> m_properties;
     vector<string> m_types;
 
@@ -65,9 +68,11 @@ class GenieAnalysisAutoHistograms : public GenieAnalysis {
     vector<tuple<string, string, vector<string>>> m_vs_property_plots;
 
     bool m_hists_initialized{false};
-    map<string, map<string, TH1F>> m_TH1Fs; // The 1D histograms for each property, type combination
-    map<string, map<string, TH1F>> m_TH2Fs; // The 2D histograms showing pairs of properties vs each other
-    map<string, map<string, map<string, TH1F>>> m_staged_hists; // same as m_TH1Fs but for the stages
+    map<string, map<string, TH1F>> m_simple_property_hists; // The TH1F objects, map keys are property, type in order
+    map<string, map<string, map<string, TH1F>>> m_staged_hists; // same as m_simple_property_hists but for the stages,
+                                                                // map keys are stage, property and type in order
+    map<string, map<string, map<string, TH2F>>> m_vs_property_hists; // The TH2F object to vs property plots, the map
+                                                                     // keys are property1, property2 and type in order
 
   protected:
     map<string, AutoProperty> m_known_properties{
@@ -116,10 +121,10 @@ class GenieAnalysisAutoHistograms : public GenieAnalysis {
         // Create "final" stage (post all cuts) hists
         for (const string &property : m_properties) {
             for (const string &type : m_types) {
-                name = makeTH1FName(property, type);
-                title = makeTH1FTitle(property, type);
+                name = makeSimplePropertyHistName(property, type);
+                title = makeSimplePropertyHistTitle(property, type);
                 std::tie(nbinsx, xlow, xup) = m_known_properties[property].bin_params;
-                m_TH1Fs[property][type] = TH1F(name.c_str(), title.c_str(), nbinsx, xlow, xup);
+                m_simple_property_hists[property][type] = TH1F(name.c_str(), title.c_str(), nbinsx, xlow, xup);
             }
         }
 
@@ -127,11 +132,23 @@ class GenieAnalysisAutoHistograms : public GenieAnalysis {
         for (const string &stage : m_stages) {
             for (const string &property : m_properties) {
                 for (const string &type : m_types) {
-                    name = makeTH1FName(stage, property, type);
-                    title = makeTH1FTitle(stage, property, type);
+                    name = makeSimplePropertyHistName(stage, property, type);
+                    title = makeSimplePropertyHistTitle(stage, property, type);
                     std::tie(nbinsx, xlow, xup) = m_known_properties[property].bin_params;
                     m_staged_hists[stage][property][type] = TH1F(name.c_str(), title.c_str(), nbinsx, xlow, xup);
                 }
+            }
+        }
+
+        Int_t nbinsy, ylow, yup;
+        for (auto const &[property1, property2, types] : m_vs_property_plots) {
+            for (auto const &type : types) {
+                name = makeVsPlotName(property1, property2, type);
+                title = makeVsPlotTitle(property1, property2, type);
+                std::tie(nbinsx, xlow, xup) = m_known_properties[property1].bin_params;
+                std::tie(nbinsy, ylow, yup) = m_known_properties[property2].bin_params;
+                m_vs_property_hists[property1][property2][type] =
+                    TH2F(name.c_str(), title.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup);
             }
         }
     }
@@ -151,10 +168,10 @@ class GenieAnalysisAutoHistograms : public GenieAnalysis {
 
             color_i = 0;
             for (const string &type : m_types) {
-                m_TH1Fs[property][type].SetLineColor(m_colors[color_i++ % m_number_colors]);
-                m_TH1Fs[property][type].Write();
-                hist_stack.Add(&m_TH1Fs[property][type]);
-                stack_legend.AddEntry(&m_TH1Fs[property][type], m_known_types[type].title.c_str());
+                m_simple_property_hists[property][type].SetLineColor(m_colors[color_i++ % m_number_colors]);
+                m_simple_property_hists[property][type].Write();
+                hist_stack.Add(&m_simple_property_hists[property][type]);
+                stack_legend.AddEntry(&m_simple_property_hists[property][type], m_known_types[type].title.c_str());
             }
 
             hist_stack.Write();
@@ -173,11 +190,17 @@ class GenieAnalysisAutoHistograms : public GenieAnalysis {
                     m_staged_hists[stage][property][type].SetLineColor(m_colors[color_i++ % m_number_colors]);
                     m_staged_hists[stage][property][type].Write();
                     hist_stack.Add(&m_staged_hists[stage][property][type]);
-                    stack_legend.AddEntry(&m_TH1Fs[property][type], m_known_types[type].title.c_str());
+                    stack_legend.AddEntry(&m_simple_property_hists[property][type], m_known_types[type].title.c_str());
                 }
 
                 hist_stack.Write();
                 stack_legend.Write();
+            }
+        }
+
+        for (auto const &[property1, property2, types] : m_vs_property_plots) {
+            for (auto const &type : types) {
+                m_vs_property_hists[property1][property2][type].Write();
             }
         }
     }
@@ -198,21 +221,38 @@ class GenieAnalysisAutoHistograms : public GenieAnalysis {
         for (const string &property : m_properties) {
             for (const string &type : m_types) {
                 if (m_known_types[type].is_type()) {
-                    m_TH1Fs[property][type].Fill(m_known_properties[property].get_property(), weight);
+                    m_simple_property_hists[property][type].Fill(m_known_properties[property].get_property(), weight);
                 }
+            }
+        }
+
+        for (auto const &[property1, property2, types] : m_vs_property_plots) {
+            for (auto const &type : types) {
+                m_vs_property_hists[property1][property2][type].Fill(
+                    m_known_properties[property1].get_property(), m_known_properties[property2].get_property(), weight);
             }
         }
     }
 
-    virtual const string makeTH1FName(const string &property, const string &type) { return property + "_" + type; }
-    virtual const string makeTH1FName(const string &stage, const string &property, const string &type) {
-        return stage + "_" + makeTH1FName(property, type);
+    virtual const string makeSimplePropertyHistName(const string &property, const string &type) {
+        return property + "_" + type;
     }
-    virtual const string makeTH1FTitle(const string &property, const string &type) {
+    virtual const string makeSimplePropertyHistName(const string &stage, const string &property, const string &type) {
+        return stage + "_" + makeSimplePropertyHistName(property, type);
+    }
+    virtual const string makeSimplePropertyHistTitle(const string &property, const string &type) {
         return m_known_properties[property].title + " - " + m_known_types[type].title;
     }
-    virtual const string makeTH1FTitle(const string &stage, const string &property, const string &type) {
-        return makeTH1FTitle(property, type) + " - at " + stage;
+    virtual const string makeSimplePropertyHistTitle(const string &stage, const string &property, const string &type) {
+        return makeSimplePropertyHistTitle(property, type) + " - at " + stage;
+    }
+
+    virtual const string makeVsPlotName(const string &property1, const string &property2, const string &type) {
+        return "vs_" + property1 + "_" + property2 + "_" + type;
+    }
+    virtual const string makeVsPlotTitle(const string &property1, const string &property2, const string &type) {
+        return m_known_properties[property1].title + " vs " + m_known_properties[property2].title + " - " +
+               m_known_types[type].title;
     }
 };
 
