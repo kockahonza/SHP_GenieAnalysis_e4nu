@@ -11,7 +11,7 @@ LDFLAGS   += -std=c++17 $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -O3
 
 
 # Executables
-all: genie_analysis_deltas genie_analysis_1pi1p genie_analysis_FS_transparency genie_analysis_1p
+all: genie_analysis_deltas genie_analysis_1pi1nuc genie_analysis_FS_transparency genie_analysis_1p
 
 genie_analysis_1p: genie_analysis_1p.cpp $(GA_LIB_OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
@@ -19,7 +19,7 @@ genie_analysis_1p: genie_analysis_1p.cpp $(GA_LIB_OBJECTS)
 genie_analysis_FS_transparency: genie_analysis_FS_transparency.cpp $(GA_LIB_OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
-genie_analysis_1pi1p: genie_analysis_1pi1p.cpp $(GA_LIB_OBJECTS)
+genie_analysis_1pi1nuc: genie_analysis_1pi1nuc.cpp $(GA_LIB_OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 genie_analysis_deltas: genie_analysis_deltas.cpp $(GA_LIB_OBJECTS)
@@ -43,7 +43,7 @@ GenieAnalysis/%.o: GenieAnalysis/%.cpp GenieAnalysis/%.h
 
 
 clean:
-	@rm -rf GenieAnalysis/*.o *.o genie_analysis_demo genie_analysis_lucass_cuts genie_analysis_deltas
+	@rm -rf GenieAnalysis/*.o *.o genie_analysis_demo genie_analysis_lucass_cuts genie_analysis_deltas genie_analysis_1pi1nuc genie_analysis_FS_transparency genie_analysis_1p
 
 debug: CXXFLAGS += -pg
 debug: LDFLAGS += -pg
