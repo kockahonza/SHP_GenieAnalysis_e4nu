@@ -34,7 +34,6 @@ class GenieAnalysis1Proton : public GenieAnalysisDeltaStudies {
     }
 };
 
-
 int main(int argc, char *argv[]) {
     string input_file, output_file;
     if (argc == 2) {

@@ -25,19 +25,17 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-
-    GenieAnalysisPiNucleonCounts gapp{input_file.c_str(), (output_file + "_1pip0pim1p0n.root").c_str(), 1, {}, 1, {}};
+    GenieAnalysisPiNucleonCounts gapp{input_file.c_str(), (output_file + "_1pip0pim1p0n.root").c_str(), 1, 0, 1, 0};
     gapp.runAnalysis();
 
-    GenieAnalysisPiNucleonCounts gapn{input_file.c_str(), (output_file + "_1pip0pim0p1n.root").c_str(), 1, {}, {}, 1};
+    GenieAnalysisPiNucleonCounts gapn{input_file.c_str(), (output_file + "_1pip0pim0p1n.root").c_str(), 1, 0, 0, 1};
     gapn.runAnalysis();
 
-    GenieAnalysisPiNucleonCounts gamp{input_file.c_str(), (output_file + "_0pip1pim1p0n.root").c_str(), {}, 1, 1, {}};
+    GenieAnalysisPiNucleonCounts gamp{input_file.c_str(), (output_file + "_0pip1pim1p0n.root").c_str(), 0, 1, 1, 0};
     gamp.runAnalysis();
 
-    GenieAnalysisPiNucleonCounts gamn{input_file.c_str(), (output_file + "_0pip1pim0p1n.root").c_str(), {}, 1, {}, 1};
+    GenieAnalysisPiNucleonCounts gamn{input_file.c_str(), (output_file + "_0pip1pim0p1n.root").c_str(), 0, 1, 0, 1};
     gamn.runAnalysis();
-
 
     return 0;
 }
