@@ -333,7 +333,8 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisDeltaStudiesCuts, public G
 };
 
 /**
- * Continues on from DeltaStudies, adds specific cuts for the number of protons, neutrons and charged pions
+ * Continues on from DeltaStudies, adds specific cuts for the number of protons, neutrons and charged pions.
+ * It is a very simple wrapper that might be good for quick tests, that's why I keep it here.
  */
 class GenieAnalysisPiNucleonCounts : public GenieAnalysisDeltaStudies {
   public:
@@ -378,83 +379,6 @@ class GenieAnalysisPiNucleonCounts : public GenieAnalysisDeltaStudies {
         }
 
         return weight;
-    }
-};
-
-/**
- * This is for studies that have exactly one charged Pion, does all the stuff from DeltaStudies and add's the pion
- * filter, can check for nucleon numbers and uses pion acceptance for the weight, also adds the pions properties
- */
-class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
-  public:
-    enum class PionType { Minus, Plus, Either };
-
-    const PionType m_pion_type;
-    const optional<int> m_proton_count;
-    const optional<int> m_neutron_count;
-
-  protected:
-    TLorentzVector m_pion_V4;
-    TVector3 m_pion_V3;
-    Double_t m_pion_acceptance;
-
-  protected:
-    map<string, AutoProperty> m_new_known_properties{
-        {"pi_phi",
-         {"Pion phi [°]",
-          {720, -30, 330},
-          [this]() {
-              double phi_deg{m_pion_V3.Phi() * TMath::RadToDeg()};
-              return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
-          }}},
-        {"pi_cos_theta", {"Pion cos theta", {720, -1, 1}, [this]() { return m_pion_V3.CosTheta(); }}},
-        {"pi_p", {"Pion momentum [GeV/c]", {720, 0, 3}, [this]() { return m_pion_V4.P(); }}},
-        {"pi_E", {"Pion energy [GeV]", {720, 0, 3}, [this]() { return m_pion_V4.E(); }}},
-        {"pi_acceptance", {"Pion acceptance weight", {100, 0, 1}, [this]() { return m_pion_acceptance; }}}};
-
-  public:
-    GenieAnalysis1Pion(const char *filename, const char *output_filename, PionType pion_type = PionType::Either,
-                       optional<int> proton_count = {}, optional<int> neutron_count = {},
-                       const vector<string> &stages = {}, const vector<string> &properties = {},
-                       const vector<string> &types = {},
-                       const vector<GenieAnalysisAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                       const Target &target = GenieAnalysisDeltaStudies::Target::C12,
-                       const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
-
-        : GenieAnalysis(filename), GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types,
-                                                             vs_property_plots, target, beam_energy),
-          m_pion_type{pion_type}, m_proton_count{proton_count}, m_neutron_count{neutron_count} {
-        m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
-    }
-
-    Double_t passesCuts() override {
-        Double_t weight{GenieAnalysisDeltaStudies::passesCuts()};
-        if (weight == 0) {
-            return 0;
-        }
-
-        if ((m_pion_type != PionType::Plus) && (m_passed_pi_plus.size() == 0) && (m_passed_pi_minus.size() == 1)) {
-            std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_minus[0];
-        } else if ((m_pion_type != PionType::Minus) && (m_passed_pi_minus.size() == 0) &&
-                   (m_passed_pi_plus.size() == 1)) {
-            std::tie(m_pion_V4, m_pion_V3, m_pion_acceptance) = m_passed_pi_plus[0];
-        } else {
-            return 0;
-        }
-
-        if (m_proton_count && (m_proton_count != m_fs_number_of_protons)) {
-            return 0;
-        }
-
-        if (m_neutron_count && (m_neutron_count != m_fs_number_of_neutrons)) {
-            return 0;
-        }
-
-        if (m_do_pion_acceptance) {
-            return weight * m_pion_acceptance;
-        } else {
-            return weight;
-        }
     }
 };
 
