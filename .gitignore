@@ -11,5 +11,7 @@ genie_analysis_1p
 systematics
 e2a_ep
 
+doxygen_out
+
 # My vim setup makes a lot of these
 .vim
