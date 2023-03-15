@@ -135,8 +135,10 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoHistograms {
 
         // Passed particle properties, this mainly applies to pi+- and protons which there may be multiple of and we
         // have acceptances fo5
-        {"passed_num_pip", {"Number of detected pi plus", {6, -0.5, 5.5}, [this]() { return m_passed_pi_plus.size(); }}},
-        {"passed_num_pim", {"Number of detected pi minus", {6, -0.5, 5.5}, [this]() { return m_passed_pi_minus.size(); }}},
+        {"passed_num_pip",
+         {"Number of detected pi plus", {6, -0.5, 5.5}, [this]() { return m_passed_pi_plus.size(); }}},
+        {"passed_num_pim",
+         {"Number of detected pi minus", {6, -0.5, 5.5}, [this]() { return m_passed_pi_minus.size(); }}},
 
         // "Truth" data follows, there's a lot of it and it's quite repetitive
         // Primary state (pre FSI) data

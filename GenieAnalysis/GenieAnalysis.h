@@ -84,7 +84,7 @@ struct GenieEvent {
     Int_t niem;
     Int_t niother;
     Int_t ni;
-    Int_t pdgi[2];   //[ni]
+    Int_t pdgi[2]; //[ni]
     Int_t resc;
     Double_t Ei[2];  //[ni]
     Double_t pxi[2]; //[ni]

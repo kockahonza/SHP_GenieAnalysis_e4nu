@@ -13,52 +13,11 @@ int main(int argc, char *argv[]) {
         std::string arg{argv[1]};
         if (arg == "local") {
             input_file = "/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root";
-
-            GenieAnalysis1Pion ga{input_file.c_str(), "output_local_FSt_pip.root", GenieAnalysis1Pion::PionType::Plus};
-            ga.runAnalysis();
-
-            GenieAnalysis1Pion ga2{input_file.c_str(), "output_local_FSt_pim.root",
-                                   GenieAnalysis1Pion::PionType::Minus};
-            ga2.runAnalysis();
-
-            GenieAnalysisDeltaStudies ga3{input_file.c_str(), "output_local_FSt_e.root"};
-            ga3.runAnalysis();
-
-            GenieAnalysisDeltaStudies ga4{input_file.c_str(), "output_local_FSt_e_noa.root"};
-            ga4.m_do_electron_acceptance = false;
-            ga4.m_do_pion_acceptance = false;
-            ga4.runAnalysis();
-
-            GenieAnalysisDeltaStudies ga5{input_file.c_str(), "output_local_FSt_e_nocuts.root"};
-            ga5.m_do_precuts = false;
-            ga5.m_do_electron_fiducials = false;
-            ga5.m_do_pion_fiducials = false;
-            ga5.m_do_photon_fiducials = false;
-            ga5.m_p_pion_momentum_threshold = 0;
-            ga5.m_do_electron_acceptance = false;
-            ga5.m_do_pion_acceptance = false;
-            ga5.runAnalysis();
+            output_file = "output_local";
         } else if (arg == "full") {
             input_file = "/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/C12_2261GeV/"
                          "apapadop_SuSav2_C12_2261GeV_master.root";
-
-            /* GenieAnalysis1Pion gap{ */
-            /*     input_file.c_str(), "output_full_pip.root", {}, properties, types,
-             * GenieAnalysis1Pion::PionType::Plus}; */
-            /* gap.runAnalysis(); */
-
-            /* GenieAnalysis1Pion gam{ */
-            /*     input_file.c_str(), "output_full_pim.root", {}, properties, types,
-             * GenieAnalysis1Pion::PionType::Minus}; */
-            /* gam.runAnalysis(); */
-
-            /* GenieAnalysis1Pion gae{input_file.c_str(), */
-            /*                        "output_full_pie.root", */
-            /*                        {}, */
-            /*                        properties, */
-            /*                        types, */
-            /*                        GenieAnalysis1Pion::PionType::Either}; */
-            /* gae.runAnalysis(); */
+            output_file = "output_full";
         }
     } else {
         std::cout << "Needs an argument to specify which way to run (should be \"local\" or \"full\"), check the code"
@@ -66,12 +25,25 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    /* ga.m_do_precuts = false; */
-    /* ga.m_do_electron_fiducials = false; */
-    /* ga.m_do_pion_fiducials = false; */
-    /* ga.m_do_photon_fiducials = false; */
-
-    /* ga.m_p_pion_momentum_threshold = 0; */
+    GenieAnalysisDeltaStudies ga1{input_file.c_str(),
+                                  (output_file + "_FSt_new.root").c_str(),
+                                  {},
+                                  {},
+                                  {},
+                                  {
+                                      {"W", "Ws", {}},
+                                      {"W", "el_p", {}},
+                                      {"W", "bjorken_x", {}},
+                                      {"Ws", "bjorken_x", {}},
+                                      {"passed_num_pip", "passed_num_pim", {}},
+                                      {"fs_num_pim", "passed_num_pim", {}},
+                                      {"fs_num_pip", "passed_num_pip", {}},
+                                      {"fs_num_pip", "fs_num_neutrons", {}},
+                                      {"fs_num_pim", "fs_num_neutrons", {}},
+                                      {"fs_num_pip", "fs_num_protons", {}},
+                                      {"fs_num_pim", "fs_num_protons", {}},
+                                  }};
+    ga1.runAnalysis();
 
     return 0;
 }

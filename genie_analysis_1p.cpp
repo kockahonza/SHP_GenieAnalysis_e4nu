@@ -6,8 +6,23 @@
 #include "GenieAnalysis/GenieAnalysisDeltaStudies.h"
 #include "GenieAnalysis/misc.h"
 
-int main(int argc, char *argv[]) {
+class GenieAnalysis1Proton : public GenieAnalysisDeltaStudies {
+  public:
+  public:
+    using GenieAnalysisDeltaStudies::GenieAnalysisDeltaStudies;
 
+    Double_t passesCuts() override {
+        Double_t weight{GenieAnalysisDeltaStudies::passesCuts()};
+
+        if (m_fs_number_of_protons != 1) {
+            return 0;
+        }
+
+        return weight;
+    }
+};
+
+int main(int argc, char *argv[]) {
     string input_file, output_file;
     if (argc == 2) {
         std::string arg{argv[1]};
@@ -25,41 +40,37 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    GenieAnalysisPiNucleonCounts ga1{input_file.c_str(),
-                                     (output_file + "_1p.root").c_str(),
-                                     {},
-                                     {},
-                                     1,
-                                     {},
-                                     {},
-                                     {
-                                         /* "W", */
-                                         /* "Ws", */
-                                         /* "resc", */
-                                         /* "reco_W", */
-                                         /* "bjorken_x", */
-                                         /* "el_p", */
-                                         "passed_num_pip",
-                                         "passed_num_pim",
-                                         "ps_num_pip",
-                                         /* "ps_num_pim", */
-                                         /* "ps_num_protons", */
-                                         /* "ps_num_neutrons", */
-                                         /* "fs_num_pip", */
-                                         /* "fs_num_pim", */
-                                         /* "fs_num_protons", */
-                                         /* "fs_num_neutrons", */
-                                     },
-                                     {},
-                                     {
-                                         /* {"W", "Ws", {}}, */
-                                         /* {"W", "el_p", {}}, */
-                                         /* {"W", "bjorken_x", {}}, */
-                                         /* {"Ws", "bjorken_x", {}}, */
-                                         /* {"passed_num_pip", "passed_num_pim", {}}, */
-                                         /* {"fs_num_pim", "passed_num_pim", {}}, */
-                                         /* {"fs_num_pip", "passed_num_pip", {}}, */
-                                     }};
+    GenieAnalysis1Proton ga1{input_file.c_str(),
+                             (output_file + "_1p.root").c_str(),
+                             {},
+                             {
+                                 "W",
+                                 "Ws",
+                                 "resc",
+                                 "reco_W",
+                                 "bjorken_x",
+                                 "el_p",
+                                 "passed_num_pip",
+                                 "passed_num_pim",
+                                 "ps_num_pip",
+                                 "ps_num_pim",
+                                 "ps_num_protons",
+                                 "ps_num_neutrons",
+                                 "fs_num_pip",
+                                 "fs_num_pim",
+                                 "fs_num_protons",
+                                 "fs_num_neutrons",
+                             },
+                             {},
+                             {
+                                 {"W", "Ws", {}},
+                                 {"W", "el_p", {}},
+                                 {"W", "bjorken_x", {}},
+                                 {"Ws", "bjorken_x", {}},
+                                 {"passed_num_pip", "passed_num_pim", {}},
+                                 {"fs_num_pim", "passed_num_pim", {}},
+                                 {"fs_num_pip", "passed_num_pip", {}},
+                             }};
     ga1.runAnalysis();
 
     return 0;
