@@ -40,7 +40,7 @@ using std::vector, std::string, std::map, std::tuple, std::pair, std::function;
  * string passed to the constructor another set of all the TH1Fs is created and filled whenever `useEntryAtStage` is
  * called with that particular stage string passed as an argument.
  */
-class GenieAnalysisAutoHistograms : public GenieAnalysis {
+class GenieAnalysisAutoHistograms : public virtual GenieAnalysis {
   public:
     struct AutoProperty {
         string title;

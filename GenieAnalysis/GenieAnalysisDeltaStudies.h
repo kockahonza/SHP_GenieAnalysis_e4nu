@@ -175,8 +175,8 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoHistograms {
                               const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
                               // Pass this to GenieAnalysis
                               const char *gst_ttree_name = "gst")
-        : GenieAnalysisAutoHistograms(filename, output_filename, stages, properties, types, vs_property_plots,
-                                      gst_ttree_name),
+        : GenieAnalysis(filename), GenieAnalysisAutoHistograms(filename, output_filename, stages, properties, types,
+                                                               vs_property_plots, gst_ttree_name),
           m_target{target}, m_beam_energy{beam_energy},
 
           m_fiducials{std::make_unique<FiducialWrapper>(m_target, m_beam_energy)},
@@ -334,8 +334,8 @@ class GenieAnalysisPiNucleonCounts : public GenieAnalysisDeltaStudies {
                                  const Target &target = GenieAnalysisDeltaStudies::Target::C12,
                                  const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
 
-        : GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, vs_property_plots, target,
-                                    beam_energy),
+        : GenieAnalysis(filename), GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types,
+                                                             vs_property_plots, target, beam_energy),
           m_pi_plus_count{pi_plus_count}, m_pi_minus_count{pi_minus_count}, m_proton_count{proton_count},
           m_neutron_count{neutron_count} {
         /* m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end()); */
@@ -404,8 +404,8 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
                        const Target &target = GenieAnalysisDeltaStudies::Target::C12,
                        const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
 
-        : GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, vs_property_plots, target,
-                                    beam_energy),
+        : GenieAnalysis(filename), GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types,
+                                                             vs_property_plots, target, beam_energy),
           m_pion_type{pion_type}, m_proton_count{proton_count}, m_neutron_count{neutron_count} {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
