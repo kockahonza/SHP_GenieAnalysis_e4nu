@@ -7,7 +7,7 @@ GA_LIB_OBJECTS := GenieAnalysis/GenieAnalysis.o GenieAnalysis/misc.o GenieAnalys
 
 CXX       := g++
 CXXFLAGS  += -std=c++17 -Wall -Wshadow -Warray-bounds -Wmissing-field-initializers -fPIC $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -O3
-LDFLAGS   += -std=c++17 $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS)
+LDFLAGS   += -std=c++17 $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -O3
 
 
 # Executables
