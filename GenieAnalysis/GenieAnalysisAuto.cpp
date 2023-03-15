@@ -51,11 +51,10 @@ void GenieAnalysisAutoHistograms::prepareAutoHists() {
         }
         for (auto const &type : types) {
             name = makeVsPlotName(property1, property2, type);
-            title = makeVsPlotTitle(property1, property2, type);
             std::tie(nbinsx, xlow, xup) = m_known_properties[property1].bin_params;
             std::tie(nbinsy, ylow, yup) = m_known_properties[property2].bin_params;
             m_vs_property_hists[property1][property2][type] =
-                TH2F(name.c_str(), title.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup);
+                TH2F(name.c_str(), m_known_types[type].title.c_str(), nbinsx, xlow, xup, nbinsy, ylow, yup);
         }
     }
 }

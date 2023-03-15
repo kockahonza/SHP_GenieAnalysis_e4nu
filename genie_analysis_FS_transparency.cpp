@@ -35,13 +35,17 @@ int main(int argc, char *argv[]) {
                                       {"W", "el_p", {}},
                                       {"W", "bjorken_x", {}},
                                       {"Ws", "bjorken_x", {}},
-                                      {"passed_num_pip", "passed_num_pim", {}},
+                                      {"ps_num_pim", "fs_num_pim", {}},
+                                      {"ps_num_pip", "fs_num_pip", {}},
                                       {"fs_num_pim", "passed_num_pim", {}},
                                       {"fs_num_pip", "passed_num_pip", {}},
-                                      {"fs_num_pip", "fs_num_neutrons", {}},
-                                      {"fs_num_pim", "fs_num_neutrons", {}},
-                                      {"fs_num_pip", "fs_num_protons", {}},
-                                      {"fs_num_pim", "fs_num_protons", {}},
+                                      {"passed_num_pip", "passed_num_pim", {}},
+                                      /* {"fs_num_pim", "passed_num_pim", {}}, */
+                                      /* {"fs_num_pip", "passed_num_pip", {}}, */
+                                      /* {"fs_num_pip", "fs_num_neutrons", {}}, */
+                                      /* {"fs_num_pim", "fs_num_neutrons", {}}, */
+                                      /* {"fs_num_pip", "fs_num_protons", {}}, */
+                                      /* {"fs_num_pim", "fs_num_protons", {}}, */
                                   }};
     ga1.runAnalysis();
 
