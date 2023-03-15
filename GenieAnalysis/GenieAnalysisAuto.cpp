@@ -59,7 +59,7 @@ void GenieAnalysisAutoHistograms::prepareAutoHists() {
     }
 }
 
-void GenieAnalysisAutoHistograms::runPostAnalysis() {
+void GenieAnalysisAutoHistograms::runPostAnalysis(const Long64_t &number_of_entries) {
     int color_i;
     for (const string &property : m_properties) {
         THStack hist_stack{property.c_str(), m_known_properties[property].title.c_str()};
@@ -69,6 +69,7 @@ void GenieAnalysisAutoHistograms::runPostAnalysis() {
         color_i = 0;
         for (const string &type : m_types) {
             m_simple_property_hists[property][type].SetLineColor(m_colors[color_i++ % m_number_colors]);
+            m_simple_property_hists[property][type].Scale(1.0 / number_of_entries);
             m_simple_property_hists[property][type].Write();
 
             m_simple_property_hists[property][type].SetTitle(m_known_types[type].title.c_str());
@@ -90,6 +91,7 @@ void GenieAnalysisAutoHistograms::runPostAnalysis() {
             color_i = 0;
             for (const string &type : m_types) {
                 m_staged_hists[stage][property][type].SetLineColor(m_colors[color_i++ % m_number_colors]);
+                m_staged_hists[stage][property][type].Scale(1.0 / number_of_entries);
                 m_staged_hists[stage][property][type].Write();
 
                 m_staged_hists[stage][property][type].SetTitle(m_known_types[type].title.c_str());
@@ -114,6 +116,7 @@ void GenieAnalysisAutoHistograms::runPostAnalysis() {
                 m_known_properties[property1].title.c_str());
             m_vs_property_hists[property1][property2][type].GetYaxis()->SetTitle(
                 m_known_properties[property2].title.c_str());
+            m_vs_property_hists[property1][property2][type].Scale(1.0 / number_of_entries);
             m_vs_property_hists[property1][property2][type].Write();
 
             m_vs_property_hists[property1][property2][type].SetTitle(m_known_types[type].title.c_str());

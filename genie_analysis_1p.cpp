@@ -34,7 +34,73 @@ class GenieAnalysis1Proton : public GenieAnalysisDeltaStudies {
     }
 };
 
-int main(int argc, char *argv[]) {
+class GenieAnalysisOptimalWCut : public GenieAnalysisDeltaStudiesCuts {
+  public:
+    const Double_t m_Wmin;
+    const Double_t m_Wmax;
+
+    int m_number_of_delta_events;
+    double m_result;
+
+  public:
+    GenieAnalysisOptimalWCut(const char *filename, const Double_t Wmin, const Double_t Wmax,
+                             const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
+                             const char *gst_ttree_name = "gst")
+        : GenieAnalysis(filename, gst_ttree_name),
+          GenieAnalysisDeltaStudiesCuts(filename, target, beam_energy), m_Wmin{Wmin}, m_Wmax{Wmax} {}
+
+    Double_t passesCuts() override {
+        Double_t weight{GenieAnalysisDeltaStudiesCuts::passesCuts()};
+
+        if ((m_reconstructed_W < m_Wmin) || (m_reconstructed_W > m_Wmax)) {
+            return 0;
+        }
+
+        if ((m_fs_number_of_neutrons == 1) && (m_passed_pi_plus.size() == 1) ||
+            (m_fs_number_of_protons == 1) && (m_passed_pi_minus.size() == 1)) {
+            return weight;
+        }
+
+        return 0;
+    }
+
+    void runPreAnalysis() override { m_number_of_delta_events = 0; }
+
+    void useEntry(const Double_t &weight) override { m_number_of_delta_events += 1; }
+
+    void runPostAnalysis(const Long64_t &number_of_entries) override {
+        m_result = static_cast<double>(m_number_of_delta_events) / number_of_entries;
+    }
+};
+
+void runWScan() {
+    using std::cout, std::endl;
+
+    vector<Double_t> Wmins{0, 0.4, 0.8, 1.2};
+    vector<Double_t> Wmaxs{1.3, 1.4, 1.5, 1.6};
+
+    vector<tuple<Double_t, Double_t, double>> results;
+
+    GenieAnalysisOptimalWCut *ga;
+
+    for (auto Wmin : Wmins) {
+        for (auto Wmax : Wmaxs) {
+            ga = new GenieAnalysisOptimalWCut(
+                "/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root", Wmin, Wmax);
+            ga->runAnalysis();
+            results.push_back({Wmin, Wmax, ga->m_result});
+            delete ga;
+        }
+    }
+
+    cout << "--------------------" << endl;
+    for (auto &[Wmin, Wmax, result] : results) {
+        cout << Wmin << "," << Wmax << "," << result << endl;
+    }
+    cout << "--------------------" << endl;
+}
+
+void scratch(int argc, char *argv[]) {
     string input_file, output_file;
     if (argc == 2) {
         std::string arg{argv[1]};
@@ -49,7 +115,6 @@ int main(int argc, char *argv[]) {
     } else {
         std::cout << "Needs an argument to specify which way to run (should be \"local\" or \"full\"), check the code"
                   << std::endl;
-        return -1;
     }
 
     GenieAnalysis1Proton ga1{input_file.c_str(),
@@ -84,6 +149,13 @@ int main(int argc, char *argv[]) {
                                  {"fs_num_pip", "passed_num_pip", {}},
                              }};
     ga1.runAnalysis();
+}
+
+int main(int argc, char *argv[]) {
+
+    runWScan();
+
+    /* scratch(argc, argv); */
 
     return 0;
 }

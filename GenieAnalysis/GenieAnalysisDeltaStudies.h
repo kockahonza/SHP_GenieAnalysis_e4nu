@@ -116,7 +116,7 @@ class GenieAnalysisDeltaStudiesCuts : public virtual GenieAnalysis {
     Int_t m_fs_number_of_photons;
 
   public:
-    GenieAnalysisDeltaStudiesCuts(const char *filename, const char *output_filename,
+    GenieAnalysisDeltaStudiesCuts(const char *filename,
                                   // Select run
                                   const Target &target = Target::C12,
                                   const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
@@ -326,8 +326,7 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisDeltaStudiesCuts, public G
                               const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
                               // Pass this to GenieAnalysis
                               const char *gst_ttree_name = "gst")
-        : GenieAnalysis(filename, gst_ttree_name),
-          GenieAnalysisDeltaStudiesCuts(filename, output_filename, target, beam_energy),
+        : GenieAnalysis(filename, gst_ttree_name), GenieAnalysisDeltaStudiesCuts(filename, target, beam_energy),
           GenieAnalysisAutoHistograms(filename, output_filename, stages, properties, types, vs_property_plots) {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }

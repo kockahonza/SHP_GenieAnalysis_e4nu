@@ -119,7 +119,7 @@ class GenieAnalysisAutoHistograms : public virtual GenieAnalysis {
         }
     }
 
-    void runPostAnalysis() override;
+    void runPostAnalysis(const Long64_t &) override;
 
     void useEntryAtStage(const string &stage, const Double_t &weight = 1) {
         if (auto stage_hists{m_staged_hists.find(stage)}; stage_hists != m_staged_hists.end()) {

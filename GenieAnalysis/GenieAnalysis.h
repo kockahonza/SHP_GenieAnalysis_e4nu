@@ -149,7 +149,7 @@ class GenieAnalysis {
             }
         }
 
-        runPostAnalysis();
+        runPostAnalysis(number_of_entries);
     }
 
     virtual void runPreAnalysis(){};
@@ -158,7 +158,7 @@ class GenieAnalysis {
 
     virtual void useEntry(const Double_t &weight = 1) {}
 
-    virtual void runPostAnalysis(){};
+    virtual void runPostAnalysis(const Long64_t &number_of_entries){};
 };
 
 #endif
