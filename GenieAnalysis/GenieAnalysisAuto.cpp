@@ -3,7 +3,8 @@
 void GenieAnalysisAutoHistograms::prepareAutoHists() {
     string name;
     string title;
-    Int_t nbinsx, xlow, xup;
+    Int_t nbinsx;
+    Double_t xlow, xup;
 
     if (m_properties.empty()) {
         for (const auto &known_property_keyval : m_known_properties) {
@@ -40,7 +41,8 @@ void GenieAnalysisAutoHistograms::prepareAutoHists() {
         }
     }
 
-    Int_t nbinsy, ylow, yup;
+    Int_t nbinsy;
+    Double_t ylow, yup;
     for (auto &[property1, property2, types] : m_vs_property_plots) {
         if (types.empty()) {
             for (const auto &known_type_keyval : m_known_types) {

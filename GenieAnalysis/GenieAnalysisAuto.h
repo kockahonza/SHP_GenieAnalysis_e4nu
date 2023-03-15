@@ -44,7 +44,7 @@ class GenieAnalysisAutoHistograms : public GenieAnalysis {
   public:
     struct AutoProperty {
         string title;
-        tuple<Int_t, Int_t, Int_t> bin_params; // How to initialize the TH1F - nbinsx, xlow, xup in order
+        tuple<Int_t, Double_t, Double_t> bin_params; // How to initialize the TH1F - nbinsx, xlow, xup in order
         function<double()> get_property;
     };
 
@@ -87,8 +87,9 @@ class GenieAnalysisAutoHistograms : public GenieAnalysis {
     map<string, AutoProperty> m_known_properties{
         {"Ws", {"Ws (generated in GENIE) from gst [GeV]", {1000, 0, 4}, [this]() { return m_ge.Ws; }}},
         {"W", {"W (computed in GENIE) from gst [GeV]", {1000, 0, 4}, [this]() { return m_ge.W; }}},
-        {"fspl", {"Final state lepton PDG from gst", {51, 0, 50}, [this]() { return m_ge.fspl; }}},
-        {"wght", {"wght from gst", {100, 0, 2}, [this]() { return m_ge.wght; }}}};
+        {"fspl", {"Final state lepton PDG from gst", {51, -0.5, 50.5}, [this]() { return m_ge.fspl; }}},
+        {"resc", {"resc code from gst", {301, -150.5, 150.5}, [this]() { return m_ge.resc; }}},
+        {"wght", {"wght from gst", {100, -2, 2}, [this]() { return m_ge.wght; }}}};
 
     map<string, AutoType> m_known_types{
         {"ALL", {"All", [this]() { return true; }}},

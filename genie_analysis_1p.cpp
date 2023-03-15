@@ -33,24 +33,33 @@ int main(int argc, char *argv[]) {
                                      {},
                                      {},
                                      {
-                                         "W",
-                                         "Ws",
-                                         "reco_W",
-                                         "bjorken_x",
-                                         "el_p",
+                                         /* "W", */
+                                         /* "Ws", */
+                                         /* "resc", */
+                                         /* "reco_W", */
+                                         /* "bjorken_x", */
+                                         /* "el_p", */
                                          "passed_num_pip",
                                          "passed_num_pim",
                                          "ps_num_pip",
-                                         "ps_num_pim",
-                                         "ps_num_protons",
-                                         "ps_num_neutrons",
-                                         "fs_num_pip",
-                                         "fs_num_pim",
-                                         "fs_num_protons",
-                                         "fs_num_neutrons",
+                                         /* "ps_num_pim", */
+                                         /* "ps_num_protons", */
+                                         /* "ps_num_neutrons", */
+                                         /* "fs_num_pip", */
+                                         /* "fs_num_pim", */
+                                         /* "fs_num_protons", */
+                                         /* "fs_num_neutrons", */
                                      },
                                      {},
-                                     {{"W", "Ws", {}}, {"passed_num_pip", "passed_num_pim", {}}}};
+                                     {
+                                         /* {"W", "Ws", {}}, */
+                                         /* {"W", "el_p", {}}, */
+                                         /* {"W", "bjorken_x", {}}, */
+                                         /* {"Ws", "bjorken_x", {}}, */
+                                         /* {"passed_num_pip", "passed_num_pim", {}}, */
+                                         /* {"fs_num_pim", "passed_num_pim", {}}, */
+                                         /* {"fs_num_pip", "passed_num_pip", {}}, */
+                                     }};
     ga1.runAnalysis();
 
     return 0;
