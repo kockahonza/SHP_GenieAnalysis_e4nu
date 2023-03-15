@@ -16,11 +16,13 @@ class FiducialWrapper;
 using std::unique_ptr, std::optional;
 
 /**
- * Base class for Delta studies analysis, mainly tailored for Genie data tuned for the CLAS6 runs.
- * It takes care of the electron smearing, cuts and so on. It also gathers all pions, get the
- * number of protons and neutrons and possibly detects radiation photons.
- * The electron properties are made available here any pion properties should be done in
- * inheriting classes.
+ * Main class for Delta studies analysis, mainly tailored for Genie data tuned for the CLAS6 runs. It takes care of the
+ * electron smearing, cuts and so on. It also gathers all pions, gets the numbers of selected hadrons (pi+-, p, n) in
+ * the primary and final states. The electron properties are made available here any single pion properties should be
+ * done in inheriting classes.
+ *
+ * The class collects no data, `GenieAnalysisDeltaStudies` also adds the auto histogram functionality and many available
+ * properties, most other classes then inherit from that.
  */
 class GenieAnalysisDeltaStudiesCuts : public virtual GenieAnalysis {
   public:
@@ -256,6 +258,10 @@ class FiducialWrapper {
     }
 };
 
+/*
+ * Adds automatic histogram generation from `GenieAnalysisAutoHistograms` and a bunch of suitable properties to
+ * `GenieAnalysisDeltaStudiesCuts`.
+ */
 class GenieAnalysisDeltaStudies : public GenieAnalysisDeltaStudiesCuts, public GenieAnalysisAutoHistograms {
   protected:
     // Extensions to automatic TH1Fs

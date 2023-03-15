@@ -8,8 +8,20 @@
 
 class GenieAnalysis1Proton : public GenieAnalysisDeltaStudies {
   public:
-  public:
-    using GenieAnalysisDeltaStudies::GenieAnalysisDeltaStudies;
+    GenieAnalysis1Proton(const char *filename, const char *output_filename,
+                         // Specify the analysis - which stages, properties and types to do histograms for
+                         const vector<string> &stages = {}, const vector<string> &properties = {},
+                         const vector<string> &types = {},
+                         const vector<GenieAnalysisAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                         // Select run
+                         const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
+                         // Pass this to GenieAnalysis
+                         const char *gst_ttree_name = "gst")
+        : GenieAnalysis(filename, gst_ttree_name),
+          GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types, vs_property_plots, target,
+                                    beam_energy) {
+        m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
+    }
 
     Double_t passesCuts() override {
         Double_t weight{GenieAnalysisDeltaStudies::passesCuts()};
