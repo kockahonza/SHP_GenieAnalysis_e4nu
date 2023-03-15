@@ -25,21 +25,19 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    GenieAnalysis1Pion ga1{input_file.c_str(), (output_file + "_1pip0pim1p0n.root").c_str(),
-                           GenieAnalysis1Pion::PionType::Plus, 1, 0};
-    ga1.runAnalysis();
 
-    GenieAnalysis1Pion ga2{input_file.c_str(), (output_file + "_1pip0pim0p1n.root").c_str(),
-                           GenieAnalysis1Pion::PionType::Plus, 0, 1};
-    ga2.runAnalysis();
+    GenieAnalysisPiNucleonCounts gapp{input_file.c_str(), (output_file + "_1pip0pim1p0n.root").c_str(), 1, {}, 1, {}};
+    gapp.runAnalysis();
 
-    GenieAnalysis1Pion ga3{input_file.c_str(), (output_file + "_0pip1pim1p0n.root").c_str(),
-                           GenieAnalysis1Pion::PionType::Minus, 1, 0};
-    ga3.runAnalysis();
+    GenieAnalysisPiNucleonCounts gapn{input_file.c_str(), (output_file + "_1pip0pim0p1n.root").c_str(), 1, {}, {}, 1};
+    gapn.runAnalysis();
 
-    GenieAnalysis1Pion ga4{input_file.c_str(), (output_file + "_0pip1pim0p1n.root").c_str(),
-                           GenieAnalysis1Pion::PionType::Minus, 0, 1};
-    ga4.runAnalysis();
+    GenieAnalysisPiNucleonCounts gamp{input_file.c_str(), (output_file + "_0pip1pim1p0n.root").c_str(), {}, 1, 1, {}};
+    gamp.runAnalysis();
+
+    GenieAnalysisPiNucleonCounts gamn{input_file.c_str(), (output_file + "_0pip1pim0p1n.root").c_str(), {}, 1, {}, 1};
+    gamn.runAnalysis();
+
 
     return 0;
 }
