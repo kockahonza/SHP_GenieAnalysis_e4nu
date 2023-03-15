@@ -6,6 +6,47 @@
 #include "GenieAnalysis/GenieAnalysisDeltaStudies.h"
 #include "GenieAnalysis/misc.h"
 
+class GenieAnalysis1Pion1Nucleon : public GenieAnalysisDeltaStudies {
+  public:
+    enum class PionType { Plus, Minus };
+
+    enum class NucleonType { Proton, Neutron };
+
+  private:
+    const PionType m_pi_type;
+    const NucleonType m_nuc_type;
+
+  public:
+    GenieAnalysis1Pion1Nucleon(const char *filename, const char *output_filename, const PionType &pi_type,
+                               const NucleonType &nuc_type, const vector<string> &stages = {},
+                               const vector<string> &properties = {}, const vector<string> &types = {},
+                               const vector<GenieAnalysisAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                               const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
+                               const char *gst_ttree_name = "gst")
+        : GenieAnalysis(filename, gst_ttree_name), GenieAnalysisDeltaStudies{filename, output_filename,
+                                                                             stages,   properties,
+                                                                             types,    vs_property_plots,
+                                                                             target,   beam_energy},
+          m_pi_type{pi_type}, m_nuc_type{nuc_type} {}
+
+    Double_t passesCuts() override {
+        Double_t weight{GenieAnalysisDeltaStudies::passesCuts()};
+
+        if (weight == 0) {
+            return 0;
+        }
+        if ((m_pi_type == PionType::Plus) && (m_passed_pi_plus.size() == 1) && (m_passed_pi_minus.size() == 0)) {
+
+        } else if ((m_pi_type == PionType::Minus) && (m_passed_pi_plus.size() == 0) && (m_passed_pi_minus.size() == 1)) {
+
+        } else {
+            return 0;
+        }
+
+        return weight;
+    }
+};
+
 int main(int argc, char *argv[]) {
 
     string input_file, output_file;

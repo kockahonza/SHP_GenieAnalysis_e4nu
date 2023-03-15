@@ -83,7 +83,6 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
     }
 };
 
-
 int main(int argc, char *argv[]) {
     vector<string> properties{"W",
                               "wght",
