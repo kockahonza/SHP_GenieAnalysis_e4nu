@@ -22,7 +22,7 @@ using std::unique_ptr, std::optional;
  * The electron properties are made available here any pion properties should be done in
  * inheriting classes.
  */
-class GenieAnalysisDeltaStudies : public GenieAnalysisAutoHistograms {
+class GenieAnalysisDeltaStudiesCuts : public virtual GenieAnalysis {
   public:
     // Configuration options for the major target/energy runs
     enum class Target { C12, Fe56 };
@@ -113,71 +113,14 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoHistograms {
     Int_t m_fs_number_of_neutrons;
     Int_t m_fs_number_of_photons;
 
-    // Extensions to automatic TH1Fs
-    map<string, AutoProperty> m_new_known_properties{
-        // Electrons properties
-        {"el_phi",
-         {"Out electron phi [°]",
-          {720, -30, 330},
-          [this]() {
-              double phi_deg{m_smeared_el_V3.Phi() * TMath::RadToDeg()};
-              return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
-          }}},
-        {"el_cos_theta", {"Out electron cos theta", {720, -1, 1}, [this]() { return m_smeared_el_V3.CosTheta(); }}},
-        {"el_p", {"Out electron momentum [GeV/c]", {720, 0, 3}, [this]() { return m_smeared_el_V4.P(); }}},
-        {"el_E", {"Out electron energy [GeV]", {720, 0, 3}, [this]() { return m_smeared_el_V4.Energy(); }}},
-        {"el_acceptance",
-         {"Out electron acceptance weight", {100, 0, 1}, [this]() { return m_electron_acceptance_weight; }}},
-
-        // Physical properties of the event as a whole
-        {"reco_W", {"Reconstructed W [GeV]", {1000, 0, 4}, [this]() { return m_reconstructed_W; }}},
-        {"bjorken_x", {"Bjorken x", {1000, 0, 1.01}, [this]() { return m_bjorken_x; }}},
-
-        // Passed particle properties, this mainly applies to pi+- and protons which there may be multiple of and we
-        // have acceptances fo5
-        {"passed_num_pip",
-         {"Number of detected pi plus", {6, -0.5, 5.5}, [this]() { return m_passed_pi_plus.size(); }}},
-        {"passed_num_pim",
-         {"Number of detected pi minus", {6, -0.5, 5.5}, [this]() { return m_passed_pi_minus.size(); }}},
-
-        // "Truth" data follows, there's a lot of it and it's quite repetitive
-        // Primary state (pre FSI) data
-        {"ps_num_pip",
-         {"Number of pi plus in the primary state", {6, -0.5, 5.5}, [this]() { return m_ps_number_of_pi_plus; }}},
-        {"ps_num_pim",
-         {"Number of pi minus in the primary state", {6, -0.5, 5.5}, [this]() { return m_ps_number_of_pi_minus; }}},
-        {"ps_num_protons",
-         {"Number of protons in the primary state", {6, -0.5, 5.5}, [this]() { return m_ps_number_of_protons; }}},
-        {"ps_num_neutrons",
-         {"Number of neutrons in the primary state", {6, -0.5, 5.5}, [this]() { return m_ps_number_of_neutrons; }}},
-        {"ps_num_photons",
-         {"Number of photons in the primary state", {6, -0.5, 5.5}, [this]() { return m_ps_number_of_photons; }}},
-        // Final state (post FSI) data, truth - before accounting for detector with fiducials and acceptances
-        {"fs_num_pip",
-         {"Number of pi plus in the final state", {6, -0.5, 5.5}, [this]() { return m_fs_number_of_pi_plus; }}},
-        {"fs_num_pim",
-         {"Number of pi minus in the final state", {6, -0.5, 5.5}, [this]() { return m_fs_number_of_pi_minus; }}},
-        {"fs_num_protons",
-         {"Number of protons in the final state", {6, -0.5, 5.5}, [this]() { return m_fs_number_of_protons; }}},
-        {"fs_num_neutrons",
-         {"Number of neutrons in the final state", {6, -0.5, 5.5}, [this]() { return m_fs_number_of_neutrons; }}},
-        {"fs_num_photons",
-         {"Number of photons in the final state", {6, -0.5, 5.5}, [this]() { return m_fs_number_of_photons; }}},
-    };
-
   public:
-    GenieAnalysisDeltaStudies(const char *filename, const char *output_filename,
-                              // Specify the analysis - which stages, properties and types to do histograms for
-                              const vector<string> &stages = {}, const vector<string> &properties = {},
-                              const vector<string> &types = {},
-                              const vector<GenieAnalysisAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                              // Select run
-                              const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
-                              // Pass this to GenieAnalysis
-                              const char *gst_ttree_name = "gst")
-        : GenieAnalysis(filename), GenieAnalysisAutoHistograms(filename, output_filename, stages, properties, types,
-                                                               vs_property_plots, gst_ttree_name),
-          m_target{target}, m_beam_energy{beam_energy},
+    GenieAnalysisDeltaStudiesCuts(const char *filename, const char *output_filename,
+                                  // Select run
+                                  const Target &target = Target::C12,
+                                  const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
+                                  // Pass this to GenieAnalysis
+                                  const char *gst_ttree_name = "gst")
+        : GenieAnalysis(filename, gst_ttree_name), m_target{target}, m_beam_energy{beam_energy},
 
           m_fiducials{std::make_unique<FiducialWrapper>(m_target, m_beam_energy)},
 
@@ -196,8 +139,6 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisAutoHistograms {
           m_acc_pim_acc{(TH3D *)m_pim_acceptance_file->Get("Accepted Particles")}
 
     {
-        m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
-
         // Initialize precut parameters
         if (beam_energy == BeamEnergy::MeV_1161) {
             m_precut_parameter1 = 17;
@@ -265,8 +206,8 @@ class FiducialWrapper {
   public:
     enum class PiPhotonId : int { Minus = -1, Photon = 0, Plus = 1 };
 
-    const GenieAnalysisDeltaStudies::Target m_target;
-    const GenieAnalysisDeltaStudies::BeamEnergy m_beam_energy;
+    const GenieAnalysisDeltaStudiesCuts::Target m_target;
+    const GenieAnalysisDeltaStudiesCuts::BeamEnergy m_beam_energy;
     const string m_target_str;
     const string m_beam_energy_str;
 
@@ -274,8 +215,8 @@ class FiducialWrapper {
     Fiducial m_fiducial;
 
   public:
-    FiducialWrapper(const GenieAnalysisDeltaStudies::Target &target,
-                    const GenieAnalysisDeltaStudies::BeamEnergy &beam_energy)
+    FiducialWrapper(const GenieAnalysisDeltaStudiesCuts::Target &target,
+                    const GenieAnalysisDeltaStudiesCuts::BeamEnergy &beam_energy)
         : m_target(target), m_beam_energy(beam_energy), m_target_str{targetStr(m_target)},
           m_beam_energy_str{beamEnergyStr(m_beam_energy)}, m_fiducial{} {
 
@@ -283,7 +224,7 @@ class FiducialWrapper {
         m_fiducial.InitEClimits();
 
         // The first value is torusCurrent, values taken from original
-        m_fiducial.SetConstants(m_beam_energy == GenieAnalysisDeltaStudies::BeamEnergy::MeV_1161 ? 750 : 2250,
+        m_fiducial.SetConstants(m_beam_energy == GenieAnalysisDeltaStudiesCuts::BeamEnergy::MeV_1161 ? 750 : 2250,
                                 m_target_str, {{"1161", 1.161}, {"2261", 2.261}, {"4461", 4.461}});
         m_fiducial.SetFiducialCutParameters(m_beam_energy_str);
     }
@@ -294,24 +235,95 @@ class FiducialWrapper {
         return m_fiducial.Pi_phot_fid_united(m_beam_energy_str, momentum_V3, static_cast<int>(which_particle));
     }
 
-    static string targetStr(const GenieAnalysisDeltaStudies::Target &target) {
-        if (target == GenieAnalysisDeltaStudies::Target::C12) {
+    static string targetStr(const GenieAnalysisDeltaStudiesCuts::Target &target) {
+        if (target == GenieAnalysisDeltaStudiesCuts::Target::C12) {
             return "12C";
-        } else if (target == GenieAnalysisDeltaStudies::Target::Fe56) {
+        } else if (target == GenieAnalysisDeltaStudiesCuts::Target::Fe56) {
             return "12C"; // There's no dedicated Fe file and original used 12C for anything except He
         }
         throw "This should not happen";
     }
 
-    static string beamEnergyStr(const GenieAnalysisDeltaStudies::BeamEnergy &beam_energy) {
-        if (beam_energy == GenieAnalysisDeltaStudies::BeamEnergy::MeV_1161) {
+    static string beamEnergyStr(const GenieAnalysisDeltaStudiesCuts::BeamEnergy &beam_energy) {
+        if (beam_energy == GenieAnalysisDeltaStudiesCuts::BeamEnergy::MeV_1161) {
             return "1161";
-        } else if (beam_energy == GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261) {
+        } else if (beam_energy == GenieAnalysisDeltaStudiesCuts::BeamEnergy::MeV_2261) {
             return "2261";
-        } else if (beam_energy == GenieAnalysisDeltaStudies::BeamEnergy::MeV_4461) {
+        } else if (beam_energy == GenieAnalysisDeltaStudiesCuts::BeamEnergy::MeV_4461) {
             return "4461";
         }
         throw "This should not happen";
+    }
+};
+
+class GenieAnalysisDeltaStudies : public GenieAnalysisDeltaStudiesCuts, public GenieAnalysisAutoHistograms {
+  protected:
+    // Extensions to automatic TH1Fs
+    map<string, AutoProperty> m_new_known_properties{
+        // Electrons properties
+        {"el_phi",
+         {"Out electron phi [°]",
+          {720, -30, 330},
+          [this]() {
+              double phi_deg{m_smeared_el_V3.Phi() * TMath::RadToDeg()};
+              return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
+          }}},
+        {"el_cos_theta", {"Out electron cos theta", {720, -1, 1}, [this]() { return m_smeared_el_V3.CosTheta(); }}},
+        {"el_p", {"Out electron momentum [GeV/c]", {720, 0, 3}, [this]() { return m_smeared_el_V4.P(); }}},
+        {"el_E", {"Out electron energy [GeV]", {720, 0, 3}, [this]() { return m_smeared_el_V4.Energy(); }}},
+        {"el_acceptance",
+         {"Out electron acceptance weight", {100, 0, 1}, [this]() { return m_electron_acceptance_weight; }}},
+
+        // Physical properties of the event as a whole
+        {"reco_W", {"Reconstructed W [GeV]", {1000, 0, 4}, [this]() { return m_reconstructed_W; }}},
+        {"bjorken_x", {"Bjorken x", {1000, 0, 1.01}, [this]() { return m_bjorken_x; }}},
+
+        // Passed particle properties, this mainly applies to pi+- and protons which there may be multiple of and we
+        // have acceptances fo5
+        {"passed_num_pip",
+         {"Number of detected pi plus", {6, -0.5, 5.5}, [this]() { return m_passed_pi_plus.size(); }}},
+        {"passed_num_pim",
+         {"Number of detected pi minus", {6, -0.5, 5.5}, [this]() { return m_passed_pi_minus.size(); }}},
+
+        // "Truth" data follows, there's a lot of it and it's quite repetitive
+        // Primary state (pre FSI) data
+        {"ps_num_pip",
+         {"Number of pi plus in the primary state", {6, -0.5, 5.5}, [this]() { return m_ps_number_of_pi_plus; }}},
+        {"ps_num_pim",
+         {"Number of pi minus in the primary state", {6, -0.5, 5.5}, [this]() { return m_ps_number_of_pi_minus; }}},
+        {"ps_num_protons",
+         {"Number of protons in the primary state", {6, -0.5, 5.5}, [this]() { return m_ps_number_of_protons; }}},
+        {"ps_num_neutrons",
+         {"Number of neutrons in the primary state", {6, -0.5, 5.5}, [this]() { return m_ps_number_of_neutrons; }}},
+        {"ps_num_photons",
+         {"Number of photons in the primary state", {6, -0.5, 5.5}, [this]() { return m_ps_number_of_photons; }}},
+        // Final state (post FSI) data, truth - before accounting for detector with fiducials and acceptances
+        {"fs_num_pip",
+         {"Number of pi plus in the final state", {6, -0.5, 5.5}, [this]() { return m_fs_number_of_pi_plus; }}},
+        {"fs_num_pim",
+         {"Number of pi minus in the final state", {6, -0.5, 5.5}, [this]() { return m_fs_number_of_pi_minus; }}},
+        {"fs_num_protons",
+         {"Number of protons in the final state", {6, -0.5, 5.5}, [this]() { return m_fs_number_of_protons; }}},
+        {"fs_num_neutrons",
+         {"Number of neutrons in the final state", {6, -0.5, 5.5}, [this]() { return m_fs_number_of_neutrons; }}},
+        {"fs_num_photons",
+         {"Number of photons in the final state", {6, -0.5, 5.5}, [this]() { return m_fs_number_of_photons; }}},
+    };
+
+  public:
+    GenieAnalysisDeltaStudies(const char *filename, const char *output_filename,
+                              // Specify the analysis - which stages, properties and types to do histograms for
+                              const vector<string> &stages = {}, const vector<string> &properties = {},
+                              const vector<string> &types = {},
+                              const vector<GenieAnalysisAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                              // Select run
+                              const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
+                              // Pass this to GenieAnalysis
+                              const char *gst_ttree_name = "gst")
+        : GenieAnalysis(filename, gst_ttree_name),
+          GenieAnalysisDeltaStudiesCuts(filename, output_filename, target, beam_energy),
+          GenieAnalysisAutoHistograms(filename, output_filename, stages, properties, types, vs_property_plots) {
+        m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
 };
 

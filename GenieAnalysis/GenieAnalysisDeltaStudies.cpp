@@ -1,9 +1,7 @@
 #include "GenieAnalysisDeltaStudies.h"
 #include <TMath.h>
 
-Double_t GenieAnalysisDeltaStudies::passesCuts() {
-    useEntryAtStage("nocut", m_ge.wght);
-
+Double_t GenieAnalysisDeltaStudiesCuts::passesCuts() {
     // Do electron smearing
     const double smeared_pl{gRandom->Gaus(m_ge.pl, m_smearing_reso_el * m_ge.pl)};
     const double smeared_El{sqrt(smeared_pl * smeared_pl + e_mass * e_mass)};
@@ -26,7 +24,6 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
             (m_smeared_el_V3.Theta() > 80 * TMath::DegToRad())) {
             return 0;
         }
-        useEntryAtStage("p_gdoc", m_ge.wght);
     }
 
     // This was originally later on but I think it makes more sense here
@@ -34,7 +31,6 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
         if (!m_fiducials->electronCut(m_smeared_el_V3)) {
             return 0;
         }
-        useEntryAtStage("p_efid", m_ge.wght);
     }
 
     // Filter some specific sectors, this was enabled and probably makes some sense, essentially only
@@ -205,9 +201,9 @@ Double_t GenieAnalysisDeltaStudies::passesCuts() {
     }
 }
 
-double GenieAnalysisDeltaStudies::acceptanceJoined(const double &p, const double &cos_theta, double phi,
-                                                   const std::unique_ptr<TH3D> &generated,
-                                                   const std::unique_ptr<TH3D> &accepted) {
+double GenieAnalysisDeltaStudiesCuts::acceptanceJoined(const double &p, const double &cos_theta, double phi,
+                                                       const std::unique_ptr<TH3D> &generated,
+                                                       const std::unique_ptr<TH3D> &accepted) {
     // first map -pi, pi to [0, 2pi
     if (phi < 0) {
         phi += 2 * TMath::Pi();
