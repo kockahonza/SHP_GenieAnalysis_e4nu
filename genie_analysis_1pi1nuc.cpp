@@ -8,26 +8,29 @@
 
 class GenieAnalysis1Pion1Nucleon : public GenieAnalysisDeltaStudies {
   public:
+    enum class RunType { Detector, FinalState };
+
     enum class PionType { Plus, Minus };
 
     enum class NucleonType { Proton, Neutron };
 
   private:
+    const RunType m_run_type;
     const PionType m_pi_type;
     const NucleonType m_nuc_type;
 
   protected:
     TLorentzVector m_pion_V4;
     TVector3 m_pion_V3;
-    Double_t m_pion_acceptance;
+    /* Double_t m_pion_acceptance; */
 
     TLorentzVector m_nucleon_V4;
     TVector3 m_nucleon_V3;
-    Double_t m_nucleon_acceptance;
+    /* Double_t m_nucleon_acceptance; */
 
   public:
-    GenieAnalysis1Pion1Nucleon(const char *filename, const char *output_filename, const PionType &pi_type,
-                               const NucleonType &nuc_type, const vector<string> &stages = {},
+    GenieAnalysis1Pion1Nucleon(const char *filename, const char *output_filename, const RunType &run_type,
+                               const PionType &pi_type, const NucleonType &nuc_type, const vector<string> &stages = {},
                                const vector<string> &properties = {}, const vector<string> &types = {},
                                const vector<GenieAnalysisAutoHistograms::AutoVsPlot> &vs_property_plots = {},
                                const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
@@ -36,7 +39,9 @@ class GenieAnalysis1Pion1Nucleon : public GenieAnalysisDeltaStudies {
                                                                              stages,   properties,
                                                                              types,    vs_property_plots,
                                                                              target,   beam_energy},
-          m_pi_type{pi_type}, m_nuc_type{nuc_type} {}
+          m_run_type{run_type}, m_pi_type{pi_type}, m_nuc_type{nuc_type} {
+        m_gather_fs_particles = true;
+    }
 
     Double_t passesCuts() override {
         Double_t weight{GenieAnalysisDeltaStudies::passesCuts()};
@@ -44,11 +49,45 @@ class GenieAnalysis1Pion1Nucleon : public GenieAnalysisDeltaStudies {
         if (weight == 0) {
             return 0;
         }
-        if ((m_pi_type == PionType::Plus) && (m_passed_pi_plus.size() == 1) && (m_passed_pi_minus.size() == 0)) {
 
-        } else if ((m_pi_type == PionType::Minus) && (m_passed_pi_plus.size() == 0) &&
-                   (m_passed_pi_minus.size() == 1)) {
+        size_t pip_num, pim_num, p_num, n_num;
+        if (m_run_type == RunType::Detector) {
+            pip_num = m_passed_pi_plus.size();
+            pim_num = m_passed_pi_minus.size();
+            p_num = m_passed_protons.size();
+            n_num = m_fs_neutrons.size();
+        } else if (m_run_type == RunType::FinalState) {
+            pip_num = m_fs_pi_plus.size();
+            pim_num = m_fs_pi_minus.size();
+            p_num = m_fs_protons.size();
+            n_num = m_fs_neutrons.size();
+        }
 
+        if ((m_pi_type == PionType::Plus) && (pip_num == 1) && (pim_num == 0)) {
+            if (m_run_type == RunType::Detector) {
+                std::tie(m_pion_V4, m_pion_V3, std::ignore) = m_passed_pi_plus[0];
+            } else if (m_run_type == RunType::FinalState) {
+                std::tie(m_pion_V4, m_pion_V3) = m_fs_pi_plus[0];
+            }
+        } else if ((m_pi_type == PionType::Minus) && (pip_num == 0) && (pim_num == 1)) {
+            if (m_run_type == RunType::Detector) {
+                std::tie(m_pion_V4, m_pion_V3, std::ignore) = m_passed_pi_minus[0];
+            } else if (m_run_type == RunType::FinalState) {
+                std::tie(m_pion_V4, m_pion_V3) = m_fs_pi_minus[0];
+            }
+        } else {
+            return 0;
+        }
+
+        if ((m_nuc_type == NucleonType::Proton) && (p_num == 1) && (n_num == 0)) {
+            if (m_run_type == RunType::Detector) {
+                std::tie(m_nucleon_V4, m_nucleon_V3, std::ignore) = m_passed_protons[0];
+            } else if (m_run_type == RunType::FinalState) {
+                std::tie(m_nucleon_V4, m_nucleon_V3) = m_fs_protons[0];
+            }
+        } else if ((m_nuc_type == NucleonType::Neutron) && (p_num == 0) && (n_num == 1)) {
+            // Neutrons aren't detected so always use fs neutrons
+            std::tie(m_nucleon_V4, m_nucleon_V3) = m_fs_neutrons[0];
         } else {
             return 0;
         }
@@ -57,8 +96,7 @@ class GenieAnalysis1Pion1Nucleon : public GenieAnalysisDeltaStudies {
     }
 };
 
-int main(int argc, char *argv[]) {
-
+int simple_pi_nucleon_counts(int argc, char *argv[]) {
     string input_file, output_file;
     if (argc == 2) {
         std::string arg{argv[1]};
@@ -90,3 +128,5 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
+int main(int argc, char *argv[]) { return simple_pi_nucleon_counts(argc, argv); }
