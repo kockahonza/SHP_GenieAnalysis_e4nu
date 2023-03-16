@@ -89,6 +89,15 @@ Double_t GenieAnalysisDeltaStudiesCuts::passesCuts() {
     for (int i{0}; i < m_ge.nf; i++) {
         if (m_ge.pdgf[i] == 2212) { // proton
             m_fs_number_of_protons += 1;
+
+            if (m_gather_fs_particles) {
+                V3.SetXYZ(m_ge.pxf[i], m_ge.pyf[i], m_ge.pzf[i]);
+                V3.SetPhi(V3.Phi() + TMath::Pi());
+
+                m_fs_protons.push_back({{V3, m_ge.Ef[i]}, V3});
+            }
+
+            // required momentum for detection
             if (m_ge.pf[i] < m_p_proton_momentum_threshold) {
                 continue;
             }
@@ -105,7 +114,8 @@ Double_t GenieAnalysisDeltaStudiesCuts::passesCuts() {
                 }
             }
 
-            // Only use protons with reasonable acceptance, quite often they are negative or so on, this is kindof a workaround, if proton acceptance is turned off use them regardless
+            // Only use protons with reasonable acceptance, quite often they are negative or so on, this is kindof a
+            // workaround, if proton acceptance is turned off use them regardless
             acceptance = protonAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi());
             if ((!m_do_proton_acceptance) || (acceptance == TMath::Abs(acceptance))) {
                 m_passed_protons.push_back({{V3, smeared_E}, V3, acceptance});
@@ -114,8 +124,23 @@ Double_t GenieAnalysisDeltaStudiesCuts::passesCuts() {
         } else if (m_ge.pdgf[i] == 2112) { // neutron
             m_fs_number_of_neutrons += 1;
 
+            if (m_gather_fs_particles) {
+                V3.SetXYZ(m_ge.pxf[i], m_ge.pyf[i], m_ge.pzf[i]);
+                V3.SetPhi(V3.Phi() + TMath::Pi());
+
+                m_fs_neutrons.push_back({{V3, m_ge.Ef[i]}, V3});
+            }
+
         } else if (m_ge.pdgf[i] == -211) { // pi-
             m_fs_number_of_pi_minus += 1;
+
+            if (m_gather_fs_particles) {
+                V3.SetXYZ(m_ge.pxf[i], m_ge.pyf[i], m_ge.pzf[i]);
+                V3.SetPhi(V3.Phi() + TMath::Pi());
+
+                m_fs_pi_minus.push_back({{V3, m_ge.Ef[i]}, V3});
+            }
+
             // required momentum for detection
             if (m_ge.pf[i] < m_p_pion_momentum_threshold) {
                 continue;
@@ -142,6 +167,14 @@ Double_t GenieAnalysisDeltaStudiesCuts::passesCuts() {
 
         } else if (m_ge.pdgf[i] == 211) { // pi+
             m_fs_number_of_pi_plus += 1;
+
+            if (m_gather_fs_particles) {
+                V3.SetXYZ(m_ge.pxf[i], m_ge.pyf[i], m_ge.pzf[i]);
+                V3.SetPhi(V3.Phi() + TMath::Pi());
+
+                m_fs_pi_plus.push_back({{V3, m_ge.Ef[i]}, V3});
+            }
+
             // required momentum for detection
             if (m_ge.pf[i] < m_p_pion_momentum_threshold) {
                 continue;

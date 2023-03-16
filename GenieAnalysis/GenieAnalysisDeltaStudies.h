@@ -51,6 +51,8 @@ class GenieAnalysisDeltaStudiesCuts : public virtual GenieAnalysis {
     bool m_do_pion_acceptance{true};
     bool m_do_proton_acceptance{true};
 
+    bool m_gather_fs_particles{false};
+
     double m_p_pion_momentum_threshold{0.15};
     double m_p_photon_momentum_threshold{0.3};
     double m_p_proton_momentum_threshold{0.3};
@@ -74,10 +76,10 @@ class GenieAnalysisDeltaStudiesCuts : public virtual GenieAnalysis {
     const unique_ptr<FiducialWrapper> m_fiducials;
 
     // e2a acceptance maps
-    const unique_ptr<TFile> m_el_acceptance_file;       // electron
-    const unique_ptr<TFile> m_p_acceptance_file;        // proton
-    const unique_ptr<TFile> m_pip_acceptance_file;      // pi plus
-    const unique_ptr<TFile> m_pim_acceptance_file;      // pi minus
+    const unique_ptr<TFile> m_el_acceptance_file;  // electron
+    const unique_ptr<TFile> m_p_acceptance_file;   // proton
+    const unique_ptr<TFile> m_pip_acceptance_file; // pi plus
+    const unique_ptr<TFile> m_pim_acceptance_file; // pi minus
     // It seems to be necessary for I suppose performance reason? that these are found beforehand and not at each call
     // to acceptanceJoined
     const unique_ptr<TH3D> m_acc_el_gen, m_acc_el_acc, m_acc_p_gen, m_acc_p_acc, m_acc_pip_gen, m_acc_pip_acc,
@@ -104,6 +106,15 @@ class GenieAnalysisDeltaStudiesCuts : public virtual GenieAnalysis {
     vector<tuple<TLorentzVector, TVector3, double>> m_passed_pi_minus;
     vector<tuple<TLorentzVector, TVector3, double>> m_passed_protons;
     vector<tuple<TLorentzVector, TVector3>> m_passed_photons; // photons don't have acceptances
+                                                              //
+
+    // Also gather charged pions and nucleons in the final state, to perform ?truth level? studies and also we don't
+    // have detected neutrons so this way we can still look at all 1pion1nucleon events not just 1pim1p. (these
+    // naturally don't have acceptances)
+    vector<tuple<TLorentzVector, TVector3>> m_fs_pi_plus;
+    vector<tuple<TLorentzVector, TVector3>> m_fs_pi_minus;
+    vector<tuple<TLorentzVector, TVector3>> m_fs_protons;
+    vector<tuple<TLorentzVector, TVector3>> m_fs_neutrons;
 
     // "Primary" state properties, used as in the gst documentation, these are particles after interaction but before
     // FSI
