@@ -25,28 +25,42 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    /* GenieAnalysisDeltaStudies ga1{input_file.c_str(), */
+    /*                               (output_file + "_FSt_new.root").c_str(), */
+    /*                               {}, */
+    /*                               {}, */
+    /*                               {}, */
+    /*                               { */
+    /*                                   {"W", "Ws", {}}, */
+    /*                                   {"W", "el_p", {}}, */
+    /*                                   {"W", "bjorken_x", {}}, */
+    /*                                   {"Ws", "bjorken_x", {}}, */
+    /*                                   {"ps_num_pim", "fs_num_pim", {}}, */
+    /*                                   {"ps_num_pip", "fs_num_pip", {}}, */
+    /*                                   {"fs_num_pim", "passed_num_pim", {}}, */
+    /*                                   {"fs_num_pip", "passed_num_pip", {}}, */
+    /*                                   {"passed_num_pip", "passed_num_pim", {}}, */
+    /*                                   /1* {"fs_num_pim", "passed_num_pim", {}}, *1/ */
+    /*                                   /1* {"fs_num_pip", "passed_num_pip", {}}, *1/ */
+    /*                                   /1* {"fs_num_pip", "fs_num_neutrons", {}}, *1/ */
+    /*                                   /1* {"fs_num_pim", "fs_num_neutrons", {}}, *1/ */
+    /*                                   /1* {"fs_num_pip", "fs_num_protons", {}}, *1/ */
+    /*                                   /1* {"fs_num_pim", "fs_num_protons", {}}, *1/ */
+    /*                               }}; */
+    /* ga1.runAnalysis(); */
+
     GenieAnalysisDeltaStudies ga1{input_file.c_str(),
-                                  (output_file + "_FSt_new.root").c_str(),
+                                  (output_file + "_FSt_resc.root").c_str(),
                                   {},
                                   {},
                                   {},
-                                  {
-                                      {"W", "Ws", {}},
-                                      {"W", "el_p", {}},
-                                      {"W", "bjorken_x", {}},
-                                      {"Ws", "bjorken_x", {}},
-                                      {"ps_num_pim", "fs_num_pim", {}},
-                                      {"ps_num_pip", "fs_num_pip", {}},
-                                      {"fs_num_pim", "passed_num_pim", {}},
-                                      {"fs_num_pip", "passed_num_pip", {}},
-                                      {"passed_num_pip", "passed_num_pim", {}},
-                                      /* {"fs_num_pim", "passed_num_pim", {}}, */
-                                      /* {"fs_num_pip", "passed_num_pip", {}}, */
-                                      /* {"fs_num_pip", "fs_num_neutrons", {}}, */
-                                      /* {"fs_num_pim", "fs_num_neutrons", {}}, */
-                                      /* {"fs_num_pip", "fs_num_protons", {}}, */
-                                      /* {"fs_num_pim", "fs_num_protons", {}}, */
-                                  }};
+                                  {{"W", "Ws", {}},
+                                   {"resc", "passed_num_pip", {}},
+                                   {"resc", "passed_num_pim", {}},
+                                   {"resc", "passed_num_protons", {}},
+                                   {"resc", "fs_num_pip", {}},
+                                   {"resc", "fs_num_pim", {}},
+                                   {"resc", "fs_num_protons", {}}}};
     ga1.runAnalysis();
 
     return 0;
