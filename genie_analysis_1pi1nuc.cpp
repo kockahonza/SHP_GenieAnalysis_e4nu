@@ -16,6 +16,15 @@ class GenieAnalysis1Pion1Nucleon : public GenieAnalysisDeltaStudies {
     const PionType m_pi_type;
     const NucleonType m_nuc_type;
 
+  protected:
+    TLorentzVector m_pion_V4;
+    TVector3 m_pion_V3;
+    Double_t m_pion_acceptance;
+
+    TLorentzVector m_nucleon_V4;
+    TVector3 m_nucleon_V3;
+    Double_t m_nucleon_acceptance;
+
   public:
     GenieAnalysis1Pion1Nucleon(const char *filename, const char *output_filename, const PionType &pi_type,
                                const NucleonType &nuc_type, const vector<string> &stages = {},
@@ -37,7 +46,8 @@ class GenieAnalysis1Pion1Nucleon : public GenieAnalysisDeltaStudies {
         }
         if ((m_pi_type == PionType::Plus) && (m_passed_pi_plus.size() == 1) && (m_passed_pi_minus.size() == 0)) {
 
-        } else if ((m_pi_type == PionType::Minus) && (m_passed_pi_plus.size() == 0) && (m_passed_pi_minus.size() == 1)) {
+        } else if ((m_pi_type == PionType::Minus) && (m_passed_pi_plus.size() == 0) &&
+                   (m_passed_pi_minus.size() == 1)) {
 
         } else {
             return 0;

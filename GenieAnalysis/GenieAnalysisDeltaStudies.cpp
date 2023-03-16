@@ -3,8 +3,8 @@
 
 Double_t GenieAnalysisDeltaStudiesCuts::passesCuts() {
     // Do electron smearing
-    const double smeared_pl{gRandom->Gaus(m_ge.pl, m_smearing_reso_el * m_ge.pl)};
-    const double smeared_El{sqrt(smeared_pl * smeared_pl + e_mass * e_mass)};
+    const double smeared_pl{gRandom->Gaus(m_ge.pl, m_smearing_reso_electron * m_ge.pl)};
+    const double smeared_El{sqrt(smeared_pl * smeared_pl + mass_electron * mass_electron)};
     m_smeared_el_V3.SetXYZ(smeared_pl / m_ge.pl * m_ge.pxl, smeared_pl / m_ge.pl * m_ge.pyl,
                            smeared_pl / m_ge.pl * m_ge.pzl);
     m_smeared_el_V4.SetPxPyPzE(m_smeared_el_V3.X(), m_smeared_el_V3.Y(), m_smeared_el_V3.Z(), smeared_El);
@@ -52,9 +52,9 @@ Double_t GenieAnalysisDeltaStudiesCuts::passesCuts() {
     const double Q2 = -el_change.Mag2();
 
     const double nu = -el_change.E();
-    m_bjorken_x = Q2 / (2 * proton_mass * nu);
+    m_bjorken_x = Q2 / (2 * mass_proton * nu);
 
-    m_reconstructed_W = TMath::Sqrt((proton_mass + nu) * (proton_mass + nu) - el_change.Vect().Mag2());
+    m_reconstructed_W = TMath::Sqrt((mass_proton + nu) * (mass_proton + nu) - el_change.Vect().Mag2());
 
     // Get the electron acceptance weight from the e2a map
     m_electron_acceptance_weight = electronAcceptance(smeared_pl, m_smeared_el_V3.CosTheta(), m_smeared_el_V3.Phi());
@@ -79,26 +79,49 @@ Double_t GenieAnalysisDeltaStudiesCuts::passesCuts() {
     m_fs_number_of_neutrons = 0;
     m_fs_number_of_photons = 0;
 
-    // Temp variables for the final state hadrons loop, declared here for performance, these are the most interesting
-    // hadrons for comparison to experiment
+    // Temp variables for the final state hadrons(and photon) loop, declared here for performance, these are the most
+    // interesting hadrons for comparison to experiment
     double smeared_p;
     double smeared_E;
-    double pi_acceptance;
+    double acceptance;
     TVector3 V3;
     double positive_phi_difference;
     for (int i{0}; i < m_ge.nf; i++) {
         if (m_ge.pdgf[i] == 2212) { // proton
             m_fs_number_of_protons += 1;
+            if (m_ge.pf[i] < m_p_proton_momentum_threshold) {
+                continue;
+            }
+            smeared_p = gRandom->Gaus(m_ge.pf[i], m_smearing_reso_proton * m_ge.pf[i]);
+            smeared_E = sqrt(smeared_p * smeared_p + mass_proton * mass_proton);
+
+            V3.SetXYZ(smeared_p / m_ge.pf[i] * m_ge.pxf[i], smeared_p / m_ge.pf[i] * m_ge.pyf[i],
+                      smeared_p / m_ge.pf[i] * m_ge.pzf[i]);
+            V3.SetPhi(V3.Phi() + TMath::Pi());
+
+            if (m_do_proton_fiducials) {
+                if (!m_fiducials->protonCut(V3)) {
+                    continue;
+                }
+            }
+
+            // Only use protons with reasonable acceptance, quite often they are negative or so on, this is kindof a workaround, if proton acceptance is turned off use them regardless
+            acceptance = protonAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi());
+            if ((!m_do_proton_acceptance) || (acceptance == TMath::Abs(acceptance))) {
+                m_passed_protons.push_back({{V3, smeared_E}, V3, acceptance});
+            }
+
         } else if (m_ge.pdgf[i] == 2112) { // neutron
             m_fs_number_of_neutrons += 1;
+
         } else if (m_ge.pdgf[i] == -211) { // pi-
             m_fs_number_of_pi_minus += 1;
             // required momentum for detection
             if (m_ge.pf[i] < m_p_pion_momentum_threshold) {
                 continue;
             }
-            smeared_p = gRandom->Gaus(m_ge.pf[i], m_smearing_reso_pi * m_ge.pf[i]);
-            smeared_E = sqrt(smeared_p * smeared_p + m_pion * m_pion);
+            smeared_p = gRandom->Gaus(m_ge.pf[i], m_smearing_reso_pion * m_ge.pf[i]);
+            smeared_E = sqrt(smeared_p * smeared_p + mass_pion * mass_pion);
 
             V3.SetXYZ(smeared_p / m_ge.pf[i] * m_ge.pxf[i], smeared_p / m_ge.pf[i] * m_ge.pyf[i],
                       smeared_p / m_ge.pf[i] * m_ge.pzf[i]);
@@ -112,18 +135,19 @@ Double_t GenieAnalysisDeltaStudiesCuts::passesCuts() {
 
             // And only use pions with reasonable acceptance, quite often they are negative or so on, this is kindof a
             // workaround, if pion acceptance is turned off use them regardless
-            pi_acceptance = piMinusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi());
-            if ((!m_do_pion_acceptance) || (pi_acceptance == TMath::Abs(pi_acceptance))) {
-                m_passed_pi_minus.push_back({{V3, smeared_E}, V3, pi_acceptance});
+            acceptance = piMinusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi());
+            if ((!m_do_pion_acceptance) || (acceptance == TMath::Abs(acceptance))) {
+                m_passed_pi_minus.push_back({{V3, smeared_E}, V3, acceptance});
             }
+
         } else if (m_ge.pdgf[i] == 211) { // pi+
             m_fs_number_of_pi_plus += 1;
             // required momentum for detection
             if (m_ge.pf[i] < m_p_pion_momentum_threshold) {
                 continue;
             }
-            smeared_p = gRandom->Gaus(m_ge.pf[i], m_smearing_reso_pi * m_ge.pf[i]);
-            smeared_E = sqrt(smeared_p * smeared_p + m_pion * m_pion);
+            smeared_p = gRandom->Gaus(m_ge.pf[i], m_smearing_reso_pion * m_ge.pf[i]);
+            smeared_E = sqrt(smeared_p * smeared_p + mass_pion * mass_pion);
 
             V3.SetXYZ(smeared_p / m_ge.pf[i] * m_ge.pxf[i], smeared_p / m_ge.pf[i] * m_ge.pyf[i],
                       smeared_p / m_ge.pf[i] * m_ge.pzf[i]);
@@ -137,10 +161,11 @@ Double_t GenieAnalysisDeltaStudiesCuts::passesCuts() {
 
             // And only use pions with reasonable acceptance, quite often they are negative or so on, this is kindof a
             // workaround, if pion acceptance is turned off use them regardless
-            pi_acceptance = piPlusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi());
-            if ((!m_do_pion_acceptance) || (pi_acceptance == TMath::Abs(pi_acceptance))) {
-                m_passed_pi_plus.push_back({{V3, smeared_E}, V3, pi_acceptance});
+            acceptance = piPlusAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi());
+            if ((!m_do_pion_acceptance) || (acceptance == TMath::Abs(acceptance))) {
+                m_passed_pi_plus.push_back({{V3, smeared_E}, V3, acceptance});
             }
+
         } else if (m_ge.pdgf[i] == 22) { // photon
             m_fs_number_of_photons += 1;
             // required momentum for detection
@@ -171,7 +196,7 @@ Double_t GenieAnalysisDeltaStudiesCuts::passesCuts() {
                 }
             }
 
-            m_passed_photons.push_back({{V3, m_ge.Ef[i]}, V3, photonAcceptance(V3.Mag(), V3.CosTheta(), V3.Phi())});
+            m_passed_photons.push_back({{V3, m_ge.Ef[i]}, V3});
         } else {
             /* std::cout << "extra FS particle -- " << m_ge.pdgf[i] << std::endl; */
         }

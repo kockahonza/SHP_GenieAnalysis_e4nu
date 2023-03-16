@@ -44,20 +44,23 @@ class GenieAnalysisDeltaStudiesCuts : public virtual GenieAnalysis {
 
     bool m_do_electron_fiducials{true};
     bool m_do_pion_fiducials{true};
+    bool m_do_proton_fiducials{true};
     bool m_do_photon_fiducials{true};
 
     bool m_do_electron_acceptance{true};
     bool m_do_pion_acceptance{true};
+    bool m_do_proton_acceptance{true};
 
     double m_p_pion_momentum_threshold{0.15};
     double m_p_photon_momentum_threshold{0.3};
+    double m_p_proton_momentum_threshold{0.3};
     double m_p_radiation_photon_angle{40};
     double m_p_radiation_photon_phi_diff{30};
 
-    // Electron, pion and photon smearing
-    double m_smearing_reso_el{0.005};
-    double m_smearing_reso_pi{0.007};
-    double m_smearing_reso_p{0.01};
+    // Electron, pion and nucleon smearing, photons aren't smeared
+    double m_smearing_reso_electron{0.005};
+    double m_smearing_reso_pion{0.007};
+    double m_smearing_reso_proton{0.01};
 
   protected:
     // Automatically determined parameters -- should be essentially const, but leaving mutable for easy initialization
@@ -71,10 +74,10 @@ class GenieAnalysisDeltaStudiesCuts : public virtual GenieAnalysis {
     const unique_ptr<FiducialWrapper> m_fiducials;
 
     // e2a acceptance maps
-    const unique_ptr<TFile> m_el_acceptance_file;
-    const unique_ptr<TFile> m_p_acceptance_file;
-    const unique_ptr<TFile> m_pip_acceptance_file;
-    const unique_ptr<TFile> m_pim_acceptance_file;
+    const unique_ptr<TFile> m_el_acceptance_file;       // electron
+    const unique_ptr<TFile> m_p_acceptance_file;        // proton
+    const unique_ptr<TFile> m_pip_acceptance_file;      // pi plus
+    const unique_ptr<TFile> m_pim_acceptance_file;      // pi minus
     // It seems to be necessary for I suppose performance reason? that these are found beforehand and not at each call
     // to acceptanceJoined
     const unique_ptr<TH3D> m_acc_el_gen, m_acc_el_acc, m_acc_p_gen, m_acc_p_acc, m_acc_pip_gen, m_acc_pip_acc,
@@ -93,12 +96,14 @@ class GenieAnalysisDeltaStudiesCuts : public virtual GenieAnalysis {
     Double_t m_reconstructed_W;
     Double_t m_bjorken_x;
 
-    // hadrons -- all of these only contain information on final state particles passing relevant cuts (pions
-    // need momentum above 0.15 for example)
-    vector<tuple<TLorentzVector, TVector3, double>>
-        m_passed_pi_plus; // tuple has the smeared 4 momentum, smeared 3 momentum and the pions calculated acceptance
+    // Collection of particles detectable by the CLAS6 detector -- these come from final state particles, passing
+    // fiducials and momentum thresholds and have acceptances (except photons) Only charged pions, protons and photons
+    // are detected as that's all the particles we have fiducials for. The tuples contain the smeared 4 momentum and 3
+    // momentum and calculated acceptance.
+    vector<tuple<TLorentzVector, TVector3, double>> m_passed_pi_plus;
     vector<tuple<TLorentzVector, TVector3, double>> m_passed_pi_minus;
-    vector<tuple<TLorentzVector, TVector3, double>> m_passed_photons;
+    vector<tuple<TLorentzVector, TVector3, double>> m_passed_protons;
+    vector<tuple<TLorentzVector, TVector3>> m_passed_photons; // photons don't have acceptances
 
     // "Primary" state properties, used as in the gst documentation, these are particles after interaction but before
     // FSI
@@ -166,7 +171,7 @@ class GenieAnalysisDeltaStudiesCuts : public virtual GenieAnalysis {
         return acceptanceJoined(p, cos_theta, phi, m_acc_el_gen, m_acc_el_acc);
     }
 
-    double photonAcceptance(const double &p, const double &cos_theta, const double &phi) {
+    double protonAcceptance(const double &p, const double &cos_theta, const double &phi) {
         return acceptanceJoined(p, cos_theta, phi, m_acc_p_gen, m_acc_p_acc);
     }
 
@@ -232,6 +237,8 @@ class FiducialWrapper {
     }
 
     bool electronCut(const TVector3 &momentum_V3) { return m_fiducial.EFiducialCut(m_beam_energy_str, momentum_V3); }
+
+    bool protonCut(const TVector3 &momentum_V3) { return m_fiducial.PFiducialCut(m_beam_energy_str, momentum_V3); }
 
     bool piAndPhotonCuts(const TVector3 &momentum_V3, const PiPhotonId &which_particle) {
         return m_fiducial.Pi_phot_fid_united(m_beam_energy_str, momentum_V3, static_cast<int>(which_particle));
