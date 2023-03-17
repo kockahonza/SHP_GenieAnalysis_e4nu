@@ -75,7 +75,7 @@ void GenieAnalysis::pointBranchesAtEvent() {
     m_genie_data->SetBranchAddress("niother", &m_ge.niother);
     m_genie_data->SetBranchAddress("ni", &m_ge.ni);
     m_genie_data->SetBranchAddress("pdgi", m_ge.pdgi);
-    m_genie_data->SetBranchAddress("resc", &m_ge.resc);
+    m_genie_data->SetBranchAddress("resc", m_ge.resc);
     m_genie_data->SetBranchAddress("Ei", m_ge.Ei);
     m_genie_data->SetBranchAddress("pxi", m_ge.pxi);
     m_genie_data->SetBranchAddress("pyi", m_ge.pyi);

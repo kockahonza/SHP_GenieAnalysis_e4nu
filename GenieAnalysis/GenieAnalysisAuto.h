@@ -88,7 +88,7 @@ class GenieAnalysisAutoHistograms : public virtual GenieAnalysis {
         {"Ws", {"Ws (generated in GENIE) from gst [GeV]", {1000, 0, 4}, [this]() { return m_ge.Ws; }}},
         {"W", {"W (computed in GENIE) from gst [GeV]", {1000, 0, 4}, [this]() { return m_ge.W; }}},
         {"fspl", {"Final state lepton PDG from gst", {51, -0.5, 50.5}, [this]() { return m_ge.fspl; }}},
-        {"resc", {"resc code from gst", {301, -150.5, 150.5}, [this]() { return m_ge.resc; }}},
+        {"resc", {"resc code from gst", {301, -150.5, 150.5}, [this]() { return m_ge.resc[0]; }}},
         {"wght", {"wght from gst", {100, -2, 2}, [this]() { return m_ge.wght; }}}};
 
     map<string, AutoType> m_known_types{

@@ -9,8 +9,12 @@
 
 #include "Fiducial.h"
 
+
 // Very simple struct to have all the fields stored in the genie summary table (gst) format
 struct GenieEvent {
+    static constexpr int max_ni{20};
+    static constexpr int max_nf{120};
+
     Int_t iev;
     Int_t neu;
     Int_t fspl;
@@ -84,20 +88,20 @@ struct GenieEvent {
     Int_t niem;
     Int_t niother;
     Int_t ni;
-    Int_t pdgi[2]; //[ni]
-    Int_t resc;
-    Double_t Ei[2];  //[ni]
-    Double_t pxi[2]; //[ni]
-    Double_t pyi[2]; //[ni]
-    Double_t pzi[2]; //[ni]
+    Int_t pdgi[max_ni]; //[ni]
+    Int_t resc[max_ni];
+    Double_t Ei[max_ni];  //[ni]
+    Double_t pxi[max_ni]; //[ni]
+    Double_t pyi[max_ni]; //[ni]
+    Double_t pzi[max_ni]; //[ni]
     Int_t nf;
-    Int_t pdgf[120];    //[nf]
-    Double_t Ef[120];   //[nf]
-    Double_t pxf[120];  //[nf]
-    Double_t pyf[120];  //[nf]
-    Double_t pzf[120];  //[nf]
-    Double_t pf[120];   //[nf]
-    Double_t cthf[120]; //[nf]
+    Int_t pdgf[max_nf];    //[nf]
+    Double_t Ef[max_nf];   //[nf]
+    Double_t pxf[max_nf];  //[nf]
+    Double_t pyf[max_nf];  //[nf]
+    Double_t pzf[max_nf];  //[nf]
+    Double_t pf[max_nf];   //[nf]
+    Double_t cthf[max_nf]; //[nf]
     Double_t vtxx;
     Double_t vtxy;
     Double_t vtxz;
