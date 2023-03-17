@@ -55,6 +55,8 @@ int main(int argc, char *argv[]) {
                                   {},
                                   {},
                                   {{"W", "Ws", {}},
+                                   {"fs_num_pip", "nfpip", {}},
+                                   {"fs_num_protons", "nfp", {}},
                                    {"resc", "passed_num_pip", {}},
                                    {"resc", "passed_num_pim", {}},
                                    {"resc", "passed_num_protons", {}},
