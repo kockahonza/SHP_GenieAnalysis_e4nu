@@ -331,9 +331,9 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisDeltaStudiesCuts, public G
         {"fs_num_pim",
          {"Number of pi minus in the final state", {6, -0.5, 5.5}, [this]() { return m_fs_number_of_pi_minus; }}},
         {"fs_num_protons",
-         {"Number of protons in the final state", {6, -0.5, 5.5}, [this]() { return m_fs_number_of_protons; }}},
+         {"Number of protons in the final state", {9, -0.5, 8.5}, [this]() { return m_fs_number_of_protons; }}},
         {"fs_num_neutrons",
-         {"Number of neutrons in the final state", {6, -0.5, 5.5}, [this]() { return m_fs_number_of_neutrons; }}},
+         {"Number of neutrons in the final state", {9, -0.5, 8.5}, [this]() { return m_fs_number_of_neutrons; }}},
         {"fs_num_photons",
          {"Number of photons in the final state", {6, -0.5, 5.5}, [this]() { return m_fs_number_of_photons; }}},
     };
