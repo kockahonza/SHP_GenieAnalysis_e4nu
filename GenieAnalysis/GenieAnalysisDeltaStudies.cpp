@@ -66,6 +66,14 @@ Double_t GenieAnalysisDeltaStudiesCuts::passesCuts() {
     m_passed_pi_minus.clear();
     m_passed_pi_plus.clear();
     m_passed_photons.clear();
+    m_passed_protons.clear();
+
+    if (m_gather_fs_particles) {
+        m_fs_pi_plus.clear();
+        m_fs_pi_minus.clear();
+        m_fs_protons.clear();
+        m_fs_neutrons.clear();
+    }
 
     m_ps_number_of_pi_plus = 0;
     m_ps_number_of_pi_minus = 0;

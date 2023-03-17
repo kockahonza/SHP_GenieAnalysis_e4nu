@@ -63,6 +63,8 @@ class GenieAnalysis1Pion1Nucleon : public GenieAnalysisDeltaStudies {
             n_num = m_fs_neutrons.size();
         }
 
+        /* std::cout << pip_num << "," << pim_num << "," << p_num << "," << n_num << std::endl; */
+
         if ((m_pi_type == PionType::Plus) && (pip_num == 1) && (pim_num == 0)) {
             if (m_run_type == RunType::Detector) {
                 std::tie(m_pion_V4, m_pion_V3, std::ignore) = m_passed_pi_plus[0];
