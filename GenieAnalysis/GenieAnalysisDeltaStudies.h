@@ -86,8 +86,7 @@ class GenieAnalysisDeltaStudiesCuts : public virtual GenieAnalysis {
         m_acc_pim_gen, m_acc_pim_acc;
 
   protected:
-    // Mostly physical properties of the event and system to be used in passesCuts and fot
-    // various properties
+    // Mostly physical properties of the event and system to be used in passesCuts and for various properties
     // will be set in constructor and then const
     Double_t m_beam_energy_val;
 

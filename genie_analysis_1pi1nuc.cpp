@@ -114,16 +114,28 @@ int simple_pi_nucleon_counts(int argc, char *argv[]) {
         return -1;
     }
 
-    GenieAnalysisPiNucleonCounts gapp{input_file.c_str(), (output_file + "_1pip0pim1p0n.root").c_str(), 1, 0, 1, 0};
+    GenieAnalysis1Pion1Nucleon gapp{input_file.c_str(), (output_file + "_n_1pip0pim1p0n.root").c_str(),
+                                    GenieAnalysis1Pion1Nucleon::RunType::Detector,
+                                    GenieAnalysis1Pion1Nucleon::PionType::Plus,
+                                    GenieAnalysis1Pion1Nucleon::NucleonType::Proton};
     gapp.runAnalysis();
 
-    GenieAnalysisPiNucleonCounts gapn{input_file.c_str(), (output_file + "_1pip0pim0p1n.root").c_str(), 1, 0, 0, 1};
+    GenieAnalysis1Pion1Nucleon gapn{input_file.c_str(), (output_file + "_n_1pip0pim0p1n.root").c_str(),
+                                    GenieAnalysis1Pion1Nucleon::RunType::Detector,
+                                    GenieAnalysis1Pion1Nucleon::PionType::Plus,
+                                    GenieAnalysis1Pion1Nucleon::NucleonType::Neutron};
     gapn.runAnalysis();
 
-    GenieAnalysisPiNucleonCounts gamp{input_file.c_str(), (output_file + "_0pip1pim1p0n.root").c_str(), 0, 1, 1, 0};
+    GenieAnalysis1Pion1Nucleon gamp{input_file.c_str(), (output_file + "_n_0pip1pim1p0n.root").c_str(),
+                                    GenieAnalysis1Pion1Nucleon::RunType::Detector,
+                                    GenieAnalysis1Pion1Nucleon::PionType::Minus,
+                                    GenieAnalysis1Pion1Nucleon::NucleonType::Proton};
     gamp.runAnalysis();
 
-    GenieAnalysisPiNucleonCounts gamn{input_file.c_str(), (output_file + "_0pip1pim0p1n.root").c_str(), 0, 1, 0, 1};
+    GenieAnalysis1Pion1Nucleon gamn{input_file.c_str(), (output_file + "_n_0pip1pim0p1n.root").c_str(),
+                                    GenieAnalysis1Pion1Nucleon::RunType::Detector,
+                                    GenieAnalysis1Pion1Nucleon::PionType::Minus,
+                                    GenieAnalysis1Pion1Nucleon::NucleonType::Neutron};
     gamn.runAnalysis();
 
     return 0;
