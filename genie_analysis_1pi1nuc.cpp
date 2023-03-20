@@ -61,16 +61,14 @@ class GA1Pion1Nucleon : public GACLAS6MC {
     };
 
   public:
-    GA1Pion1Nucleon(const char *filename, const char *output_filename, const RunType &run_type,
-                               const PionType &pi_type, const NucleonType &nuc_type, const vector<string> &stages = {},
-                               const vector<string> &properties = {}, const vector<string> &types = {},
-                               const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                               const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
-                               const char *gst_ttree_name = "gst")
-        : GenieAnalysis(filename, gst_ttree_name), GACLAS6MC{filename, output_filename,
-                                                                             stages,   properties,
-                                                                             types,    vs_property_plots,
-                                                                             target,   beam_energy},
+    GA1Pion1Nucleon(const char *filename, const char *output_filename, const RunType &run_type, const PionType &pi_type,
+                    const NucleonType &nuc_type, const vector<string> &stages = {},
+                    const vector<string> &properties = {}, const vector<string> &types = {},
+                    const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                    const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
+                    const char *gst_ttree_name = "gst")
+        : GenieAnalysis(filename, gst_ttree_name), GACLAS6MC{filename, output_filename,   stages, properties,
+                                                             types,    vs_property_plots, target, beam_energy},
           m_run_type{run_type}, m_pi_type{pi_type}, m_nuc_type{nuc_type} {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
         m_gather_fs_particles = true;
@@ -162,30 +160,26 @@ int simple_pi_nucleon_counts(int argc, char *argv[]) {
     }
 
     GA1Pion1Nucleon gapp{input_file.c_str(), (output_file + "_n_1pip0pim1p0n_Wlucas.root").c_str(),
-                                    GA1Pion1Nucleon::RunType::Detector,
-                                    GA1Pion1Nucleon::PionType::Plus,
-                                    GA1Pion1Nucleon::NucleonType::Proton};
+                         GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Plus,
+                         GA1Pion1Nucleon::NucleonType::Proton};
     gapp.m_p_Wcut_max = 1.405;
     gapp.runAnalysis();
 
     GA1Pion1Nucleon gapn{input_file.c_str(), (output_file + "_n_1pip0pim0p1n_Wlucas.root").c_str(),
-                                    GA1Pion1Nucleon::RunType::Detector,
-                                    GA1Pion1Nucleon::PionType::Plus,
-                                    GA1Pion1Nucleon::NucleonType::Neutron};
+                         GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Plus,
+                         GA1Pion1Nucleon::NucleonType::Neutron};
     gapn.m_p_Wcut_max = 1.405;
     gapn.runAnalysis();
 
     GA1Pion1Nucleon gamp{input_file.c_str(), (output_file + "_n_0pip1pim1p0n_Wlucas.root").c_str(),
-                                    GA1Pion1Nucleon::RunType::Detector,
-                                    GA1Pion1Nucleon::PionType::Minus,
-                                    GA1Pion1Nucleon::NucleonType::Proton};
+                         GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Minus,
+                         GA1Pion1Nucleon::NucleonType::Proton};
     gamp.m_p_Wcut_max = 1.445;
     gamp.runAnalysis();
 
     GA1Pion1Nucleon gamn{input_file.c_str(), (output_file + "_n_0pip1pim0p1n_Wlucas.root").c_str(),
-                                    GA1Pion1Nucleon::RunType::Detector,
-                                    GA1Pion1Nucleon::PionType::Minus,
-                                    GA1Pion1Nucleon::NucleonType::Neutron};
+                         GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Minus,
+                         GA1Pion1Nucleon::NucleonType::Neutron};
     gamn.m_p_Wcut_max = 1.445;
     gamn.runAnalysis();
 

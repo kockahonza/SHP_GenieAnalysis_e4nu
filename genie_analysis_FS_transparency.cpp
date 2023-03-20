@@ -23,14 +23,12 @@ class GAFinalStateTransparency : public GACLAS6MC {
 
   public:
     GAFinalStateTransparency(const char *filename, const char *output_filename, const vector<string> &stages = {},
-                                const vector<string> &properties = {}, const vector<string> &types = {},
-                                const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                                const Target &target = Target::C12,
-                                const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
-                                const char *gst_ttree_name = "gst")
-        : GenieAnalysis(filename, gst_ttree_name), GACLAS6MC{
-                                                       filename, output_filename,   stages, properties,
-                                                       types,    vs_property_plots, target, beam_energy} {
+                             const vector<string> &properties = {}, const vector<string> &types = {},
+                             const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                             const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
+                             const char *gst_ttree_name = "gst")
+        : GenieAnalysis(filename, gst_ttree_name), GACLAS6MC{filename, output_filename,   stages, properties,
+                                                             types,    vs_property_plots, target, beam_energy} {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
 
@@ -110,19 +108,19 @@ int main(int argc, char *argv[]) {
     /* ga1.runAnalysis(); */
 
     GAFinalStateTransparency ga1{input_file.c_str(),
-                                    (output_file + "_FSt_resc.root").c_str(),
-                                    {},
-                                    {},
-                                    {},
-                                    {{"W", "Ws", {}},
-                                     {"fs_num_pip", "nfpip", {}},
-                                     {"fs_num_protons", "nfp", {}},
-                                     {"resc", "passed_num_pip", {}},
-                                     {"resc", "passed_num_pim", {}},
-                                     {"resc", "passed_num_protons", {}},
-                                     {"resc", "fs_num_pip", {}},
-                                     {"resc", "fs_num_pim", {}},
-                                     {"resc", "fs_num_protons", {}}}};
+                                 (output_file + "_FSt_resc.root").c_str(),
+                                 {},
+                                 {},
+                                 {},
+                                 {{"W", "Ws", {}},
+                                  {"fs_num_pip", "nfpip", {}},
+                                  {"fs_num_protons", "nfp", {}},
+                                  {"resc", "passed_num_pip", {}},
+                                  {"resc", "passed_num_pim", {}},
+                                  {"resc", "passed_num_protons", {}},
+                                  {"resc", "fs_num_pip", {}},
+                                  {"resc", "fs_num_pim", {}},
+                                  {"resc", "fs_num_protons", {}}}};
     ga1.runAnalysis();
 
     return 0;

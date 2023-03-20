@@ -268,8 +268,7 @@ Double_t GACLAS6MCCuts::passesCuts() {
 }
 
 double GACLAS6MCCuts::acceptanceJoined(const double &p, const double &cos_theta, double phi,
-                                                       const std::unique_ptr<TH3D> &generated,
-                                                       const std::unique_ptr<TH3D> &accepted) {
+                                       const std::unique_ptr<TH3D> &generated, const std::unique_ptr<TH3D> &accepted) {
     // first map -pi, pi to [0, 2pi
     if (phi < 0) {
         phi += 2 * TMath::Pi();

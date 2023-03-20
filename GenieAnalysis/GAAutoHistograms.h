@@ -109,8 +109,8 @@ class GAAutoHistograms : public virtual GenieAnalysis {
     std::array<Color_t, m_number_colors> m_colors{kBlack, kRed, kGreen, kBlue, kMagenta, kCyan, kOrange};
 
     GAAutoHistograms(const char *filename, const char *output_filename, const vector<string> &stages = {},
-                                const vector<string> &properties = {}, const vector<string> &types = {},
-                                const vector<AutoVsPlot> vs_property_plots = {}, const char *gst_ttree_name = "gst")
+                     const vector<string> &properties = {}, const vector<string> &types = {},
+                     const vector<AutoVsPlot> vs_property_plots = {}, const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name),
           m_output_file(TFile::Open(output_filename, "RECREATE")), m_stages{stages},
           m_properties{properties}, m_types{types}, m_vs_property_plots{vs_property_plots} {}

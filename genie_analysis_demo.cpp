@@ -2,8 +2,8 @@
 
 #include <TH1F.h>
 
-#include "GenieAnalysis/GenieAnalysis.h"
 #include "GenieAnalysis/GAAutoHistograms.h"
+#include "GenieAnalysis/GenieAnalysis.h"
 #include "GenieAnalysis/misc.h"
 
 constexpr Int_t W_hist_bins{1000};

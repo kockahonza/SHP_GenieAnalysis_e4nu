@@ -39,15 +39,14 @@ class GA1Pion : public GACLAS6MC {
 
   public:
     GA1Pion(const char *filename, const char *output_filename, PionType pion_type = PionType::Either,
-                       optional<int> proton_count = {}, optional<int> neutron_count = {},
-                       const vector<string> &stages = {}, const vector<string> &properties = {},
-                       const vector<string> &types = {},
-                       const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                       const Target &target = GACLAS6MC::Target::C12,
-                       const BeamEnergy &beam_energy = GACLAS6MC::BeamEnergy::MeV_2261)
+            optional<int> proton_count = {}, optional<int> neutron_count = {}, const vector<string> &stages = {},
+            const vector<string> &properties = {}, const vector<string> &types = {},
+            const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+            const Target &target = GACLAS6MC::Target::C12,
+            const BeamEnergy &beam_energy = GACLAS6MC::BeamEnergy::MeV_2261)
 
-        : GenieAnalysis(filename), GACLAS6MC(filename, output_filename, stages, properties, types,
-                                                             vs_property_plots, target, beam_energy),
+        : GenieAnalysis(filename),
+          GACLAS6MC(filename, output_filename, stages, properties, types, vs_property_plots, target, beam_energy),
           m_pion_type{pion_type}, m_proton_count{proton_count}, m_neutron_count{neutron_count} {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
@@ -112,23 +111,23 @@ int main(int argc, char *argv[]) {
             input_file = "/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root";
 
             GA1Pion ga{input_file.c_str(),
-                                  "output_local_pip.root",
-                                  GA1Pion::PionType::Plus,
-                                  {},
-                                  {},
-                                  {"nocut"},
-                                  properties,
-                                  types};
+                       "output_local_pip.root",
+                       GA1Pion::PionType::Plus,
+                       {},
+                       {},
+                       {"nocut"},
+                       properties,
+                       types};
             ga.runAnalysis();
 
             GA1Pion ga2{input_file.c_str(),
-                                   "output_local_pim.root",
-                                   GA1Pion::PionType::Minus,
-                                   {},
-                                   {},
-                                   {"nocut"},
-                                   properties,
-                                   types};
+                        "output_local_pim.root",
+                        GA1Pion::PionType::Minus,
+                        {},
+                        {},
+                        {"nocut"},
+                        properties,
+                        types};
             ga2.runAnalysis();
 
             /* GA1Pion ga3{input_file.c_str(), */

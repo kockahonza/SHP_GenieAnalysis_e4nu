@@ -9,17 +9,15 @@
 class GA1Proton : public GACLAS6MC {
   public:
     GA1Proton(const char *filename, const char *output_filename,
-                         // Specify the analysis - which stages, properties and types to do histograms for
-                         const vector<string> &stages = {}, const vector<string> &properties = {},
-                         const vector<string> &types = {},
-                         const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                         // Select run
-                         const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
-                         // Pass this to GenieAnalysis
-                         const char *gst_ttree_name = "gst")
+              // Specify the analysis - which stages, properties and types to do histograms for
+              const vector<string> &stages = {}, const vector<string> &properties = {},
+              const vector<string> &types = {}, const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+              // Select run
+              const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
+              // Pass this to GenieAnalysis
+              const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name),
-          GACLAS6MC(filename, output_filename, stages, properties, types, vs_property_plots, target,
-                                    beam_energy) {
+          GACLAS6MC(filename, output_filename, stages, properties, types, vs_property_plots, target, beam_energy) {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
 
@@ -52,36 +50,36 @@ int main(int argc, char *argv[]) {
     }
 
     GA1Proton ga1{input_file.c_str(),
-                             (output_file + "_1p.root").c_str(),
-                             {},
-                             {
-                                 "W",
-                                 "Ws",
-                                 "resc",
-                                 "reco_W",
-                                 "bjorken_x",
-                                 "el_p",
-                                 "passed_num_pip",
-                                 "passed_num_pim",
-                                 "ps_num_pip",
-                                 "ps_num_pim",
-                                 "ps_num_protons",
-                                 "ps_num_neutrons",
-                                 "fs_num_pip",
-                                 "fs_num_pim",
-                                 "fs_num_protons",
-                                 "fs_num_neutrons",
-                             },
-                             {},
-                             {
-                                 {"W", "Ws", {}},
-                                 {"W", "el_p", {}},
-                                 {"W", "bjorken_x", {}},
-                                 {"Ws", "bjorken_x", {}},
-                                 {"passed_num_pip", "passed_num_pim", {}},
-                                 {"fs_num_pim", "passed_num_pim", {}},
-                                 {"fs_num_pip", "passed_num_pip", {}},
-                             }};
+                  (output_file + "_1p.root").c_str(),
+                  {},
+                  {
+                      "W",
+                      "Ws",
+                      "resc",
+                      "reco_W",
+                      "bjorken_x",
+                      "el_p",
+                      "passed_num_pip",
+                      "passed_num_pim",
+                      "ps_num_pip",
+                      "ps_num_pim",
+                      "ps_num_protons",
+                      "ps_num_neutrons",
+                      "fs_num_pip",
+                      "fs_num_pim",
+                      "fs_num_protons",
+                      "fs_num_neutrons",
+                  },
+                  {},
+                  {
+                      {"W", "Ws", {}},
+                      {"W", "el_p", {}},
+                      {"W", "bjorken_x", {}},
+                      {"Ws", "bjorken_x", {}},
+                      {"passed_num_pip", "passed_num_pim", {}},
+                      {"fs_num_pim", "passed_num_pim", {}},
+                      {"fs_num_pip", "passed_num_pip", {}},
+                  }};
     ga1.runAnalysis();
 
     return 0;

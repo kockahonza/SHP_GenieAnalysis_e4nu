@@ -134,11 +134,10 @@ class GACLAS6MCCuts : public virtual GenieAnalysis {
 
   public:
     GACLAS6MCCuts(const char *filename,
-                                  // Select run
-                                  const Target &target = Target::C12,
-                                  const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
-                                  // Pass this to GenieAnalysis
-                                  const char *gst_ttree_name = "gst")
+                  // Select run
+                  const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
+                  // Pass this to GenieAnalysis
+                  const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name), m_target{target}, m_beam_energy{beam_energy},
 
           m_fiducials{std::make_unique<FiducialWrapper>(m_target, m_beam_energy)},
@@ -234,8 +233,7 @@ class FiducialWrapper {
     Fiducial m_fiducial;
 
   public:
-    FiducialWrapper(const GACLAS6MCCuts::Target &target,
-                    const GACLAS6MCCuts::BeamEnergy &beam_energy)
+    FiducialWrapper(const GACLAS6MCCuts::Target &target, const GACLAS6MCCuts::BeamEnergy &beam_energy)
         : m_target(target), m_beam_energy(beam_energy), m_target_str{targetStr(m_target)},
           m_beam_energy_str{beamEnergyStr(m_beam_energy)}, m_fiducial{} {
 
@@ -243,8 +241,8 @@ class FiducialWrapper {
         m_fiducial.InitEClimits();
 
         // The first value is torusCurrent, values taken from original
-        m_fiducial.SetConstants(m_beam_energy == GACLAS6MCCuts::BeamEnergy::MeV_1161 ? 750 : 2250,
-                                m_target_str, {{"1161", 1.161}, {"2261", 2.261}, {"4461", 4.461}});
+        m_fiducial.SetConstants(m_beam_energy == GACLAS6MCCuts::BeamEnergy::MeV_1161 ? 750 : 2250, m_target_str,
+                                {{"1161", 1.161}, {"2261", 2.261}, {"4461", 4.461}});
         m_fiducial.SetFiducialCutParameters(m_beam_energy_str);
     }
 
@@ -342,14 +340,13 @@ class GACLAS6MC : public GACLAS6MCCuts, public GAAutoHistograms {
 
   public:
     GACLAS6MC(const char *filename, const char *output_filename,
-                              // Specify the analysis - which stages, properties and types to do histograms for
-                              const vector<string> &stages = {}, const vector<string> &properties = {},
-                              const vector<string> &types = {},
-                              const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                              // Select run
-                              const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
-                              // Pass this to GenieAnalysis
-                              const char *gst_ttree_name = "gst")
+              // Specify the analysis - which stages, properties and types to do histograms for
+              const vector<string> &stages = {}, const vector<string> &properties = {},
+              const vector<string> &types = {}, const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+              // Select run
+              const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
+              // Pass this to GenieAnalysis
+              const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name), GACLAS6MCCuts(filename, target, beam_energy),
           GAAutoHistograms(filename, output_filename, stages, properties, types, vs_property_plots) {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
@@ -369,15 +366,15 @@ class GAPiNucleonCounts : public GACLAS6MC {
 
   public:
     GAPiNucleonCounts(const char *filename, const char *output_filename, optional<int> pi_plus_count = {},
-                                 optional<int> pi_minus_count = {}, optional<int> proton_count = {},
-                                 optional<int> neutron_count = {}, const vector<string> &stages = {},
-                                 const vector<string> &properties = {}, const vector<string> &types = {},
-                                 const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                                 const Target &target = GACLAS6MC::Target::C12,
-                                 const BeamEnergy &beam_energy = GACLAS6MC::BeamEnergy::MeV_2261)
+                      optional<int> pi_minus_count = {}, optional<int> proton_count = {},
+                      optional<int> neutron_count = {}, const vector<string> &stages = {},
+                      const vector<string> &properties = {}, const vector<string> &types = {},
+                      const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                      const Target &target = GACLAS6MC::Target::C12,
+                      const BeamEnergy &beam_energy = GACLAS6MC::BeamEnergy::MeV_2261)
 
-        : GenieAnalysis(filename), GACLAS6MC(filename, output_filename, stages, properties, types,
-                                                             vs_property_plots, target, beam_energy),
+        : GenieAnalysis(filename),
+          GACLAS6MC(filename, output_filename, stages, properties, types, vs_property_plots, target, beam_energy),
           m_pi_plus_count{pi_plus_count}, m_pi_minus_count{pi_minus_count}, m_proton_count{proton_count},
           m_neutron_count{neutron_count} {
         /* m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end()); */

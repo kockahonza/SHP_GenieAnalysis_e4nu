@@ -1,6 +1,8 @@
 #ifndef MISC_H
 #define MISC_H
 
+#include <string>
+
 #include <TMath.h>
 
 // Useful environment constants
@@ -26,5 +28,8 @@ constexpr double CenterThirdSector = 150;
 constexpr double CenterFourthSector = 210;
 constexpr double CenterFifthSector = 270;
 constexpr double CenterSixthSector = 330;
+
+// Automatically get file paths on local and full runs for the CLAS6 data and MC
+std::string get_MC_path();
 
 #endif

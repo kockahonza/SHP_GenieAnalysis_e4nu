@@ -3,7 +3,12 @@ ROOTLDFLAGS := $(shell root-config --ldflags)
 ROOTLIBS    := $(shell root-config --libs) -lEG
 ROOTGLIBS   := $(shell root-config --glibs)
 
-GA_LIB_OBJECTS := GenieAnalysis/GenieAnalysis.o GenieAnalysis/misc.o GenieAnalysis/GAAutoHistograms.o GenieAnalysis/Fiducial.o GenieAnalysis/GACLAS6MC.o
+GA_LIB_OBJECTS := GenieAnalysis/GenieAnalysis.o \
+				  GenieAnalysis/GAAutoHistograms.o \
+				  GenieAnalysis/GACLAS6MC.o \
+				  GenieAnalysis/GACLAS6Data.o \
+				  GenieAnalysis/Fiducial.o \
+				  GenieAnalysis/misc.o
 
 CXX       := g++
 CXXFLAGS  += -std=c++17 -Wall -Wshadow -Warray-bounds -Wmissing-field-initializers -fPIC $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -O3
@@ -11,7 +16,10 @@ LDFLAGS   += -std=c++17 $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -O3
 
 
 # Executables
-all: genie_analysis_deltas genie_analysis_1pi1nuc genie_analysis_FS_transparency genie_analysis_1p
+all: genie_analysis_deltas genie_analysis_1pi1nuc genie_analysis_FS_transparency genie_analysis_data
+
+genie_analysis_data: genie_analysis_data.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o $@ $^ $(LDFLAGS)
 
 genie_analysis_1p: genie_analysis_1p.cpp $(GA_LIB_OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
