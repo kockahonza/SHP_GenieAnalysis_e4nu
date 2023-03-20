@@ -15,7 +15,7 @@ class GenieAnalysis1Pion1Nucleon : public GenieAnalysisDeltaStudies {
 
     enum class NucleonType { Proton, Neutron };
 
-    bool m_do_acceptances{true};
+    bool m_use_acceptances{true};
 
     double m_p_Wcut_min{0};
     double m_p_Wcut_max{std::numeric_limits<double>::max()};
@@ -135,7 +135,7 @@ class GenieAnalysis1Pion1Nucleon : public GenieAnalysisDeltaStudies {
             return 0;
         }
 
-        if (m_do_acceptances) {
+        if (m_use_acceptances) {
             return weight * m_pion_acceptance * m_nucleon_acceptance;
         } else {
             return weight;
@@ -161,28 +161,32 @@ int simple_pi_nucleon_counts(int argc, char *argv[]) {
         return -1;
     }
 
-    GenieAnalysis1Pion1Nucleon gapp{input_file.c_str(), (output_file + "_n_1pip0pim1p0n.root").c_str(),
+    GenieAnalysis1Pion1Nucleon gapp{input_file.c_str(), (output_file + "_n_1pip0pim1p0n_Wlucas.root").c_str(),
                                     GenieAnalysis1Pion1Nucleon::RunType::Detector,
                                     GenieAnalysis1Pion1Nucleon::PionType::Plus,
                                     GenieAnalysis1Pion1Nucleon::NucleonType::Proton};
+    gapp.m_p_Wcut_max = 1.405;
     gapp.runAnalysis();
 
-    GenieAnalysis1Pion1Nucleon gapn{input_file.c_str(), (output_file + "_n_1pip0pim0p1n.root").c_str(),
+    GenieAnalysis1Pion1Nucleon gapn{input_file.c_str(), (output_file + "_n_1pip0pim0p1n_Wlucas.root").c_str(),
                                     GenieAnalysis1Pion1Nucleon::RunType::Detector,
                                     GenieAnalysis1Pion1Nucleon::PionType::Plus,
                                     GenieAnalysis1Pion1Nucleon::NucleonType::Neutron};
+    gapn.m_p_Wcut_max = 1.405;
     gapn.runAnalysis();
 
-    GenieAnalysis1Pion1Nucleon gamp{input_file.c_str(), (output_file + "_n_0pip1pim1p0n.root").c_str(),
+    GenieAnalysis1Pion1Nucleon gamp{input_file.c_str(), (output_file + "_n_0pip1pim1p0n_Wlucas.root").c_str(),
                                     GenieAnalysis1Pion1Nucleon::RunType::Detector,
                                     GenieAnalysis1Pion1Nucleon::PionType::Minus,
                                     GenieAnalysis1Pion1Nucleon::NucleonType::Proton};
+    gamp.m_p_Wcut_max = 1.445;
     gamp.runAnalysis();
 
-    GenieAnalysis1Pion1Nucleon gamn{input_file.c_str(), (output_file + "_n_0pip1pim0p1n.root").c_str(),
+    GenieAnalysis1Pion1Nucleon gamn{input_file.c_str(), (output_file + "_n_0pip1pim0p1n_Wlucas.root").c_str(),
                                     GenieAnalysis1Pion1Nucleon::RunType::Detector,
                                     GenieAnalysis1Pion1Nucleon::PionType::Minus,
                                     GenieAnalysis1Pion1Nucleon::NucleonType::Neutron};
+    gamn.m_p_Wcut_max = 1.445;
     gamn.runAnalysis();
 
     return 0;

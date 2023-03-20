@@ -49,10 +49,10 @@ Double_t GenieAnalysisDeltaStudiesCuts::passesCuts() {
 
     // Calculation of kinematic quantities (nu, Q2, x bjorken, q and W) -- literally taken from original though
     const TLorentzVector el_change{m_smeared_el_V4 - TLorentzVector{0, 0, m_beam_energy_val, m_beam_energy_val}};
-    const double Q2 = -el_change.Mag2();
+    m_reconstructed_Q2 = -el_change.Mag2();
 
     const double nu = -el_change.E();
-    m_bjorken_x = Q2 / (2 * mass_proton * nu);
+    m_bjorken_x = m_reconstructed_Q2 / (2 * mass_proton * nu);
 
     m_reconstructed_W = TMath::Sqrt((mass_proton + nu) * (mass_proton + nu) - el_change.Vect().Mag2());
 

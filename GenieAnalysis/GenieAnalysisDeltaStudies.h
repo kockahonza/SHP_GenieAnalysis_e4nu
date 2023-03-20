@@ -95,6 +95,7 @@ class GenieAnalysisDeltaStudiesCuts : public virtual GenieAnalysis {
     Double_t m_electron_acceptance_weight;
 
     Double_t m_reconstructed_W;
+    Double_t m_reconstructed_Q2;
     Double_t m_bjorken_x;
 
     // Collection of particles detectable by the CLAS6 detector -- these come from final state particles, passing
@@ -299,6 +300,7 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisDeltaStudiesCuts, public G
 
         // Physical properties of the event as a whole
         {"reco_W", {"Reconstructed W [GeV]", {1000, 0, 4}, [this]() { return m_reconstructed_W; }}},
+        {"reco_Q2", {"Reconsotructed Q^2 [GeV]", {1000, 0, 4}, [this]() { return m_reconstructed_Q2; }}},
         {"bjorken_x", {"Bjorken x", {1000, 0, 1.01}, [this]() { return m_bjorken_x; }}},
 
         // Passed particle properties, this mainly applies to pi+- and protons which there may be multiple of and we
