@@ -1,6 +1,6 @@
-#include "GenieAnalysisAuto.h"
+#include "GAAutoHistograms.h"
 
-void GenieAnalysisAutoHistograms::prepareAutoHists() {
+void GAAutoHistograms::prepareAutoHists() {
     string name;
     string title;
     Int_t nbinsx;
@@ -59,7 +59,7 @@ void GenieAnalysisAutoHistograms::prepareAutoHists() {
     }
 }
 
-void GenieAnalysisAutoHistograms::runPostAnalysis(const Long64_t &number_of_entries) {
+void GAAutoHistograms::runPostAnalysis(const Long64_t &number_of_entries) {
     int color_i;
     for (const string &property : m_properties) {
         THStack hist_stack{property.c_str(), m_known_properties[property].title.c_str()};

@@ -1,7 +1,7 @@
-#include "GenieAnalysisDeltaStudies.h"
+#include "GACLAS6MC.h"
 #include <TMath.h>
 
-Double_t GenieAnalysisDeltaStudiesCuts::passesCuts() {
+Double_t GACLAS6MCCuts::passesCuts() {
     // Do electron smearing
     const double smeared_pl{gRandom->Gaus(m_ge.pl, m_smearing_reso_electron * m_ge.pl)};
     const double smeared_El{sqrt(smeared_pl * smeared_pl + mass_electron * mass_electron)};
@@ -267,7 +267,7 @@ Double_t GenieAnalysisDeltaStudiesCuts::passesCuts() {
     }
 }
 
-double GenieAnalysisDeltaStudiesCuts::acceptanceJoined(const double &p, const double &cos_theta, double phi,
+double GACLAS6MCCuts::acceptanceJoined(const double &p, const double &cos_theta, double phi,
                                                        const std::unique_ptr<TH3D> &generated,
                                                        const std::unique_ptr<TH3D> &accepted) {
     // first map -pi, pi to [0, 2pi

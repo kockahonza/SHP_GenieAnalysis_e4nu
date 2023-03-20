@@ -7,8 +7,6 @@
 #include <TH1F.h>
 #include <TTree.h>
 
-#include "Fiducial.h"
-
 // Very simple struct to have all the fields stored in the genie summary table (gst) format
 struct GenieEvent {
     static constexpr int max_ni{20};

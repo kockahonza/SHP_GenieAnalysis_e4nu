@@ -8,7 +8,8 @@
 #include <TMath.h>
 #include <TRandom.h>
 
-#include "GenieAnalysisAuto.h"
+#include "Fiducial.h"
+#include "GAAutoHistograms.h"
 #include "misc.h"
 
 class FiducialWrapper;
@@ -21,10 +22,10 @@ using std::unique_ptr, std::optional;
  * the primary and final states. The electron properties are made available here any single pion properties should be
  * done in inheriting classes.
  *
- * The class collects no data, `GenieAnalysisDeltaStudies` also adds the auto histogram functionality and many available
+ * The class collects no data, `GACLAS6MC` also adds the auto histogram functionality and many available
  * properties, most other classes then inherit from that.
  */
-class GenieAnalysisDeltaStudiesCuts : public virtual GenieAnalysis {
+class GACLAS6MCCuts : public virtual GenieAnalysis {
   public:
     // Configuration options for the major target/energy runs
     enum class Target { C12, Fe56 };
@@ -132,7 +133,7 @@ class GenieAnalysisDeltaStudiesCuts : public virtual GenieAnalysis {
     Int_t m_fs_number_of_photons;
 
   public:
-    GenieAnalysisDeltaStudiesCuts(const char *filename,
+    GACLAS6MCCuts(const char *filename,
                                   // Select run
                                   const Target &target = Target::C12,
                                   const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
@@ -224,8 +225,8 @@ class FiducialWrapper {
   public:
     enum class PiPhotonId : int { Minus = -1, Photon = 0, Plus = 1 };
 
-    const GenieAnalysisDeltaStudiesCuts::Target m_target;
-    const GenieAnalysisDeltaStudiesCuts::BeamEnergy m_beam_energy;
+    const GACLAS6MCCuts::Target m_target;
+    const GACLAS6MCCuts::BeamEnergy m_beam_energy;
     const string m_target_str;
     const string m_beam_energy_str;
 
@@ -233,8 +234,8 @@ class FiducialWrapper {
     Fiducial m_fiducial;
 
   public:
-    FiducialWrapper(const GenieAnalysisDeltaStudiesCuts::Target &target,
-                    const GenieAnalysisDeltaStudiesCuts::BeamEnergy &beam_energy)
+    FiducialWrapper(const GACLAS6MCCuts::Target &target,
+                    const GACLAS6MCCuts::BeamEnergy &beam_energy)
         : m_target(target), m_beam_energy(beam_energy), m_target_str{targetStr(m_target)},
           m_beam_energy_str{beamEnergyStr(m_beam_energy)}, m_fiducial{} {
 
@@ -242,7 +243,7 @@ class FiducialWrapper {
         m_fiducial.InitEClimits();
 
         // The first value is torusCurrent, values taken from original
-        m_fiducial.SetConstants(m_beam_energy == GenieAnalysisDeltaStudiesCuts::BeamEnergy::MeV_1161 ? 750 : 2250,
+        m_fiducial.SetConstants(m_beam_energy == GACLAS6MCCuts::BeamEnergy::MeV_1161 ? 750 : 2250,
                                 m_target_str, {{"1161", 1.161}, {"2261", 2.261}, {"4461", 4.461}});
         m_fiducial.SetFiducialCutParameters(m_beam_energy_str);
     }
@@ -255,21 +256,21 @@ class FiducialWrapper {
         return m_fiducial.Pi_phot_fid_united(m_beam_energy_str, momentum_V3, static_cast<int>(which_particle));
     }
 
-    static string targetStr(const GenieAnalysisDeltaStudiesCuts::Target &target) {
-        if (target == GenieAnalysisDeltaStudiesCuts::Target::C12) {
+    static string targetStr(const GACLAS6MCCuts::Target &target) {
+        if (target == GACLAS6MCCuts::Target::C12) {
             return "12C";
-        } else if (target == GenieAnalysisDeltaStudiesCuts::Target::Fe56) {
+        } else if (target == GACLAS6MCCuts::Target::Fe56) {
             return "12C"; // There's no dedicated Fe file and original used 12C for anything except He
         }
         throw "This should not happen";
     }
 
-    static string beamEnergyStr(const GenieAnalysisDeltaStudiesCuts::BeamEnergy &beam_energy) {
-        if (beam_energy == GenieAnalysisDeltaStudiesCuts::BeamEnergy::MeV_1161) {
+    static string beamEnergyStr(const GACLAS6MCCuts::BeamEnergy &beam_energy) {
+        if (beam_energy == GACLAS6MCCuts::BeamEnergy::MeV_1161) {
             return "1161";
-        } else if (beam_energy == GenieAnalysisDeltaStudiesCuts::BeamEnergy::MeV_2261) {
+        } else if (beam_energy == GACLAS6MCCuts::BeamEnergy::MeV_2261) {
             return "2261";
-        } else if (beam_energy == GenieAnalysisDeltaStudiesCuts::BeamEnergy::MeV_4461) {
+        } else if (beam_energy == GACLAS6MCCuts::BeamEnergy::MeV_4461) {
             return "4461";
         }
         throw "This should not happen";
@@ -277,10 +278,10 @@ class FiducialWrapper {
 };
 
 /*
- * Adds automatic histogram generation from `GenieAnalysisAutoHistograms` and a bunch of suitable properties to
- * `GenieAnalysisDeltaStudiesCuts`.
+ * Adds automatic histogram generation from `GAAutoHistograms` and a bunch of suitable properties to
+ * `GACLAS6MCCuts`.
  */
-class GenieAnalysisDeltaStudies : public GenieAnalysisDeltaStudiesCuts, public GenieAnalysisAutoHistograms {
+class GACLAS6MC : public GACLAS6MCCuts, public GAAutoHistograms {
   protected:
     // Extensions to automatic TH1Fs
     map<string, AutoProperty> m_new_known_properties{
@@ -340,17 +341,17 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisDeltaStudiesCuts, public G
     };
 
   public:
-    GenieAnalysisDeltaStudies(const char *filename, const char *output_filename,
+    GACLAS6MC(const char *filename, const char *output_filename,
                               // Specify the analysis - which stages, properties and types to do histograms for
                               const vector<string> &stages = {}, const vector<string> &properties = {},
                               const vector<string> &types = {},
-                              const vector<GenieAnalysisAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                              const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
                               // Select run
                               const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
                               // Pass this to GenieAnalysis
                               const char *gst_ttree_name = "gst")
-        : GenieAnalysis(filename, gst_ttree_name), GenieAnalysisDeltaStudiesCuts(filename, target, beam_energy),
-          GenieAnalysisAutoHistograms(filename, output_filename, stages, properties, types, vs_property_plots) {
+        : GenieAnalysis(filename, gst_ttree_name), GACLAS6MCCuts(filename, target, beam_energy),
+          GAAutoHistograms(filename, output_filename, stages, properties, types, vs_property_plots) {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
 };
@@ -359,7 +360,7 @@ class GenieAnalysisDeltaStudies : public GenieAnalysisDeltaStudiesCuts, public G
  * Continues on from DeltaStudies, adds specific cuts for the number of protons, neutrons and charged pions.
  * It is a very simple wrapper that might be good for quick tests, that's why I keep it here.
  */
-class GenieAnalysisPiNucleonCounts : public GenieAnalysisDeltaStudies {
+class GAPiNucleonCounts : public GACLAS6MC {
   public:
     const optional<int> m_pi_plus_count;
     const optional<int> m_pi_minus_count;
@@ -367,15 +368,15 @@ class GenieAnalysisPiNucleonCounts : public GenieAnalysisDeltaStudies {
     const optional<int> m_neutron_count;
 
   public:
-    GenieAnalysisPiNucleonCounts(const char *filename, const char *output_filename, optional<int> pi_plus_count = {},
+    GAPiNucleonCounts(const char *filename, const char *output_filename, optional<int> pi_plus_count = {},
                                  optional<int> pi_minus_count = {}, optional<int> proton_count = {},
                                  optional<int> neutron_count = {}, const vector<string> &stages = {},
                                  const vector<string> &properties = {}, const vector<string> &types = {},
-                                 const vector<GenieAnalysisAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                                 const Target &target = GenieAnalysisDeltaStudies::Target::C12,
-                                 const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
+                                 const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                                 const Target &target = GACLAS6MC::Target::C12,
+                                 const BeamEnergy &beam_energy = GACLAS6MC::BeamEnergy::MeV_2261)
 
-        : GenieAnalysis(filename), GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types,
+        : GenieAnalysis(filename), GACLAS6MC(filename, output_filename, stages, properties, types,
                                                              vs_property_plots, target, beam_energy),
           m_pi_plus_count{pi_plus_count}, m_pi_minus_count{pi_minus_count}, m_proton_count{proton_count},
           m_neutron_count{neutron_count} {
@@ -383,7 +384,7 @@ class GenieAnalysisPiNucleonCounts : public GenieAnalysisDeltaStudies {
     }
 
     Double_t passesCuts() override {
-        Double_t weight{GenieAnalysisDeltaStudies::passesCuts()};
+        Double_t weight{GACLAS6MC::passesCuts()};
         if (weight == 0) {
             return 0;
         }

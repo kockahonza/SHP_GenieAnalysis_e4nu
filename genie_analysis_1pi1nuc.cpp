@@ -4,10 +4,10 @@
 #include <limits>
 #include <tuple>
 
-#include "GenieAnalysis/GenieAnalysisDeltaStudies.h"
+#include "GenieAnalysis/GACLAS6MC.h"
 #include "GenieAnalysis/misc.h"
 
-class GenieAnalysis1Pion1Nucleon : public GenieAnalysisDeltaStudies {
+class GA1Pion1Nucleon : public GACLAS6MC {
   public:
     enum class RunType { Detector, FinalState };
 
@@ -61,13 +61,13 @@ class GenieAnalysis1Pion1Nucleon : public GenieAnalysisDeltaStudies {
     };
 
   public:
-    GenieAnalysis1Pion1Nucleon(const char *filename, const char *output_filename, const RunType &run_type,
+    GA1Pion1Nucleon(const char *filename, const char *output_filename, const RunType &run_type,
                                const PionType &pi_type, const NucleonType &nuc_type, const vector<string> &stages = {},
                                const vector<string> &properties = {}, const vector<string> &types = {},
-                               const vector<GenieAnalysisAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                               const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
                                const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
                                const char *gst_ttree_name = "gst")
-        : GenieAnalysis(filename, gst_ttree_name), GenieAnalysisDeltaStudies{filename, output_filename,
+        : GenieAnalysis(filename, gst_ttree_name), GACLAS6MC{filename, output_filename,
                                                                              stages,   properties,
                                                                              types,    vs_property_plots,
                                                                              target,   beam_energy},
@@ -77,7 +77,7 @@ class GenieAnalysis1Pion1Nucleon : public GenieAnalysisDeltaStudies {
     }
 
     Double_t passesCuts() override {
-        Double_t weight{GenieAnalysisDeltaStudies::passesCuts()};
+        Double_t weight{GACLAS6MC::passesCuts()};
 
         if (weight == 0) {
             return 0;
@@ -161,31 +161,31 @@ int simple_pi_nucleon_counts(int argc, char *argv[]) {
         return -1;
     }
 
-    GenieAnalysis1Pion1Nucleon gapp{input_file.c_str(), (output_file + "_n_1pip0pim1p0n_Wlucas.root").c_str(),
-                                    GenieAnalysis1Pion1Nucleon::RunType::Detector,
-                                    GenieAnalysis1Pion1Nucleon::PionType::Plus,
-                                    GenieAnalysis1Pion1Nucleon::NucleonType::Proton};
+    GA1Pion1Nucleon gapp{input_file.c_str(), (output_file + "_n_1pip0pim1p0n_Wlucas.root").c_str(),
+                                    GA1Pion1Nucleon::RunType::Detector,
+                                    GA1Pion1Nucleon::PionType::Plus,
+                                    GA1Pion1Nucleon::NucleonType::Proton};
     gapp.m_p_Wcut_max = 1.405;
     gapp.runAnalysis();
 
-    GenieAnalysis1Pion1Nucleon gapn{input_file.c_str(), (output_file + "_n_1pip0pim0p1n_Wlucas.root").c_str(),
-                                    GenieAnalysis1Pion1Nucleon::RunType::Detector,
-                                    GenieAnalysis1Pion1Nucleon::PionType::Plus,
-                                    GenieAnalysis1Pion1Nucleon::NucleonType::Neutron};
+    GA1Pion1Nucleon gapn{input_file.c_str(), (output_file + "_n_1pip0pim0p1n_Wlucas.root").c_str(),
+                                    GA1Pion1Nucleon::RunType::Detector,
+                                    GA1Pion1Nucleon::PionType::Plus,
+                                    GA1Pion1Nucleon::NucleonType::Neutron};
     gapn.m_p_Wcut_max = 1.405;
     gapn.runAnalysis();
 
-    GenieAnalysis1Pion1Nucleon gamp{input_file.c_str(), (output_file + "_n_0pip1pim1p0n_Wlucas.root").c_str(),
-                                    GenieAnalysis1Pion1Nucleon::RunType::Detector,
-                                    GenieAnalysis1Pion1Nucleon::PionType::Minus,
-                                    GenieAnalysis1Pion1Nucleon::NucleonType::Proton};
+    GA1Pion1Nucleon gamp{input_file.c_str(), (output_file + "_n_0pip1pim1p0n_Wlucas.root").c_str(),
+                                    GA1Pion1Nucleon::RunType::Detector,
+                                    GA1Pion1Nucleon::PionType::Minus,
+                                    GA1Pion1Nucleon::NucleonType::Proton};
     gamp.m_p_Wcut_max = 1.445;
     gamp.runAnalysis();
 
-    GenieAnalysis1Pion1Nucleon gamn{input_file.c_str(), (output_file + "_n_0pip1pim0p1n_Wlucas.root").c_str(),
-                                    GenieAnalysis1Pion1Nucleon::RunType::Detector,
-                                    GenieAnalysis1Pion1Nucleon::PionType::Minus,
-                                    GenieAnalysis1Pion1Nucleon::NucleonType::Neutron};
+    GA1Pion1Nucleon gamn{input_file.c_str(), (output_file + "_n_0pip1pim0p1n_Wlucas.root").c_str(),
+                                    GA1Pion1Nucleon::RunType::Detector,
+                                    GA1Pion1Nucleon::PionType::Minus,
+                                    GA1Pion1Nucleon::NucleonType::Neutron};
     gamn.m_p_Wcut_max = 1.445;
     gamn.runAnalysis();
 

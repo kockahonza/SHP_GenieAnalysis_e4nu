@@ -40,7 +40,7 @@ using std::vector, std::string, std::map, std::tuple, std::pair, std::function;
  * string passed to the constructor another set of all the TH1Fs is created and filled whenever `useEntryAtStage` is
  * called with that particular stage string passed as an argument.
  */
-class GenieAnalysisAutoHistograms : public virtual GenieAnalysis {
+class GAAutoHistograms : public virtual GenieAnalysis {
   public:
     struct AutoProperty {
         string title;
@@ -108,7 +108,7 @@ class GenieAnalysisAutoHistograms : public virtual GenieAnalysis {
     constexpr static size_t m_number_colors{7};
     std::array<Color_t, m_number_colors> m_colors{kBlack, kRed, kGreen, kBlue, kMagenta, kCyan, kOrange};
 
-    GenieAnalysisAutoHistograms(const char *filename, const char *output_filename, const vector<string> &stages = {},
+    GAAutoHistograms(const char *filename, const char *output_filename, const vector<string> &stages = {},
                                 const vector<string> &properties = {}, const vector<string> &types = {},
                                 const vector<AutoVsPlot> vs_property_plots = {}, const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name),

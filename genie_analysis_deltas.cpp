@@ -3,14 +3,14 @@
 #include <iostream>
 #include <tuple>
 
-#include "GenieAnalysis/GenieAnalysisDeltaStudies.h"
+#include "GenieAnalysis/GACLAS6MC.h"
 #include "GenieAnalysis/misc.h"
 
 /**
  * This is for studies that have exactly one charged Pion, does all the stuff from DeltaStudies and add's the pion
  * filter, can check for nucleon numbers and uses pion acceptance for the weight, also adds the pions properties
  */
-class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
+class GA1Pion : public GACLAS6MC {
   public:
     enum class PionType { Minus, Plus, Either };
 
@@ -38,22 +38,22 @@ class GenieAnalysis1Pion : public GenieAnalysisDeltaStudies {
         {"pi_acceptance", {"Pion acceptance weight", {100, 0, 1}, [this]() { return m_pion_acceptance; }}}};
 
   public:
-    GenieAnalysis1Pion(const char *filename, const char *output_filename, PionType pion_type = PionType::Either,
+    GA1Pion(const char *filename, const char *output_filename, PionType pion_type = PionType::Either,
                        optional<int> proton_count = {}, optional<int> neutron_count = {},
                        const vector<string> &stages = {}, const vector<string> &properties = {},
                        const vector<string> &types = {},
-                       const vector<GenieAnalysisAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                       const Target &target = GenieAnalysisDeltaStudies::Target::C12,
-                       const BeamEnergy &beam_energy = GenieAnalysisDeltaStudies::BeamEnergy::MeV_2261)
+                       const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                       const Target &target = GACLAS6MC::Target::C12,
+                       const BeamEnergy &beam_energy = GACLAS6MC::BeamEnergy::MeV_2261)
 
-        : GenieAnalysis(filename), GenieAnalysisDeltaStudies(filename, output_filename, stages, properties, types,
+        : GenieAnalysis(filename), GACLAS6MC(filename, output_filename, stages, properties, types,
                                                              vs_property_plots, target, beam_energy),
           m_pion_type{pion_type}, m_proton_count{proton_count}, m_neutron_count{neutron_count} {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
 
     Double_t passesCuts() override {
-        Double_t weight{GenieAnalysisDeltaStudies::passesCuts()};
+        Double_t weight{GACLAS6MC::passesCuts()};
         if (weight == 0) {
             return 0;
         }
@@ -111,9 +111,9 @@ int main(int argc, char *argv[]) {
         if (arg == "local") {
             input_file = "/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root";
 
-            GenieAnalysis1Pion ga{input_file.c_str(),
+            GA1Pion ga{input_file.c_str(),
                                   "output_local_pip.root",
-                                  GenieAnalysis1Pion::PionType::Plus,
+                                  GA1Pion::PionType::Plus,
                                   {},
                                   {},
                                   {"nocut"},
@@ -121,9 +121,9 @@ int main(int argc, char *argv[]) {
                                   types};
             ga.runAnalysis();
 
-            GenieAnalysis1Pion ga2{input_file.c_str(),
+            GA1Pion ga2{input_file.c_str(),
                                    "output_local_pim.root",
-                                   GenieAnalysis1Pion::PionType::Minus,
+                                   GA1Pion::PionType::Minus,
                                    {},
                                    {},
                                    {"nocut"},
@@ -131,34 +131,34 @@ int main(int argc, char *argv[]) {
                                    types};
             ga2.runAnalysis();
 
-            /* GenieAnalysis1Pion ga3{input_file.c_str(), */
+            /* GA1Pion ga3{input_file.c_str(), */
             /*                        "output_local_pie.root", */
             /*                        {"nocut"}, */
             /*                        properties, */
             /*                        types, */
-            /*                        GenieAnalysis1Pion::PionType::Either}; */
+            /*                        GA1Pion::PionType::Either}; */
             /* ga3.runAnalysis(); */
 
         } else if (arg == "full") {
             input_file = "/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/C12_2261GeV/"
                          "apapadop_SuSav2_C12_2261GeV_master.root";
 
-            /* GenieAnalysis1Pion gap{ */
+            /* GA1Pion gap{ */
             /*     input_file.c_str(), "output_full_pip.root", {}, properties, types,
-             * GenieAnalysis1Pion::PionType::Plus}; */
+             * GA1Pion::PionType::Plus}; */
             /* gap.runAnalysis(); */
 
-            /* GenieAnalysis1Pion gam{ */
+            /* GA1Pion gam{ */
             /*     input_file.c_str(), "output_full_pim.root", {}, properties, types,
-             * GenieAnalysis1Pion::PionType::Minus}; */
+             * GA1Pion::PionType::Minus}; */
             /* gam.runAnalysis(); */
 
-            /* GenieAnalysis1Pion gae{input_file.c_str(), */
+            /* GA1Pion gae{input_file.c_str(), */
             /*                        "output_full_pie.root", */
             /*                        {}, */
             /*                        properties, */
             /*                        types, */
-            /*                        GenieAnalysis1Pion::PionType::Either}; */
+            /*                        GA1Pion::PionType::Either}; */
             /* gae.runAnalysis(); */
         }
     } else {

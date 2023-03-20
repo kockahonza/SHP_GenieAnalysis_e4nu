@@ -3,10 +3,10 @@
 #include <iostream>
 #include <tuple>
 
-#include "GenieAnalysis/GenieAnalysisDeltaStudies.h"
+#include "GenieAnalysis/GACLAS6MC.h"
 #include "GenieAnalysis/misc.h"
 
-class GenieAnalysisFSTransparency : public GenieAnalysisDeltaStudies {
+class GAFinalStateTransparency : public GACLAS6MC {
   protected:
     bool m_resc_all_same;
 
@@ -22,20 +22,20 @@ class GenieAnalysisFSTransparency : public GenieAnalysisDeltaStudies {
     };
 
   public:
-    GenieAnalysisFSTransparency(const char *filename, const char *output_filename, const vector<string> &stages = {},
+    GAFinalStateTransparency(const char *filename, const char *output_filename, const vector<string> &stages = {},
                                 const vector<string> &properties = {}, const vector<string> &types = {},
-                                const vector<GenieAnalysisAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                                const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
                                 const Target &target = Target::C12,
                                 const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
                                 const char *gst_ttree_name = "gst")
-        : GenieAnalysis(filename, gst_ttree_name), GenieAnalysisDeltaStudies{
+        : GenieAnalysis(filename, gst_ttree_name), GACLAS6MC{
                                                        filename, output_filename,   stages, properties,
                                                        types,    vs_property_plots, target, beam_energy} {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
     }
 
     Double_t passesCuts() override {
-        Double_t weight{GenieAnalysisDeltaStudies::passesCuts()};
+        Double_t weight{GACLAS6MC::passesCuts()};
 
         if (weight == 0) {
             return 0;
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    /* GenieAnalysisDeltaStudies ga1{input_file.c_str(), */
+    /* GACLAS6MC ga1{input_file.c_str(), */
     /*                               (output_file + "_FSt_new.root").c_str(), */
     /*                               {}, */
     /*                               {}, */
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
     /*                               }}; */
     /* ga1.runAnalysis(); */
 
-    GenieAnalysisFSTransparency ga1{input_file.c_str(),
+    GAFinalStateTransparency ga1{input_file.c_str(),
                                     (output_file + "_FSt_resc.root").c_str(),
                                     {},
                                     {},
