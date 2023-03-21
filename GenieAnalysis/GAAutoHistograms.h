@@ -5,6 +5,7 @@
 #include <functional>
 #include <iostream>
 #include <map>
+#include <stdexcept>
 #include <vector>
 
 #include <TFile.h>
@@ -21,7 +22,7 @@
 using std::vector, std::string, std::map, std::tuple, std::pair, std::function;
 
 /**
- * This implements some of the most important functionoality of the package, it takes care of the automatic histogram
+ * This implements some of the most important functionality of the package, it takes care of the automatic histogram
  * creation and filling. There are types which designate a type of interaction like QE, RES, DIS and so on, there are
  * essentially defined by a string name and a function that returns a bool. Next there are properties and these describe
  * the interesting properties of an event like the W, or the electron momentum (implemented later on).

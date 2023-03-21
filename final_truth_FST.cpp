@@ -31,11 +31,11 @@ int main(int argc, char *argv[]) {
     }
 
     Final1Pion1NucleonTruth gamp{input_file.c_str(),
-                                 ("final_" + output_file + "0pip1pim1p0n.root").c_str(),
+                                 ("final_" + output_file + "_0pip1pim1p0n.root").c_str(),
                                  Final1Pion1NucleonTruth::PionType::Minus,
                                  Final1Pion1NucleonTruth::NucleonType::Proton,
                                  {},
-                                 {},
+                                 {"W", "el_phi", "kaka", "pi_phi"},
                                  {},
                                  {{"pi_resc", "nuc_resc", {}}}};
     gamp.runAnalysis();

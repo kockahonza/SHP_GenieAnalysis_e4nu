@@ -2,6 +2,7 @@
 #define GACLAS6MC_H
 
 #include <optional>
+#include <stdexcept>
 
 #include <TH3D.h>
 #include <TLorentzVector.h>

@@ -18,10 +18,10 @@ LDFLAGS   += -std=c++17 $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -O3
 
 
 # Executables
-all: genie_analysis_deltas genie_analysis_1pi1nuc genie_analysis_FS_transparency genie_analysis_data final_truth_FST
-
 final_truth_FST: final_truth_FST.cpp $(GA_LIB_OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
+
+all: genie_analysis_deltas genie_analysis_1pi1nuc genie_analysis_1p genie_analysis_FS_transparency genie_analysis_data final_truth_FST
 
 genie_analysis_data: genie_analysis_data.cpp $(GA_LIB_OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS)

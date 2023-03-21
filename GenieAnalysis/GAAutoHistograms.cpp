@@ -10,11 +10,23 @@ void GAAutoHistograms::prepareAutoHists() {
         for (const auto &known_property_keyval : m_known_properties) {
             m_properties.push_back(known_property_keyval.first);
         }
+    } else {
+        for (const string &property : m_properties) {
+            if (m_known_properties.count(property) != 1) {
+                throw std::runtime_error("There is an unknown property \"" + property + "\"given to GAAutoHistograms");
+            }
+        }
     }
 
     if (m_types.empty()) {
         for (const auto &known_type_keyval : m_known_types) {
             m_types.push_back(known_type_keyval.first);
+        }
+    } else {
+        for (const string &type : m_types) {
+            if (m_known_types.count(type) != 1) {
+                throw std::runtime_error("There is an unknown type \"" + type + "\"given to GAAutoHistograms");
+            }
         }
     }
 
@@ -44,9 +56,25 @@ void GAAutoHistograms::prepareAutoHists() {
     Int_t nbinsy;
     Double_t ylow, yup;
     for (auto &[property1, property2, types] : m_vs_property_plots) {
+        if (m_known_properties.count(property1) != 1) {
+            throw std::runtime_error("There is an unknown property \"" + property1 +
+                                     "\"given to GAAutoHistograms for a vs plot");
+        }
+        if (m_known_properties.count(property2) != 1) {
+            throw std::runtime_error("There is an unknown property \"" + property2 +
+                                     "\"given to GAAutoHistogram for a vs plots");
+        }
+
         if (types.empty()) {
             for (const auto &known_type_keyval : m_known_types) {
                 types.push_back(known_type_keyval.first);
+            }
+        } else {
+            for (const string &type : types) {
+                if (m_known_types.count(type) != 1) {
+                    throw std::runtime_error("There is an unknown type \"" + type +
+                                             "\"given to GAAutoHistograms for a vs plot");
+                }
             }
         }
         for (auto const &type : types) {

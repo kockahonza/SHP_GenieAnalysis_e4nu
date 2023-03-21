@@ -1,6 +1,8 @@
 #ifndef GACLAS6COMMON_H
 #define GACLAS6COMMON_H
 
+#include <stdexcept>
+
 #include "Fiducial.h"
 
 using std::unique_ptr, std::optional, std::string;
@@ -55,7 +57,7 @@ class FiducialWrapper {
         } else if (target == Target::Fe56) {
             return "12C"; // There's no dedicated Fe file and original used 12C for anything except He
         }
-        throw "This should not happen";
+        throw std::runtime_error("This should not happen");
     }
 
     static string beamEnergyStr(const BeamEnergy &beam_energy) {
@@ -66,7 +68,7 @@ class FiducialWrapper {
         } else if (beam_energy == BeamEnergy::MeV_4461) {
             return "4461";
         }
-        throw "This should not happen";
+        throw std::runtime_error("This should not happen");
     }
 };
 } // namespace GACLAS6Common
