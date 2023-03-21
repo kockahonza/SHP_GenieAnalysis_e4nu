@@ -1,5 +1,5 @@
-#ifndef GENIE_ANALYSIS_GACLAS6DATA_H
-#define GENIE_ANALYSIS_GACLAS6DATA_H
+#ifndef GACLAS6DATA_H
+#define GACLAS6DATA_H
 
 #include <optional>
 

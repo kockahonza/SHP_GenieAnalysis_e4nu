@@ -1,5 +1,5 @@
-#ifndef GENIE_ANALYSIS_ORIGINAL_CUTS_H
-#define GENIE_ANALYSIS_ORIGINAL_CUTS_H
+#ifndef GACLAS6MC_H
+#define GACLAS6MC_H
 
 #include <optional>
 

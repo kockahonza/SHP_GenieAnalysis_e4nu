@@ -1,4 +1,4 @@
-#include "GACLA6Data.h"
+#include "GACLAS6Data.h"
 #include <TMath.h>
 
 Double_t GACLAS6DataPrepare::passesCuts() {

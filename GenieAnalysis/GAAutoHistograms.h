@@ -1,5 +1,5 @@
-#ifndef GENIE_ANALYSIS_AUTO_H
-#define GENIE_ANALYSIS_AUTO_H
+#ifndef GAAUTOHISTOGRAMS_H
+#define GAAUTOHISTOGRAMS_H
 
 #include <array>
 #include <functional>

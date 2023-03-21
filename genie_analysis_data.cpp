@@ -3,7 +3,7 @@
 #include <iostream>
 #include <tuple>
 
-#include "GenieAnalysis/GACLA6Data.h"
+#include "GenieAnalysis/GACLAS6Data.h"
 #include "GenieAnalysis/misc.h"
 
 int main(int argc, char *argv[]) {

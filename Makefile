@@ -8,6 +8,7 @@ GA_LIB_OBJECTS := GenieAnalysis/GenieAnalysis.o \
 				  GenieAnalysis/GACLAS6Common.o \
 				  GenieAnalysis/GACLAS6MC.o \
 				  GenieAnalysis/GACLAS6Data.o \
+				  GenieAnalysis/GACLAS6FinalFST.o \
 				  GenieAnalysis/Fiducial.o \
 				  GenieAnalysis/misc.o
 
