@@ -140,5 +140,8 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
         return 0;
     }
 
+    m_total_p_change_V4 = m_el_V4 + m_pi_V4 + m_nuc_V4 - TLorentzVector(0, 0, m_beam_energy_val, m_beam_energy_val);
+    m_reco_pi_V4 = TLorentzVector(0, 0, m_beam_energy_val, m_beam_energy_val) - m_el_V4 - m_nuc_V4;
+
     return m_ge.wght;
 }

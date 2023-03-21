@@ -30,13 +30,41 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    Final1Pion1NucleonTruth gamp{input_file.c_str(),
-                                 ("final_" + output_file + "_0pip1pim1p0n.root").c_str(),
-                                 Final1Pion1NucleonTruth::PionType::Minus,
-                                 Final1Pion1NucleonTruth::NucleonType::Proton,
-                                 {},
-                                 {"W", "el_phi", "kaka", "pi_phi"},
-                                 {},
-                                 {{"pi_resc", "nuc_resc", {}}}};
-    gamp.runAnalysis();
+    Final1Pion1NucleonTruth *ga;
+    vector<tuple<string, Final1Pion1NucleonTruth::PionType, Final1Pion1NucleonTruth::NucleonType>> variants{
+        {"_0pip1pim1p0n", Final1Pion1NucleonTruth::PionType::Minus, Final1Pion1NucleonTruth::NucleonType::Proton},
+        {"_1pip0pim0p1n", Final1Pion1NucleonTruth::PionType::Plus, Final1Pion1NucleonTruth::NucleonType::Neutron},
+
+        {"_1pip0pim1p0n", Final1Pion1NucleonTruth::PionType::Plus, Final1Pion1NucleonTruth::NucleonType::Proton},
+        {"_0pip1pim0p1n", Final1Pion1NucleonTruth::PionType::Minus, Final1Pion1NucleonTruth::NucleonType::Neutron}};
+    for (auto const &[ext, pi_t, nuc_t] : variants) {
+        ga = new Final1Pion1NucleonTruth(input_file.c_str(), ("final_" + output_file + ext + ".root").c_str(), pi_t,
+                                         nuc_t, {}, {}, {}, {},
+                                         {
+                                             {"pi_resc", "nuc_resc", {}},
+                                             {"pi_phi", "reco_pi_phi", {}},
+                                             {"pi_ct", "reco_pi_ct", {}},
+                                             {"pi_p", "reco_pi_p", {}},
+                                             {"pi_E", "reco_pi_E", {}},
+                                         });
+        ga->runAnalysis();
+        delete ga;
+    }
+
+    /* Final1Pion1NucleonTruth gamp{input_file.c_str(), */
+    /*                              ("final_" + output_file + "_0pip1pim1p0n.root").c_str(), */
+    /*                              Final1Pion1NucleonTruth::PionType::Minus, */
+    /*                              Final1Pion1NucleonTruth::NucleonType::Proton, */
+    /*                              {}, */
+    /*                              {}, */
+    /*                              {}, */
+    /*                              {}, */
+    /*                              { */
+    /*                                  {"pi_resc", "nuc_resc", {}}, */
+    /*                                  {"pi_phi", "reco_pi_phi", {}}, */
+    /*                                  {"pi_ct", "reco_pi_ct", {}}, */
+    /*                                  {"pi_p", "reco_pi_p", {}}, */
+    /*                                  {"pi_E", "reco_pi_E", {}}, */
+    /*                              }}; */
+    /* gamp.runAnalysis(); */
 }

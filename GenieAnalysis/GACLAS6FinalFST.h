@@ -116,13 +116,22 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
     double m_p_photon_momentum_threshold{0.3};
     double m_p_proton_momentum_threshold{0.3};
 
+  private:
+    // Simple flags
+    bool m_found_pi;
+    bool m_found_nuc;
+
   protected:
     // Physical properties of the event and system to be used in passesCuts and for various properties
-    bool m_found_pi;
     TLorentzVector m_pi_V4;
-
-    bool m_found_nuc;
     TLorentzVector m_nuc_V4;
+
+    // Kinematics reconstruction test
+    TLorentzVector m_total_p_change_V4;
+    TLorentzVector m_reco_pi_V4;
+
+    // not done yet
+    optional<Int_t> resc_same;
 
     // These are only available with primary state runs
     Int_t m_ps_pi_resc;
@@ -152,6 +161,22 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
         {"nuc_p", {"Nucleon momentum [GeV/c]", {720, 0, 3}, [this]() { return m_nuc_V4.P(); }}},
         {"nuc_E", {"Nucleon energy [GeV]", {720, 0, 3}, [this]() { return m_nuc_V4.Energy(); }}},
 
+        {"reco_pi_phi",
+         {"Kinematically reconstructed pion phi [°]",
+          {720, -30, 330},
+          [this]() {
+              double phi_deg{m_reco_pi_V4.Phi() * TMath::RadToDeg()};
+              return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
+          }}},
+        {"reco_pi_ct",
+         {"Kinematically reconstructed pion cos theta", {720, -1, 1}, [this]() { return m_reco_pi_V4.CosTheta(); }}},
+        {"reco_pi_p",
+         {"Kinematically reconstructed pion momentum [GeV/c]", {720, 0, 3}, [this]() { return m_reco_pi_V4.P(); }}},
+        {"reco_pi_E",
+         {"Kinematically reconstructed pion energy [GeV]", {720, 0, 3}, [this]() { return m_reco_pi_V4.Energy(); }}},
+
+        {"p_change", {"Total momentum change magnitude", {200, -1, 2}, [this]() { return m_total_p_change_V4.P(); }}},
+
         // Physical properties of the event as a whole
         {"reco_W", {"Reconstructed W [GeV]", {1000, 0, 4}, [this]() { return m_reco_W; }}},
         {"reco_Q2", {"Reconsotructed Q^2 [GeV]", {1000, 0, 4}, [this]() { return m_reco_Q2; }}},
@@ -180,6 +205,8 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
                 "Pion resc code from gst", {11, -2.5, 8.5}, [this]() { return m_ps_pi_resc; }};
             m_known_properties["nuc_resc"] = {
                 "Nucleon resc code from gst", {11, -2.5, 8.5}, [this]() { return m_ps_nuc_resc; }};
+        } else {
+            throw std::runtime_error("Not implemented yet");
         }
     }
 
