@@ -88,6 +88,8 @@ class GAAutoHistograms : public virtual GenieAnalysis {
         {"Ws", {"Ws (generated in GENIE) from gst [GeV]", {1000, 0, 4}, [this]() { return m_ge.Ws; }}},
         {"W", {"W (computed in GENIE) from gst [GeV]", {1000, 0, 4}, [this]() { return m_ge.W; }}},
         {"fspl", {"Final state lepton PDG from gst", {51, -0.5, 50.5}, [this]() { return m_ge.fspl; }}},
+        {"nf", {"nf from gst (number of final state particles)", {6, -0.5, 5.5}, [this]() { return m_ge.nf; }}},
+        {"ni", {"ni from gst (number of primary state particles)", {6, -0.5, 5.5}, [this]() { return m_ge.ni; }}},
         {"resc", {"resc code from gst", {301, -150.5, 150.5}, [this]() { return m_ge.resc[0]; }}},
         {"nfpip", {"nfpip from gst (number of final state pi plus)", {6, -0.5, 5.5}, [this]() { return m_ge.nfpip; }}},
         {"nfpim", {"nfpim from gst (number of final state pi minus)", {6, -0.5, 5.5}, [this]() { return m_ge.nfpim; }}},

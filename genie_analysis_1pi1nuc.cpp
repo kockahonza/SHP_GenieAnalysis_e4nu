@@ -170,12 +170,20 @@ int simple_pi_nucleon_counts(int argc, char *argv[]) {
         {"el_cos_theta", "pi_cos_theta", {}},
         {"el_cos_theta", "nuc_cos_theta", {}},
         {"pi_cos_theta", "nuc_cos_theta", {}},
+
         {"el_p", "ptest", {}},
         {"el_phi", "ptest", {}},
         {"el_cos_theta", "ptest", {}},
+
         {"pi_p", "ptest", {}},
         {"pi_phi", "ptest", {}},
         {"pi_cos_theta", "ptest", {}},
+
+        {"ni", "resc_same", {}},
+        {"nfp", "resc_same", {}},
+        {"nfpip", "resc_same", {}},
+        {"nfpim", "resc_same", {}},
+        {"nf", "resc_same", {}},
     };
 
     /* GA1Pion1Nucleon gapp{input_file.c_str(), (output_file + "_n_1pip0pim1p0n_Wlucas.root").c_str(), */

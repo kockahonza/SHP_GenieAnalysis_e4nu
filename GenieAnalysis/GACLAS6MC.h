@@ -125,6 +125,8 @@ class GACLAS6MCCuts : public virtual GenieAnalysis {
     Int_t m_ps_number_of_neutrons;
     Int_t m_ps_number_of_photons;
 
+    optional<Int_t> m_resc_same;
+
     // The genie final state particle counters, I think this is often referred to as truth
     Int_t m_fs_number_of_pi_plus;
     Int_t m_fs_number_of_pi_minus;
@@ -325,6 +327,9 @@ class GACLAS6MC : public GACLAS6MCCuts, public GAAutoHistograms {
          {"Number of neutrons in the primary state", {6, -0.5, 5.5}, [this]() { return m_ps_number_of_neutrons; }}},
         {"ps_num_photons",
          {"Number of photons in the primary state", {6, -0.5, 5.5}, [this]() { return m_ps_number_of_photons; }}},
+        {"resc_same",
+         {"resc if all are the same, 0 otherwise", {13, -2.5, 10.5}, [this]() { return m_resc_same.value_or(0); }}},
+
         // Final state (post FSI) data, truth - before accounting for detector with fiducials and acceptances
         {"fs_num_pip",
          {"Number of pi plus in the final state", {6, -0.5, 5.5}, [this]() { return m_fs_number_of_pi_plus; }}},

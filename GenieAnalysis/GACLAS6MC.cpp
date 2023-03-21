@@ -80,6 +80,7 @@ Double_t GACLAS6MCCuts::passesCuts() {
     m_ps_number_of_protons = 0;
     m_ps_number_of_neutrons = 0;
     m_ps_number_of_photons = 0;
+    m_resc_same = m_ge.resc[0];
 
     m_fs_number_of_pi_plus = 0;
     m_fs_number_of_pi_minus = 0;
@@ -243,8 +244,15 @@ Double_t GACLAS6MCCuts::passesCuts() {
         }
     }
 
+    if (m_ge.ni < 1) {
+        std::cout << "Something is likely wrong, ni is less than 1 -- no primary state particles" << std::endl;
+    }
     // Primary state hadron loop, just counters now but more could be added
     for (int i{0}; i < m_ge.ni; i++) {
+        if (m_ge.resc[i] != m_resc_same) {
+            m_resc_same = {};
+        }
+
         if (m_ge.pdgi[i] == 2212) { // proton
             m_ps_number_of_protons += 1;
         } else if (m_ge.pdgi[i] == 2112) { // neutron
