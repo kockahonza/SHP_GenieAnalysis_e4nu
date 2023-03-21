@@ -51,7 +51,14 @@ GenieAnalysis/%.o: GenieAnalysis/%.cpp GenieAnalysis/%.h
 
 
 clean:
-	@rm -rf GenieAnalysis/*.o *.o genie_analysis_demo genie_analysis_lucass_cuts genie_analysis_deltas genie_analysis_1pi1nuc genie_analysis_FS_transparency genie_analysis_1p
+	@rm -rf GenieAnalysis/*.o *.o \
+		genie_analysis_demo \
+		genie_analysis_lucass_cuts \
+		genie_analysis_deltas \
+		genie_analysis_1pi1nuc \
+		genie_analysis_FS_transparency \
+		genie_analysis_1p \
+		genie_analysis_data
 
 debug: CXXFLAGS += -pg
 debug: LDFLAGS += -pg

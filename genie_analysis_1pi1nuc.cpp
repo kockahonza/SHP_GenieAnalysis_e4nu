@@ -47,16 +47,17 @@ class GA1Pion1Nucleon : public GACLAS6MC {
         {"pi_E", {"Pion energy [GeV]", {720, 0, 3}, [this]() { return m_pion_V4.E(); }}},
         {"pi_acceptance", {"Pion acceptance weight", {100, 0, 1}, [this]() { return m_pion_acceptance; }}},
         {"nuc_phi",
-         {"Pion phi [°]",
+         {"Nucleon phi [°]",
           {720, -30, 330},
           [this]() {
               double phi_deg{m_nucleon_V3.Phi() * TMath::RadToDeg()};
               return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
           }}},
-        {"nuc_cos_theta", {"Pion cos theta", {720, -1, 1}, [this]() { return m_nucleon_V3.CosTheta(); }}},
-        {"nuc_p", {"Pion momentum [GeV/c]", {720, 0, 3}, [this]() { return m_nucleon_V4.P(); }}},
-        {"nuc_E", {"Pion energy [GeV]", {720, 0, 3}, [this]() { return m_nucleon_V4.E(); }}},
-        {"nuc_acceptance", {"Pion acceptance weight", {100, 0, 1}, [this]() { return m_nucleon_acceptance; }}},
+        {"nuc_cos_theta", {"Nucleon cos theta", {720, -1, 1}, [this]() { return m_nucleon_V3.CosTheta(); }}},
+        {"nuc_p", {"Nucleon momentum [GeV/c]", {720, 0, 3}, [this]() { return m_nucleon_V4.P(); }}},
+        {"nuc_E", {"Nucleon energy [GeV]", {720, 0, 3}, [this]() { return m_nucleon_V4.E(); }}},
+        {"nuc_acceptance", {"Nucleon acceptance weight", {100, 0, 1}, [this]() { return m_nucleon_acceptance; }}},
+        {"ptest", {" Magnitude of the sum of el, pi and nuc momenta", {500, -2, 2}, [this]() { return (m_smeared_el_V3 + m_pion_V3 + m_nucleon_V3 - TVector3(0, 0, m_beam_energy_val)).Mag(); }}},
 
     };
 
@@ -159,29 +160,57 @@ int simple_pi_nucleon_counts(int argc, char *argv[]) {
         return -1;
     }
 
-    GA1Pion1Nucleon gapp{input_file.c_str(), (output_file + "_n_1pip0pim1p0n_Wlucas.root").c_str(),
-                         GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Plus,
-                         GA1Pion1Nucleon::NucleonType::Proton};
-    gapp.m_p_Wcut_max = 1.405;
-    gapp.runAnalysis();
+    vector<GAAutoHistograms::AutoVsPlot> vs_property_plots{
+        {"el_p", "pi_p", {}},
+        {"el_p", "nuc_p", {}},
+        {"pi_p", "nuc_p", {}},
+        {"el_phi", "pi_phi", {}},
+        {"el_phi", "nuc_phi", {}},
+        {"pi_phi", "nuc_phi", {}},
+        {"el_cos_theta", "pi_cos_theta", {}},
+        {"el_cos_theta", "nuc_cos_theta", {}},
+        {"pi_cos_theta", "nuc_cos_theta", {}},
+        {"el_p", "ptest", {}},
+        {"el_phi", "ptest", {}},
+        {"el_cos_theta", "ptest", {}},
+        {"pi_p", "ptest", {}},
+        {"pi_phi", "ptest", {}},
+        {"pi_cos_theta", "ptest", {}},
+    };
 
-    GA1Pion1Nucleon gapn{input_file.c_str(), (output_file + "_n_1pip0pim0p1n_Wlucas.root").c_str(),
+    /* GA1Pion1Nucleon gapp{input_file.c_str(), (output_file + "_n_1pip0pim1p0n_Wlucas.root").c_str(), */
+    /*                      GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Plus, */
+    /*                      GA1Pion1Nucleon::NucleonType::Proton, {}, {}, {}, vs_property_plots}; */
+    /* gapp.m_p_Wcut_max = 1.405; */
+    /* gapp.runAnalysis(); */
+
+    GA1Pion1Nucleon gapnlc{input_file.c_str(), (output_file + "_n_1pip0pim0p1n_Wlucas.root").c_str(),
                          GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Plus,
-                         GA1Pion1Nucleon::NucleonType::Neutron};
-    gapn.m_p_Wcut_max = 1.405;
+                         GA1Pion1Nucleon::NucleonType::Neutron, {}, {}, {}, vs_property_plots};
+    gapnlc.m_p_Wcut_max = 1.405;
+    gapnlc.runAnalysis();
+
+    GA1Pion1Nucleon gamplc{input_file.c_str(), (output_file + "_n_0pip1pim1p0n_Wlucas.root").c_str(),
+                         GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Minus,
+                         GA1Pion1Nucleon::NucleonType::Proton, {}, {}, {}, vs_property_plots};
+    gamplc.m_p_Wcut_max = 1.445;
+    gamplc.runAnalysis();
+
+    /* GA1Pion1Nucleon gamn{input_file.c_str(), (output_file + "_n_0pip1pim0p1n_Wlucas.root").c_str(), */
+    /*                      GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Minus, */
+    /*                      GA1Pion1Nucleon::NucleonType::Neutron, {}, {}, {}, vs_property_plots}; */
+    /* gamn.m_p_Wcut_max = 1.445; */
+    /* gamn.runAnalysis(); */
+
+    GA1Pion1Nucleon gapn{input_file.c_str(), (output_file + "_n_1pip0pim0p1n.root").c_str(),
+                         GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Plus,
+                         GA1Pion1Nucleon::NucleonType::Neutron, {}, {}, {}, vs_property_plots};
     gapn.runAnalysis();
 
-    GA1Pion1Nucleon gamp{input_file.c_str(), (output_file + "_n_0pip1pim1p0n_Wlucas.root").c_str(),
+    GA1Pion1Nucleon gamp{input_file.c_str(), (output_file + "_n_0pip1pim1p0n.root").c_str(),
                          GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Minus,
-                         GA1Pion1Nucleon::NucleonType::Proton};
-    gamp.m_p_Wcut_max = 1.445;
+                         GA1Pion1Nucleon::NucleonType::Proton, {}, {}, {}, vs_property_plots};
     gamp.runAnalysis();
-
-    GA1Pion1Nucleon gamn{input_file.c_str(), (output_file + "_n_0pip1pim0p1n_Wlucas.root").c_str(),
-                         GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Minus,
-                         GA1Pion1Nucleon::NucleonType::Neutron};
-    gamn.m_p_Wcut_max = 1.445;
-    gamn.runAnalysis();
 
     return 0;
 }
