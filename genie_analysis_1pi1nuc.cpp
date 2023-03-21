@@ -57,7 +57,10 @@ class GA1Pion1Nucleon : public GACLAS6MC {
         {"nuc_p", {"Nucleon momentum [GeV/c]", {720, 0, 3}, [this]() { return m_nucleon_V4.P(); }}},
         {"nuc_E", {"Nucleon energy [GeV]", {720, 0, 3}, [this]() { return m_nucleon_V4.E(); }}},
         {"nuc_acceptance", {"Nucleon acceptance weight", {100, 0, 1}, [this]() { return m_nucleon_acceptance; }}},
-        {"ptest", {" Magnitude of the sum of el, pi and nuc momenta", {500, -2, 2}, [this]() { return (m_smeared_el_V3 + m_pion_V3 + m_nucleon_V3 - TVector3(0, 0, m_beam_energy_val)).Mag(); }}},
+        {"ptest",
+         {" Magnitude of the sum of el, pi and nuc momenta",
+          {500, -2, 2},
+          [this]() { return (m_smeared_el_V3 + m_pion_V3 + m_nucleon_V3 - TVector3(0, 0, m_beam_energy_val)).Mag(); }}},
 
     };
 
@@ -66,7 +69,8 @@ class GA1Pion1Nucleon : public GACLAS6MC {
                     const NucleonType &nuc_type, const vector<string> &stages = {},
                     const vector<string> &properties = {}, const vector<string> &types = {},
                     const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                    const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
+                    const GACLAS6Common::Target &target = GACLAS6Common::Target::C12,
+                    const GACLAS6Common::BeamEnergy &beam_energy = GACLAS6Common::BeamEnergy::MeV_2261,
                     const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name), GACLAS6MC{filename, output_filename,   stages, properties,
                                                              types,    vs_property_plots, target, beam_energy},
@@ -192,15 +196,27 @@ int simple_pi_nucleon_counts(int argc, char *argv[]) {
     /* gapp.m_p_Wcut_max = 1.405; */
     /* gapp.runAnalysis(); */
 
-    GA1Pion1Nucleon gapnlc{input_file.c_str(), (output_file + "_n_1pip0pim0p1n_Wlucas.root").c_str(),
-                         GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Plus,
-                         GA1Pion1Nucleon::NucleonType::Neutron, {}, {}, {}, vs_property_plots};
+    GA1Pion1Nucleon gapnlc{input_file.c_str(),
+                           (output_file + "_n_1pip0pim0p1n_Wlucas.root").c_str(),
+                           GA1Pion1Nucleon::RunType::Detector,
+                           GA1Pion1Nucleon::PionType::Plus,
+                           GA1Pion1Nucleon::NucleonType::Neutron,
+                           {},
+                           {},
+                           {},
+                           vs_property_plots};
     gapnlc.m_p_Wcut_max = 1.405;
     gapnlc.runAnalysis();
 
-    GA1Pion1Nucleon gamplc{input_file.c_str(), (output_file + "_n_0pip1pim1p0n_Wlucas.root").c_str(),
-                         GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Minus,
-                         GA1Pion1Nucleon::NucleonType::Proton, {}, {}, {}, vs_property_plots};
+    GA1Pion1Nucleon gamplc{input_file.c_str(),
+                           (output_file + "_n_0pip1pim1p0n_Wlucas.root").c_str(),
+                           GA1Pion1Nucleon::RunType::Detector,
+                           GA1Pion1Nucleon::PionType::Minus,
+                           GA1Pion1Nucleon::NucleonType::Proton,
+                           {},
+                           {},
+                           {},
+                           vs_property_plots};
     gamplc.m_p_Wcut_max = 1.445;
     gamplc.runAnalysis();
 
@@ -210,14 +226,26 @@ int simple_pi_nucleon_counts(int argc, char *argv[]) {
     /* gamn.m_p_Wcut_max = 1.445; */
     /* gamn.runAnalysis(); */
 
-    GA1Pion1Nucleon gapn{input_file.c_str(), (output_file + "_n_1pip0pim0p1n.root").c_str(),
-                         GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Plus,
-                         GA1Pion1Nucleon::NucleonType::Neutron, {}, {}, {}, vs_property_plots};
+    GA1Pion1Nucleon gapn{input_file.c_str(),
+                         (output_file + "_n_1pip0pim0p1n.root").c_str(),
+                         GA1Pion1Nucleon::RunType::Detector,
+                         GA1Pion1Nucleon::PionType::Plus,
+                         GA1Pion1Nucleon::NucleonType::Neutron,
+                         {},
+                         {},
+                         {},
+                         vs_property_plots};
     gapn.runAnalysis();
 
-    GA1Pion1Nucleon gamp{input_file.c_str(), (output_file + "_n_0pip1pim1p0n.root").c_str(),
-                         GA1Pion1Nucleon::RunType::Detector, GA1Pion1Nucleon::PionType::Minus,
-                         GA1Pion1Nucleon::NucleonType::Proton, {}, {}, {}, vs_property_plots};
+    GA1Pion1Nucleon gamp{input_file.c_str(),
+                         (output_file + "_n_0pip1pim1p0n.root").c_str(),
+                         GA1Pion1Nucleon::RunType::Detector,
+                         GA1Pion1Nucleon::PionType::Minus,
+                         GA1Pion1Nucleon::NucleonType::Proton,
+                         {},
+                         {},
+                         {},
+                         vs_property_plots};
     gamp.runAnalysis();
 
     return 0;

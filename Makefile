@@ -5,6 +5,7 @@ ROOTGLIBS   := $(shell root-config --glibs)
 
 GA_LIB_OBJECTS := GenieAnalysis/GenieAnalysis.o \
 				  GenieAnalysis/GAAutoHistograms.o \
+				  GenieAnalysis/GACLAS6Common.o \
 				  GenieAnalysis/GACLAS6MC.o \
 				  GenieAnalysis/GACLAS6Data.o \
 				  GenieAnalysis/Fiducial.o \

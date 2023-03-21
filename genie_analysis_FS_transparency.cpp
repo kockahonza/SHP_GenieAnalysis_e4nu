@@ -25,7 +25,8 @@ class GAFinalStateTransparency : public GACLAS6MC {
     GAFinalStateTransparency(const char *filename, const char *output_filename, const vector<string> &stages = {},
                              const vector<string> &properties = {}, const vector<string> &types = {},
                              const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                             const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
+                             const GACLAS6Common::Target &target = GACLAS6Common::Target::C12,
+                             const GACLAS6Common::BeamEnergy &beam_energy = GACLAS6Common::BeamEnergy::MeV_2261,
                              const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name), GACLAS6MC{filename, output_filename,   stages, properties,
                                                              types,    vs_property_plots, target, beam_energy} {

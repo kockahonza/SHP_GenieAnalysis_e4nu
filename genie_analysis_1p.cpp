@@ -13,7 +13,8 @@ class GA1Proton : public GACLAS6MC {
               const vector<string> &stages = {}, const vector<string> &properties = {},
               const vector<string> &types = {}, const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
               // Select run
-              const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
+              const GACLAS6Common::Target &target = GACLAS6Common::Target::C12,
+              const GACLAS6Common::BeamEnergy &beam_energy = GACLAS6Common::BeamEnergy::MeV_2261,
               // Pass this to GenieAnalysis
               const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name),

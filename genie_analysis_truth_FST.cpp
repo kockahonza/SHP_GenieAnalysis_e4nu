@@ -4,13 +4,13 @@
 #include <limits>
 #include <tuple>
 
-#include "GenieAnalysis/GACLAS6MC.h"
 #include "GenieAnalysis/GAAutoHistograms.h"
+#include "GenieAnalysis/GACLAS6MC.h"
 #include "GenieAnalysis/misc.h"
 
 class GA1Pion1Nucleon : public GAAutoHistograms {
   public:
-    enum class RunType { Truth, DetectorLike};
+    enum class RunType { Truth, DetectorLike };
 
     enum class PionType { Plus, Minus };
 
@@ -30,8 +30,7 @@ class GA1Pion1Nucleon : public GAAutoHistograms {
     TVector3 m_nucleon_V3;
     Double_t m_nucleon_acceptance;
 
-    map<string, AutoProperty> m_new_known_properties{
-    };
+    map<string, AutoProperty> m_new_known_properties{};
 
   public:
     GA1Pion1Nucleon(const char *filename, const char *output_filename, const RunType &run_type, const PionType &pi_type,
@@ -157,11 +156,14 @@ int main(int argc, char *argv[]) {
         {"nf", "resc_same", {}},
     };
 
-
-    GA1Pion1Nucleon gapnlc{input_file.c_str(), (output_file + "_n_1pip0pim0p1n_Wlucas.root").c_str(),
-                         GA1Pion1Nucleon::RunType::DetectorLike, GA1Pion1Nucleon::PionType::Plus,
-                         GA1Pion1Nucleon::NucleonType::Neutron, {}, {}, {}, vs_property_plots};
+    GA1Pion1Nucleon gapnlc{input_file.c_str(),
+                           (output_file + "_n_1pip0pim0p1n_Wlucas.root").c_str(),
+                           GA1Pion1Nucleon::RunType::DetectorLike,
+                           GA1Pion1Nucleon::PionType::Plus,
+                           GA1Pion1Nucleon::NucleonType::Neutron,
+                           {},
+                           {},
+                           {},
+                           vs_property_plots};
     gapnlc.runAnalysis();
-
-
 }
