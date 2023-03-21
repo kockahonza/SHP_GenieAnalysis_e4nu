@@ -11,6 +11,7 @@
 constexpr double mass_pion{0.139570};
 constexpr double mass_electron{0.000510998};
 constexpr double mass_proton{0.9382720813};
+constexpr double mass_neutron{0.93956542052};
 
 // Parameters for Fiducial I expect, they are all used in Fiducial.cpp
 constexpr double PhiOpeningAngleEl = 6;

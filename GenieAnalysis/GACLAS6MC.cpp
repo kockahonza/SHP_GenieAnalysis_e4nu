@@ -20,8 +20,7 @@ Double_t GACLAS6MCCuts::passesCuts() {
     // previous values
     if (m_do_precuts) {
         const double theta_min{TMath::DegToRad() * (m_precut_parameter1 + m_precut_parameter2 / m_smeared_el_V3.Mag())};
-        if ((m_smeared_el_V3.Theta() < theta_min) || (m_smeared_el_V3.Theta() < 0 * TMath::DegToRad()) ||
-            (m_smeared_el_V3.Theta() > 80 * TMath::DegToRad())) {
+        if ((m_smeared_el_V3.Theta() < theta_min) || (m_smeared_el_V3.Theta() > 80 * TMath::DegToRad())) {
             return 0;
         }
     }
