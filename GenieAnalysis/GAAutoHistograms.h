@@ -103,8 +103,9 @@ class GAAutoHistograms : public virtual GenieAnalysis {
         {"ALL", {"All", [this]() { return true; }}},
         {"QE", {"Quasi-Elastic", [this]() { return m_ge.qel; }}},
         {"MEC", {"Meson-exchange", [this]() { return m_ge.mec; }}},
-        {"RES_ALL", {"Resonant", [this]() { return m_ge.res; }}},
-        {"DELTA1232", {"Delta1232", [this]() { return (m_ge.res && (m_ge.resid == 0)); }}},
+        {"RES", {"Resonant", [this]() { return m_ge.res; }}},
+        {"DELTA1232", {"#Delta_{1232}", [this]() { return (m_ge.res && (m_ge.resid == 0)); }}},
+        {"RES_OTHER", {"Other resonant", [this]() { return (m_ge.res && (m_ge.resid != 0)); }}},
         {"DIS", {"Deep-inelastic", [this]() { return m_ge.dis; }}},
     };
 

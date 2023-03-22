@@ -175,7 +175,16 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
         {"reco_pi_E",
          {"Kinematically reconstructed pion energy [GeV]", {720, 0, 3}, [this]() { return m_reco_pi_V4.Energy(); }}},
 
-        {"p_change", {"Total momentum change magnitude", {200, -1, 2}, [this]() { return m_total_p_change_V4.P(); }}},
+        {"p_change_phi",
+         {"Total momentum change phi [°]",
+          {720, -30, 330},
+          [this]() {
+              double phi_deg{m_total_p_change_V4.Phi() * TMath::RadToDeg()};
+              return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
+          }}},
+        {"p_change_ct", {"Total momentum change cos theta", {}, [this]() { return m_total_p_change_V4.CosTheta(); }}},
+        {"p_change_mag",
+         {"Total momentum change magnitude [GeV/c]", {200, -1, 2}, [this]() { return m_total_p_change_V4.P(); }}},
 
         // Physical properties of the event as a whole
         {"reco_W", {"Reconstructed W [GeV]", {1000, 0, 4}, [this]() { return m_reco_W; }}},

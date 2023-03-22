@@ -39,13 +39,15 @@ int main(int argc, char *argv[]) {
         {"_0pip1pim0p1n", Final1Pion1NucleonTruth::PionType::Minus, Final1Pion1NucleonTruth::NucleonType::Neutron}};
     for (auto const &[ext, pi_t, nuc_t] : variants) {
         ga = new Final1Pion1NucleonTruth(input_file.c_str(), ("final_" + output_file + ext + ".root").c_str(), pi_t,
-                                         nuc_t, {}, {}, {}, {},
+                                         nuc_t, {}, {}, {}, {"ALL", "QE", "DELTA1232", "RES_OTHER", "DIS"},
                                          {
-                                             {"pi_resc", "nuc_resc", {}},
                                              {"pi_phi", "reco_pi_phi", {}},
                                              {"pi_ct", "reco_pi_ct", {}},
                                              {"pi_p", "reco_pi_p", {}},
                                              {"pi_E", "reco_pi_E", {}},
+                                             {"pi_resc", "nuc_resc", {}},
+                                             {"pi_resc", "p_change_mag", {}},
+                                             {"nuc_resc", "p_change_mag", {}},
                                          });
         ga->runAnalysis();
         delete ga;
