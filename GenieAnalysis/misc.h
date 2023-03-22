@@ -7,7 +7,7 @@
 
 // Useful environment constants
 
-// Constants used within GenieAnalysis
+// Constants used within GenieAnalysis, all in GeV in natural units
 constexpr double mass_pion{0.139570};
 constexpr double mass_electron{0.000510998};
 constexpr double mass_proton{0.9382720813};

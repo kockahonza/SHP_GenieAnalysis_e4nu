@@ -166,6 +166,11 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
         {"nuc_p", {"Nucleon momentum [GeV/c]", {720, 0, 3}, [this]() { return m_nuc_V4.P(); }}},
         {"nuc_E", {"Nucleon energy [GeV]", {720, 0, 3}, [this]() { return m_nuc_V4.Energy(); }}},
 
+        // Reconstructed properties of the event and then pi
+        {"reco_W", {"Reconstructed W [GeV]", {1000, 0, 4}, [this]() { return m_reco_W; }}},
+        {"reco_Q2", {"Reconsotructed Q^2 [GeV]", {1000, 0, 4}, [this]() { return m_reco_Q2; }}},
+        {"reco_x", {"Reconstructed Bjorken x", {1000, 0, 1.01}, [this]() { return m_reco_x; }}},
+
         {"reco_pi_phi",
          {"Kinematically reconstructed pion phi [°]",
           {720, -30, 330},
@@ -180,6 +185,9 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
         {"reco_pi_E",
          {"Kinematically reconstructed pion energy [GeV]", {720, 0, 3}, [this]() { return m_reco_pi_V4.Energy(); }}},
 
+        {"pi_reco_p_diff", {"", {100, -1, 1}, [this]() { return m_pi_V4.P() - m_reco_pi_V4.P(); }}},
+        {"pi_reco_p_diff2", {"", {100, -1, 1}, [this]() { return (m_pi_V4 - m_reco_pi_V4).P(); }}},
+
         {"p_change_phi",
          {"Total momentum change phi [°]",
           {720, -30, 330},
@@ -192,11 +200,6 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
         {"p_change_mag",
          {"Total momentum change magnitude [GeV/c]", {200, -1, 2}, [this]() { return m_total_p_change_V4.P(); }}},
         {"E_change", {"Total energy change [GeV/c^2]", {200, -1, 2}, [this]() { return m_total_p_change_V4.E(); }}},
-
-        // Physical properties of the event as a whole
-        {"reco_W", {"Reconstructed W [GeV]", {1000, 0, 4}, [this]() { return m_reco_W; }}},
-        {"reco_Q2", {"Reconsotructed Q^2 [GeV]", {1000, 0, 4}, [this]() { return m_reco_Q2; }}},
-        {"reco_x", {"Reconstructed Bjorken x", {1000, 0, 1.01}, [this]() { return m_reco_x; }}},
 
         // Rescattering
         {"resc_same",
