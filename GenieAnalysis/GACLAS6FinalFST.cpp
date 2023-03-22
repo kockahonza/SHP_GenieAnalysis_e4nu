@@ -43,14 +43,46 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
         return 0;
     }
 
+    // Check if primary state particles rescattered in the same way
+    m_resc_same = m_ge.resc[0];
+    for (int i{0}; i < m_ge.ni; i++) {
+        if (m_ge.resc[i] != m_resc_same) {
+            m_resc_same = {};
+        }
+    }
+
+    // This uses unsafe pointers as C style arrays are used in GenieEvent, this should be replaced by std::array but I
+    // don't hve the time now
+    Int_t num_particles;
+    Int_t *pdgs;
+    Double_t *pxs, *pys, *pzs, *Es;
+    if (m_run_type == RunType::PrimaryState) {
+        num_particles = m_ge.ni;
+        pdgs = m_ge.pdgi;
+        pxs = m_ge.pxi;
+        pys = m_ge.pyi;
+        pzs = m_ge.pzi;
+        Es = m_ge.Ei;
+    } else {
+        if ((m_run_type == RunType::FinalStateResc1) && ((!m_resc_same) || (m_resc_same.value() != 1))) {
+            return 0;
+        }
+        num_particles = m_ge.nf;
+        pdgs = m_ge.pdgf;
+        pxs = m_ge.pxf;
+        pys = m_ge.pyf;
+        pzs = m_ge.pzf;
+        Es = m_ge.Ef;
+    }
+
     m_found_pi = false;
     m_found_nuc = false;
     // Temp variables for the primary state hadrons(and photon) loop, declared here for performance, these are the
     // most interesting hadrons for comparison to experiment
     TVector3 V3;
-    for (int i{0}; i < m_ge.ni; i++) {
-        if (m_ge.pdgi[i] == 2212) { // proton
-            V3.SetXYZ(m_ge.pxi[i], m_ge.pyi[i], m_ge.pzi[i]);
+    for (int i{0}; i < num_particles; i++) {
+        if (pdgs[i] == 2212) { // proton
+            V3.SetXYZ(pxs[i], pys[i], pzs[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
             if ((V3.Mag() < m_p_proton_momentum_threshold) || (!m_fiducials->protonCut(V3))) {
@@ -66,14 +98,16 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
             // 0
             if ((m_nuc_type == NucleonType::Proton) && (!m_found_nuc)) {
                 m_found_nuc = true;
-                m_nuc_V4 = TLorentzVector(V3, m_ge.Ei[i]);
-                m_ps_nuc_resc = m_ge.resc[i];
+                m_nuc_V4 = TLorentzVector(V3, Es[i]);
+                if (m_run_type == RunType::PrimaryState) {
+                    m_ps_nuc_resc = m_ge.resc[i];
+                }
             } else {
                 return 0;
             }
 
-        } else if (m_ge.pdgi[i] == 2112) { // neutron
-            V3.SetXYZ(m_ge.pxi[i], m_ge.pyi[i], m_ge.pzi[i]);
+        } else if (pdgs[i] == 2112) { // neutron
+            V3.SetXYZ(pxs[i], pys[i], pzs[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
             // If we got here, it means it qualifies as signal, if we are still looking for a neutron, make this
@@ -81,14 +115,16 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
             // 0
             if ((m_nuc_type == NucleonType::Neutron) && (!m_found_nuc)) {
                 m_found_nuc = true;
-                m_nuc_V4 = TLorentzVector(V3, m_ge.Ei[i]);
-                m_ps_nuc_resc = m_ge.resc[i];
+                m_nuc_V4 = TLorentzVector(V3, Es[i]);
+                if (m_run_type == RunType::PrimaryState) {
+                    m_ps_nuc_resc = m_ge.resc[i];
+                }
             } else {
                 return 0;
             }
 
-        } else if (m_ge.pdgi[i] == 211) { // pi+
-            V3.SetXYZ(m_ge.pxi[i], m_ge.pyi[i], m_ge.pzi[i]);
+        } else if (pdgs[i] == 211) { // pi+
+            V3.SetXYZ(pxs[i], pys[i], pzs[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
             if ((V3.Mag() < m_p_pion_momentum_threshold) ||
@@ -104,14 +140,16 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
             // if we are looking for pi- or have already found a suitable pion, the event is invalid so return 0
             if ((m_pi_type == PionType::Plus) && (!m_found_pi)) {
                 m_found_pi = true;
-                m_pi_V4 = TLorentzVector(V3, m_ge.Ei[i]);
-                m_ps_pi_resc = m_ge.resc[i];
+                m_pi_V4 = TLorentzVector(V3, Es[i]);
+                if (m_run_type == RunType::PrimaryState) {
+                    m_ps_pi_resc = m_ge.resc[i];
+                }
             } else {
                 return 0;
             }
 
-        } else if (m_ge.pdgi[i] == -211) { // pi-
-            V3.SetXYZ(m_ge.pxi[i], m_ge.pyi[i], m_ge.pzi[i]);
+        } else if (pdgs[i] == -211) { // pi-
+            V3.SetXYZ(pxs[i], pys[i], pzs[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
             if ((V3.Mag() < m_p_pion_momentum_threshold) ||
@@ -127,13 +165,15 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
             // if we are looking for pi+ or have already found a suitable pion, the event is invalid so return 0
             if ((m_pi_type == PionType::Minus) && (!m_found_pi)) {
                 m_found_pi = true;
-                m_pi_V4 = TLorentzVector(V3, m_ge.Ei[i]);
-                m_ps_pi_resc = m_ge.resc[i];
+                m_pi_V4 = TLorentzVector(V3, Es[i]);
+                if (m_run_type == RunType::PrimaryState) {
+                    m_ps_pi_resc = m_ge.resc[i];
+                }
             } else {
                 return 0;
             }
 
-        } else if (m_ge.pdgi[i] == 22) { // photon
+        } else if (pdgs[i] == 22) { // photon
             // Nothing now
         } else {
             /* std::cout << "extra FS particle -- " << m_ge.pdgf[i] << std::endl; */
@@ -147,5 +187,5 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
     m_total_p_change_V4 = m_el_V4 + m_pi_V4 + m_nuc_V4 - TLorentzVector(0, 0, m_beam_energy_val, m_beam_energy_val);
     m_reco_pi_V4 = TLorentzVector(0, 0, m_beam_energy_val, m_beam_energy_val) - m_el_V4 - m_nuc_V4;
 
-    return m_ge.wght;
+    return weight;
 }

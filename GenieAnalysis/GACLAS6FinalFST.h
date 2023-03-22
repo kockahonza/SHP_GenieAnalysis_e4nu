@@ -107,7 +107,7 @@ class ElectronFiducials : public GAAutoHistograms {
 
 class Final1Pion1NucleonTruth : public ElectronFiducials {
   public:
-    enum class RunType { PrimaryState, FinalState };
+    enum class RunType { PrimaryState, FinalStateResc1, FinalState };
 
     enum class PionType { Plus, Minus };
     enum class NucleonType { Proton, Neutron };
@@ -135,10 +135,10 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
     TLorentzVector m_total_p_change_V4;
     TLorentzVector m_reco_pi_V4;
 
-    // not done yet
-    optional<Int_t> resc_same;
+    // Mainly intende for final state run types
+    optional<Int_t> m_resc_same;
 
-    // These are only available with primary state runs
+    // These are only available with primary state runs (RunType::PrimaryState)
     Int_t m_ps_pi_resc;
     Int_t m_ps_nuc_resc;
 
@@ -197,6 +197,12 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
         {"reco_W", {"Reconstructed W [GeV]", {1000, 0, 4}, [this]() { return m_reco_W; }}},
         {"reco_Q2", {"Reconsotructed Q^2 [GeV]", {1000, 0, 4}, [this]() { return m_reco_Q2; }}},
         {"reco_x", {"Reconstructed Bjorken x", {1000, 0, 1.01}, [this]() { return m_reco_x; }}},
+
+        // Rescattering
+        {"resc_same",
+         {"If all resc values are the same, it is that value, 0 if not",
+          {11, -2.5, 8.5},
+          [this]() { return m_resc_same.value_or(0); }}},
     };
 
   public:
@@ -223,8 +229,6 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
                 "Pion resc code from gst", {11, -2.5, 8.5}, [this]() { return m_ps_pi_resc; }};
             m_known_properties["nuc_resc"] = {
                 "Nucleon resc code from gst", {11, -2.5, 8.5}, [this]() { return m_ps_nuc_resc; }};
-        } else {
-            throw std::runtime_error("Not implemented yet");
         }
     }
 
