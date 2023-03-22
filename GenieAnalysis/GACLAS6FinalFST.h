@@ -66,9 +66,9 @@ class ElectronFiducials : public GAAutoHistograms {
               double phi_deg{m_el_V4.Phi() * TMath::RadToDeg()};
               return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
           }}},
-        {"el_ct", {"Out electron cos theta", {720, -1, 1}, [this]() { return m_el_V4.CosTheta(); }}},
-        {"el_p", {"Out electron momentum [GeV/c]", {720, 0, 3}, [this]() { return m_el_V4.P(); }}},
-        {"el_E", {"Out electron energy [GeV]", {720, 0, 3}, [this]() { return m_el_V4.Energy(); }}},
+        {"el_ct", {"Out electron cos theta", {500, -1, 1}, [this]() { return m_el_V4.CosTheta(); }}},
+        {"el_p", {"Out electron momentum [GeV/c]", {500, 0, 3}, [this]() { return m_el_V4.P(); }}},
+        {"el_E", {"Out electron energy [GeV]", {500, 0, 3}, [this]() { return m_el_V4.E(); }}},
     };
 
   public:
@@ -77,7 +77,7 @@ class ElectronFiducials : public GAAutoHistograms {
                       const vector<string> &stages = {}, const vector<string> &properties = {},
                       const vector<string> &types = {},
                       const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                      const UseFiducials use_fiducials = UseFiducials::Option1,
+                      const UseFiducials &use_fiducials = UseFiducials::Option1,
                       // CLAS6 run params
                       const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
                       // Pass this to GenieAnalysis
@@ -110,19 +110,25 @@ class ElectronFiducials : public GAAutoHistograms {
 
 class Final1Pion1NucleonTruth : public ElectronFiducials {
   public:
-    enum class RunType { PrimaryState, FinalStateResc1, FinalState };
-
     enum class PionType { Plus, Minus };
     enum class NucleonType { Proton, Neutron };
+
+    enum class RunType { PrimaryState, FinalStateResc1, FinalState };
+    // see GACLAS6FinalFST.cpp, the end of the passesCuts function for what they mean
+    enum class PiRecoType { UsingNucleon, ElectronOnly };
 
     const PionType m_pi_type;
     const NucleonType m_nuc_type;
     const RunType m_run_type;
+    const PiRecoType m_pi_reco_type;
 
-  public:
     double m_p_pion_momentum_threshold{0.15};
     double m_p_photon_momentum_threshold{0.3};
     double m_p_proton_momentum_threshold{0.3};
+
+  protected:
+    // The 4 momentum of the nucleon of the given type before the collision assuming it at rest
+    TLorentzVector m_rest_nuc_V4;
 
   private:
     // Simple flags
@@ -134,9 +140,14 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
     TLorentzVector m_pi_V4;
     TLorentzVector m_nuc_V4;
 
-    // Kinematics reconstruction test
-    TLorentzVector m_total_p_change_V4;
+    // Kinematics reconstruction
+    // The reconstructed pion 4momentum, this is calculated base on `m_pi_reco_type`
     TLorentzVector m_reco_pi_V4;
+    // The difference of the actual and the reconstructed pion 4 momentum
+    TLorentzVector m_reco_pi_diff_V4;
+    // The total 4 momentum change, it is the sum of the incident electron and the hit nucleon assumed at rest, minus
+    // the total 4 momentum of the electron, pion and nucleon
+    TLorentzVector m_total_p_change_V4;
 
     // Mainly intende for final state run types
     optional<Int_t> m_resc_same;
@@ -154,9 +165,9 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
               double phi_deg{m_pi_V4.Phi() * TMath::RadToDeg()};
               return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
           }}},
-        {"pi_ct", {"Pion cos theta", {720, -1, 1}, [this]() { return m_pi_V4.CosTheta(); }}},
-        {"pi_p", {"Pion momentum [GeV/c]", {720, 0, 3}, [this]() { return m_pi_V4.P(); }}},
-        {"pi_E", {"Pion energy [GeV]", {720, 0, 3}, [this]() { return m_pi_V4.Energy(); }}},
+        {"pi_ct", {"Pion cos theta", {500, -1, 1}, [this]() { return m_pi_V4.CosTheta(); }}},
+        {"pi_p", {"Pion momentum [GeV/c]", {500, 0, 3}, [this]() { return m_pi_V4.P(); }}},
+        {"pi_E", {"Pion energy [GeV]", {500, 0, 3}, [this]() { return m_pi_V4.E(); }}},
 
         {"nuc_phi",
          {"Nucleon phi [°]",
@@ -165,14 +176,14 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
               double phi_deg{m_nuc_V4.Phi() * TMath::RadToDeg()};
               return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
           }}},
-        {"nuc_ct", {"Nucleon cos theta", {720, -1, 1}, [this]() { return m_nuc_V4.CosTheta(); }}},
-        {"nuc_p", {"Nucleon momentum [GeV/c]", {720, 0, 3}, [this]() { return m_nuc_V4.P(); }}},
-        {"nuc_E", {"Nucleon energy [GeV]", {720, 0, 3}, [this]() { return m_nuc_V4.Energy(); }}},
+        {"nuc_ct", {"Nucleon cos theta", {500, -1, 1}, [this]() { return m_nuc_V4.CosTheta(); }}},
+        {"nuc_p", {"Nucleon momentum [GeV/c]", {500, 0, 3}, [this]() { return m_nuc_V4.P(); }}},
+        {"nuc_E", {"Nucleon energy [GeV]", {500, 0, 3}, [this]() { return m_nuc_V4.E(); }}},
 
         // Reconstructed properties of the event and then pi
-        {"reco_W", {"Reconstructed W [GeV]", {1000, 0, 4}, [this]() { return m_reco_W; }}},
-        {"reco_Q2", {"Reconsotructed Q^2 [GeV]", {1000, 0, 4}, [this]() { return m_reco_Q2; }}},
-        {"reco_x", {"Reconstructed Bjorken x", {1000, 0, 1.01}, [this]() { return m_reco_x; }}},
+        {"reco_W", {"Reconstructed W [GeV]", {500, 0, 4}, [this]() { return m_reco_W; }}},
+        {"reco_Q2", {"Reconsotructed Q^2 [GeV]", {500, 0, 4}, [this]() { return m_reco_Q2; }}},
+        {"reco_x", {"Reconstructed Bjorken x", {500, 0, 1.01}, [this]() { return m_reco_x; }}},
 
         {"reco_pi_phi",
          {"Kinematically reconstructed pion phi [°]",
@@ -182,14 +193,33 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
               return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
           }}},
         {"reco_pi_ct",
-         {"Kinematically reconstructed pion cos theta", {720, -1, 1}, [this]() { return m_reco_pi_V4.CosTheta(); }}},
+         {"Kinematically reconstructed pion cos theta", {500, -1, 1}, [this]() { return m_reco_pi_V4.CosTheta(); }}},
         {"reco_pi_p",
-         {"Kinematically reconstructed pion momentum [GeV/c]", {720, 0, 3}, [this]() { return m_reco_pi_V4.P(); }}},
+         {"Kinematically reconstructed pion momentum [GeV/c]", {500, 0, 3}, [this]() { return m_reco_pi_V4.P(); }}},
         {"reco_pi_E",
-         {"Kinematically reconstructed pion energy [GeV]", {720, 0, 3}, [this]() { return m_reco_pi_V4.Energy(); }}},
+         {"Kinematically reconstructed pion energy [GeV]", {500, 0, 3}, [this]() { return m_reco_pi_V4.E(); }}},
 
-        {"pi_reco_p_diff", {"", {100, -1, 1}, [this]() { return m_pi_V4.P() - m_reco_pi_V4.P(); }}},
-        {"pi_reco_p_diff2", {"", {100, -1, 1}, [this]() { return (m_pi_V4 - m_reco_pi_V4).P(); }}},
+        /* {"reco_pi_diff_phi", */
+        /*  {"Error of the reconstructed pion - phi [°]", */
+        /*   {720, -30, 330}, */
+        /*   [this]() { */
+        /*       double phi_deg{m_reco_pi_diff_V4.Phi() * TMath::RadToDeg()}; */
+        /*       return (phi_deg < -30) ? phi_deg + 360 : phi_deg; */
+        /*   }}}, */
+        /* {"reco_pi_diff_ct", */
+        /*  {"Error of the reconstructed pion - cos theta", {500, -1, 1}, [this]() { return
+           m_reco_pi_diff_V4.CosTheta(); }}}, */
+        /* {"reco_pi_diff_p", */
+        /*  {"Error of the reconstructed pion - momentum [GeV/c]", {500, 0, 3}, [this]() { return m_reco_pi_diff_V4.P();
+           }}}, */
+        /* {"reco_pi_diff_E", */
+        /*  {"Error of the reconstructed pion - energy [GeV]", {500, -2, 2}, [this]() { return m_reco_pi_diff_V4.E();
+           }}}, */
+
+        {"reco_pi_p_test",
+         {"Difference of the 3 momentum magnitudes of the reconstructed and actual pions",
+          {500, -2, 2},
+          [this]() { return m_reco_pi_V4.P() - m_pi_V4.P(); }}},
 
         {"p_change_phi",
          {"Total momentum change phi [°]",
@@ -199,10 +229,10 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
               return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
           }}},
         {"p_change_ct",
-         {"Total momentum change cos theta", {720, -1, 1}, [this]() { return m_total_p_change_V4.CosTheta(); }}},
+         {"Total momentum change cos theta", {500, -1, 1}, [this]() { return m_total_p_change_V4.CosTheta(); }}},
         {"p_change_mag",
-         {"Total momentum change magnitude [GeV/c]", {200, -1, 2}, [this]() { return m_total_p_change_V4.P(); }}},
-        {"E_change", {"Total energy change [GeV/c^2]", {200, -1, 2}, [this]() { return m_total_p_change_V4.E(); }}},
+         {"Total momentum change magnitude [GeV/c]", {500, -1, 2}, [this]() { return m_total_p_change_V4.P(); }}},
+        {"E_change", {"Total energy change [GeV/c^2]", {500, -1, 2}, [this]() { return m_total_p_change_V4.E(); }}},
 
         // Rescattering
         {"resc_same",
@@ -220,7 +250,8 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
                             const vector<string> &stages = {}, const vector<string> &properties = {},
                             const vector<string> &types = {},
                             const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                            const UseFiducials use_fiducials = UseFiducials::Option1,
+                            const PiRecoType &pi_reco_type = PiRecoType::UsingNucleon,
+                            const UseFiducials &use_fiducials = UseFiducials::Option1,
                             // CLAS6 run params
                             const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
                             // Pass this to GenieAnalysis
@@ -228,13 +259,18 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
         : GenieAnalysis(filename, gst_ttree_name), ElectronFiducials{filename,      output_filename, stages,
                                                                      properties,    types,           vs_property_plots,
                                                                      use_fiducials, target,          beam_energy},
-          m_pi_type{pi_type}, m_nuc_type{nuc_type}, m_run_type{run_type} {
+          m_pi_type{pi_type}, m_nuc_type{nuc_type}, m_run_type{run_type}, m_pi_reco_type{pi_reco_type} {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
         if (m_run_type == RunType::PrimaryState) {
             m_known_properties["pi_resc"] = {
                 "Pion resc code from gst", {11, -2.5, 8.5}, [this]() { return m_ps_pi_resc; }};
             m_known_properties["nuc_resc"] = {
                 "Nucleon resc code from gst", {11, -2.5, 8.5}, [this]() { return m_ps_nuc_resc; }};
+        }
+        if (m_nuc_type == NucleonType::Proton) {
+            m_rest_nuc_V4 = TLorentzVector(0, 0, 0, mass_proton);
+        } else if (m_nuc_type == NucleonType::Neutron) {
+            m_rest_nuc_V4 = TLorentzVector(0, 0, 0, mass_neutron);
         }
     }
 
