@@ -43,6 +43,7 @@ class ElectronFiducials : public GAAutoHistograms {
 
     // Initialized in constructor and then const
     Double_t m_beam_energy_val;
+    TLorentzVector m_beam_V4;
 
     // Fiducials, accesible to inheriting classes
     const unique_ptr<FiducialWrapper> m_fiducials;
@@ -100,6 +101,8 @@ class ElectronFiducials : public GAAutoHistograms {
             m_el_precut_parameter2 = 15;
             m_beam_energy_val = 4.461;
         }
+        m_beam_V4 = TLorentzVector(0, 0, sqrt(m_beam_energy_val * m_beam_energy_val - mass_electron * mass_electron),
+                                   m_beam_energy_val);
     }
 
     Double_t passesCuts() override;

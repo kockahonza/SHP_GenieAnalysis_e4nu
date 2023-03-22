@@ -21,7 +21,7 @@ Double_t ElectronFiducials::passesCuts() {
     }
 
     // Calculation of kinematic quantities (nu, Q2, x bjorken, q and W) -- literally taken from original though
-    const TLorentzVector el_change{m_el_V4 - TLorentzVector{0, 0, m_beam_energy_val, m_beam_energy_val}};
+    const TLorentzVector el_change{m_el_V4 - m_beam_V4};
     m_reco_Q2 = -el_change.Mag2();
     const double nu = -el_change.E();
     m_reco_x = m_reco_Q2 / (2 * mass_proton * nu);
@@ -184,8 +184,8 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
         return 0;
     }
 
-    m_total_p_change_V4 = m_el_V4 + m_pi_V4 + m_nuc_V4 - TLorentzVector(0, 0, m_beam_energy_val, m_beam_energy_val);
-    m_reco_pi_V4 = TLorentzVector(0, 0, m_beam_energy_val, m_beam_energy_val) - m_el_V4 - m_nuc_V4;
+    m_total_p_change_V4 = m_el_V4 + m_pi_V4 + m_nuc_V4 - m_beam_V4;
+    m_reco_pi_V4 = m_beam_V4 - m_el_V4 - m_nuc_V4;
 
     return weight;
 }
