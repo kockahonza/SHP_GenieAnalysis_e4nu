@@ -189,7 +189,7 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
     if (m_pi_reco_type == PiRecoType::UsingNucleon) {
         m_reco_pi_V4 = m_beam_V4 + m_rest_nuc_V4 - m_el_V4 - m_nuc_V4;
     } else {
-        throw std::runtime_error("Int implemented yet");
+        throw std::runtime_error("Not implemented");
     }
     m_reco_pi_diff_V4 = m_pi_V4 - m_reco_pi_V4;
 

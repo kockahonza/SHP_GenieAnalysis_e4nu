@@ -115,6 +115,7 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
 
     enum class RunType { PrimaryState, FinalStateResc1, FinalState };
     // see GACLAS6FinalFST.cpp, the end of the passesCuts function for what they mean
+    // Actually currently thinking ElectronOnly isn't possible so only UsingNucleon will work
     enum class PiRecoType { UsingNucleon, ElectronOnly };
 
     const PionType m_pi_type;
