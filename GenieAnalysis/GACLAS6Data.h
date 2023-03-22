@@ -48,7 +48,15 @@ class GACLAS6DataPrepare : public virtual GenieAnalysis {
                        const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
                        // Pass this to GenieAnalysis
                        const char *gst_ttree_name = "gst")
-        : GenieAnalysis(filename, gst_ttree_name), m_target{target}, m_beam_energy{beam_energy} {}
+        : GenieAnalysis(filename, gst_ttree_name), m_target{target}, m_beam_energy{beam_energy} {
+            if (beam_energy == BeamEnergy::MeV_1161) {
+                m_beam_energy_val = 1.161;
+            } else if (beam_energy == BeamEnergy::MeV_2261) {
+                m_beam_energy_val = 2.261;
+            } else if (beam_energy == BeamEnergy::MeV_4461) {
+                m_beam_energy_val = 4.461;
+            }
+        }
 
     Double_t passesCuts();
 };
