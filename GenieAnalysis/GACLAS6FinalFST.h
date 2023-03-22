@@ -26,6 +26,9 @@ using namespace GACLAS6Common;
  */
 class ElectronFiducials : public GAAutoHistograms {
   public:
+    enum class UseFiducials { No, Option1, Option2 };
+    const UseFiducials m_use_fiducials;
+
     const Target m_target;
     const BeamEnergy m_beam_energy;
 
@@ -73,13 +76,15 @@ class ElectronFiducials : public GAAutoHistograms {
                       const vector<string> &stages = {}, const vector<string> &properties = {},
                       const vector<string> &types = {},
                       const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                      const UseFiducials use_fiducials = UseFiducials::Option1,
                       // CLAS6 run params
                       const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
                       // Pass this to GenieAnalysis
                       const char *gst_ttree_name = "gst")
-        : GenieAnalysis(filename, gst_ttree_name),
-          GAAutoHistograms{filename, output_filename, stages, properties, types, vs_property_plots}, m_target{target},
-          m_beam_energy{beam_energy}, m_fiducials{std::make_unique<FiducialWrapper>(m_target, m_beam_energy)} {
+        : GenieAnalysis(filename, gst_ttree_name), GAAutoHistograms{filename,   output_filename, stages,
+                                                                    properties, types,           vs_property_plots},
+          m_use_fiducials{use_fiducials}, m_target{target}, m_beam_energy{beam_energy},
+          m_fiducials{std::make_unique<FiducialWrapper>(m_target, m_beam_energy)} {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
         // Initialize precut parameters
         if (beam_energy == BeamEnergy::MeV_1161) {
@@ -182,9 +187,11 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
               double phi_deg{m_total_p_change_V4.Phi() * TMath::RadToDeg()};
               return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
           }}},
-        {"p_change_ct", {"Total momentum change cos theta", {}, [this]() { return m_total_p_change_V4.CosTheta(); }}},
+        {"p_change_ct",
+         {"Total momentum change cos theta", {720, -1, 1}, [this]() { return m_total_p_change_V4.CosTheta(); }}},
         {"p_change_mag",
          {"Total momentum change magnitude [GeV/c]", {200, -1, 2}, [this]() { return m_total_p_change_V4.P(); }}},
+        {"E_change", {"Total energy change [GeV/c^2]", {200, -1, 2}, [this]() { return m_total_p_change_V4.E(); }}},
 
         // Physical properties of the event as a whole
         {"reco_W", {"Reconstructed W [GeV]", {1000, 0, 4}, [this]() { return m_reco_W; }}},
@@ -201,12 +208,14 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
                             const vector<string> &stages = {}, const vector<string> &properties = {},
                             const vector<string> &types = {},
                             const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                            const UseFiducials use_fiducials = UseFiducials::Option1,
                             // CLAS6 run params
                             const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
                             // Pass this to GenieAnalysis
                             const char *gst_ttree_name = "gst")
-        : GenieAnalysis(filename, gst_ttree_name), ElectronFiducials{filename, output_filename,   stages, properties,
-                                                                     types,    vs_property_plots, target, beam_energy},
+        : GenieAnalysis(filename, gst_ttree_name), ElectronFiducials{filename,      output_filename, stages,
+                                                                     properties,    types,           vs_property_plots,
+                                                                     use_fiducials, target,          beam_energy},
           m_pi_type{pi_type}, m_nuc_type{nuc_type}, m_run_type{run_type} {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
         if (m_run_type == RunType::PrimaryState) {

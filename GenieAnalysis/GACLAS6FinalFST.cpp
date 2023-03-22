@@ -5,17 +5,19 @@ Double_t ElectronFiducials::passesCuts() {
     m_el_V4.SetPxPyPzE(m_ge.pxl, m_ge.pyl, m_ge.pzl, m_ge.El);
     m_el_V4.SetPhi(m_el_V4.Phi() + TMath::Pi());
 
-    // Electron theta and momentum fiducial (essentially I think) cut, the values are specifically for C12 2.261GeV
-    // set by inspecting
-    // https://docs.google.com/presentation/d/1ghG08JfCYXRXh6O8hcXKrhJOFxkAs_9i5ZfoIkiiEHU/edit?usp=sharing and
-    // previous values
-    const double theta_min{TMath::DegToRad() * (m_el_precut_parameter1 + m_el_precut_parameter2 / m_el_V4.P())};
-    if ((m_el_V4.Theta() < theta_min) || (m_el_V4.Theta() > 80 * TMath::DegToRad())) {
-        return 0;
-    }
-    // Electron fiducials
-    if (!m_fiducials->electronCut(m_el_V4.Vect())) {
-        return 0;
+    if (m_use_fiducials != UseFiducials::No) {
+        // Electron theta and momentum fiducial (essentially I think) cut, the values are specifically for C12 2.261GeV
+        // set by inspecting
+        // https://docs.google.com/presentation/d/1ghG08JfCYXRXh6O8hcXKrhJOFxkAs_9i5ZfoIkiiEHU/edit?usp=sharing and
+        // previous values
+        const double theta_min{TMath::DegToRad() * (m_el_precut_parameter1 + m_el_precut_parameter2 / m_el_V4.P())};
+        if ((m_el_V4.Theta() < theta_min) || (m_el_V4.Theta() > 80 * TMath::DegToRad())) {
+            return 0;
+        }
+        // Electron fiducials
+        if (!m_fiducials->electronCut(m_el_V4.Vect())) {
+            return 0;
+        }
     }
 
     // Calculation of kinematic quantities (nu, Q2, x bjorken, q and W) -- literally taken from original though
@@ -51,12 +53,12 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
             V3.SetXYZ(m_ge.pxi[i], m_ge.pyi[i], m_ge.pzi[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
-            if (V3.Mag() < m_p_proton_momentum_threshold) {
-                continue;
-            }
-
-            if (!m_fiducials->protonCut(V3)) {
-                continue;
+            if ((V3.Mag() < m_p_proton_momentum_threshold) || (!m_fiducials->protonCut(V3))) {
+                if (m_use_fiducials == UseFiducials::Option1) {
+                    continue;
+                } else if (m_use_fiducials == UseFiducials::Option2) {
+                    return 0;
+                }
             }
 
             // If we got here, it means it qualifies as signal, if we are still looking for a proton, make this
@@ -89,12 +91,12 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
             V3.SetXYZ(m_ge.pxi[i], m_ge.pyi[i], m_ge.pzi[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
-            if (V3.Mag() < m_p_pion_momentum_threshold) {
-                continue;
-            }
-
-            if (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Plus)) {
-                continue;
+            if ((V3.Mag() < m_p_pion_momentum_threshold) || (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Plus))) {
+                if (m_use_fiducials == UseFiducials::Option1) {
+                    continue;
+                } else if (m_use_fiducials == UseFiducials::Option2) {
+                    return 0;
+                }
             }
 
             // If we got here, it means it qualifies as signal, if we are still looking for a pi+, make this found,
@@ -111,12 +113,12 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
             V3.SetXYZ(m_ge.pxi[i], m_ge.pyi[i], m_ge.pzi[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
-            if (V3.Mag() < m_p_pion_momentum_threshold) {
-                continue;
-            }
-
-            if (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Minus)) {
-                continue;
+            if ((V3.Mag() < m_p_pion_momentum_threshold) || (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Minus))) {
+                if (m_use_fiducials == UseFiducials::Option1) {
+                    continue;
+                } else if (m_use_fiducials == UseFiducials::Option2) {
+                    return 0;
+                }
             }
 
             // If we got here, it means it qualifies as signal, if we are still looking for a pi-, make this found,
