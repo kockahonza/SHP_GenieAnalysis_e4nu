@@ -91,7 +91,8 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
             V3.SetXYZ(m_ge.pxi[i], m_ge.pyi[i], m_ge.pzi[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
-            if ((V3.Mag() < m_p_pion_momentum_threshold) || (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Plus))) {
+            if ((V3.Mag() < m_p_pion_momentum_threshold) ||
+                (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Plus))) {
                 if (m_use_fiducials == UseFiducials::Option1) {
                     continue;
                 } else if (m_use_fiducials == UseFiducials::Option2) {
@@ -113,7 +114,8 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
             V3.SetXYZ(m_ge.pxi[i], m_ge.pyi[i], m_ge.pzi[i]);
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
-            if ((V3.Mag() < m_p_pion_momentum_threshold) || (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Minus))) {
+            if ((V3.Mag() < m_p_pion_momentum_threshold) ||
+                (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Minus))) {
                 if (m_use_fiducials == UseFiducials::Option1) {
                     continue;
                 } else if (m_use_fiducials == UseFiducials::Option2) {

@@ -46,8 +46,6 @@ int main(int argc, char *argv[]) {
                                              {"pi_p", "reco_pi_p", {}},
                                              {"pi_E", "reco_pi_E", {}},
                                              {"pi_resc", "nuc_resc", {}},
-                                             {"pi_resc", "p_change_mag", {}},
-                                             {"nuc_resc", "p_change_mag", {}},
                                          });
         ga->runAnalysis();
         delete ga;
