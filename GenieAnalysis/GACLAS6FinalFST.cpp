@@ -29,7 +29,6 @@ Double_t ElectronFiducials::passesCuts() {
 
     if (m_Wcut) {
         if ((m_reco_W < m_Wcut->first) || (m_reco_W > m_Wcut->second)) {
-            std::cout << "Wcut trigerred" << std::endl;
             return 0;
         }
     }
