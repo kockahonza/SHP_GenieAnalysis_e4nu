@@ -12,6 +12,87 @@
 
 #include "GenieAnalysis/GACLAS6FinalFST.h"
 
+int get_ps_fsr_fs(string input_file, string local_full, bool Wcut) {
+    vector<tuple<string, Final1Pion1NucleonTruth::PionType, Final1Pion1NucleonTruth::NucleonType>> variants{
+        {"_0pip1pim1p0n", Final1Pion1NucleonTruth::PionType::Minus, Final1Pion1NucleonTruth::NucleonType::Proton},
+        {"_1pip0pim0p1n", Final1Pion1NucleonTruth::PionType::Plus, Final1Pion1NucleonTruth::NucleonType::Neutron},
+
+        {"_1pip0pim1p0n", Final1Pion1NucleonTruth::PionType::Plus, Final1Pion1NucleonTruth::NucleonType::Proton},
+        {"_0pip1pim0p1n", Final1Pion1NucleonTruth::PionType::Minus, Final1Pion1NucleonTruth::NucleonType::Neutron},
+    };
+
+    string desc = Wcut ? "Wcut_" + local_full : local_full;
+
+    for (auto const &[ext, pi_t, nuc_t] : variants) {
+        Final1Pion1NucleonTruth ga{input_file.c_str(),
+                                   ("outs/final_ps_" + desc + ext + ".root").c_str(),
+                                   pi_t,
+                                   nuc_t,
+                                   Final1Pion1NucleonTruth::RunType::PrimaryState,
+                                   {},
+                                   {},
+                                   {"ALL", "QE", "DELTA1232", "RES_OTHER", "DIS"},
+                                   {
+                                       {"pi_phi", "reco_pi_phi", {}},
+                                       {"pi_ct", "reco_pi_ct", {}},
+                                       {"pi_p", "reco_pi_p", {}},
+                                       {"pi_E", "reco_pi_E", {}},
+                                       {"pi_resc", "nuc_resc", {}},
+                                   }};
+        if (Wcut) {
+            ga.m_Wcut = {0, 1.4};
+        }
+        ga.runAnalysis();
+    }
+
+    for (auto const &[ext, pi_t, nuc_t] : variants) {
+        Final1Pion1NucleonTruth ga{input_file.c_str(),
+                                   ("outs/final_fsr_" + desc + ext + ".root").c_str(),
+                                   pi_t,
+                                   nuc_t,
+                                   Final1Pion1NucleonTruth::RunType::FinalStateResc1,
+                                   {},
+                                   {},
+                                   {"ALL", "QE", "DELTA1232", "RES_OTHER", "DIS"},
+                                   {
+                                       {"pi_phi", "reco_pi_phi", {}},
+                                       {"pi_ct", "reco_pi_ct", {}},
+                                       {"pi_p", "reco_pi_p", {}},
+                                       {"pi_E", "reco_pi_E", {}},
+                                   }};
+        if (Wcut) {
+            ga.m_Wcut = {0, 1.4};
+        }
+        ga.runAnalysis();
+    }
+
+    for (auto const &[ext, pi_t, nuc_t] : variants) {
+        Final1Pion1NucleonTruth ga{input_file.c_str(),
+                                   ("outs/final_fs_" + desc + ext + ".root").c_str(),
+                                   pi_t,
+                                   nuc_t,
+                                   Final1Pion1NucleonTruth::RunType::FinalState,
+                                   {},
+                                   {},
+                                   {"ALL", "QE", "DELTA1232", "RES_OTHER", "DIS"},
+                                   {
+                                       {"pi_phi", "reco_pi_phi", {}},
+                                       {"pi_ct", "reco_pi_ct", {}},
+                                       {"pi_p", "reco_pi_p", {}},
+                                       {"pi_E", "reco_pi_E", {}},
+                                       {"resc_same", "reco_pi_p_test", {}},
+                                       {"resc_same", "p_change_mag", {}},
+                                       {"resc_same", "E_change", {}},
+                                   }};
+        if (Wcut) {
+            ga.m_Wcut = {0, 1.4};
+        }
+        ga.runAnalysis();
+    }
+
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
     string input_file, output_file;
     if (argc == 2) {
@@ -30,86 +111,22 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    Final1Pion1NucleonTruth ga{input_file.c_str(),
-                               ("outs/final_test_" + output_file + ".root").c_str(),
-                               Final1Pion1NucleonTruth::PionType::Minus,
-                               Final1Pion1NucleonTruth::NucleonType::Proton,
-                               Final1Pion1NucleonTruth::RunType::PrimaryState,
-                               {},
-                               {},
-                               {"ALL", "QE", "DELTA1232", "RES_OTHER", "DIS"},
-                               {
-                                   {"pi_phi", "reco_pi_phi", {}},
-                                   {"pi_ct", "reco_pi_ct", {}},
-                                   {"pi_p", "reco_pi_p", {}},
-                                   {"pi_E", "reco_pi_E", {}},
-                                   {"pi_resc", "nuc_resc", {}},
-                               }};
-    ga.runAnalysis();
+    /* Final1Pion1NucleonTruth ga{input_file.c_str(), */
+    /*                            ("outs/final_test_" + output_file + ".root").c_str(), */
+    /*                            Final1Pion1NucleonTruth::PionType::Minus, */
+    /*                            Final1Pion1NucleonTruth::NucleonType::Proton, */
+    /*                            Final1Pion1NucleonTruth::RunType::PrimaryState, */
+    /*                            {}, */
+    /*                            {}, */
+    /*                            {"ALL", "QE", "DELTA1232", "RES_OTHER", "DIS"}, */
+    /*                            { */
+    /*                                {"pi_phi", "reco_pi_phi", {}}, */
+    /*                                {"pi_ct", "reco_pi_ct", {}}, */
+    /*                                {"pi_p", "reco_pi_p", {}}, */
+    /*                                {"pi_E", "reco_pi_E", {}}, */
+    /*                                {"pi_resc", "nuc_resc", {}}, */
+    /*                            }}; */
+    /* ga.runAnalysis(); */
 
-    vector<tuple<string, Final1Pion1NucleonTruth::PionType, Final1Pion1NucleonTruth::NucleonType>> variants{
-        {"_0pip1pim1p0n", Final1Pion1NucleonTruth::PionType::Minus, Final1Pion1NucleonTruth::NucleonType::Proton},
-        {"_1pip0pim0p1n", Final1Pion1NucleonTruth::PionType::Plus, Final1Pion1NucleonTruth::NucleonType::Neutron},
-
-        {"_1pip0pim1p0n", Final1Pion1NucleonTruth::PionType::Plus, Final1Pion1NucleonTruth::NucleonType::Proton},
-        {"_0pip1pim0p1n", Final1Pion1NucleonTruth::PionType::Minus, Final1Pion1NucleonTruth::NucleonType::Neutron},
-    };
-
-    for (auto const &[ext, pi_t, nuc_t] : variants) {
-        Final1Pion1NucleonTruth ga{input_file.c_str(),
-                                   ("outs/final_ps_" + output_file + ext + ".root").c_str(),
-                                   pi_t,
-                                   nuc_t,
-                                   Final1Pion1NucleonTruth::RunType::PrimaryState,
-                                   {},
-                                   {},
-                                   {"ALL", "QE", "DELTA1232", "RES_OTHER", "DIS"},
-                                   {
-                                       {"pi_phi", "reco_pi_phi", {}},
-                                       {"pi_ct", "reco_pi_ct", {}},
-                                       {"pi_p", "reco_pi_p", {}},
-                                       {"pi_E", "reco_pi_E", {}},
-                                       {"pi_resc", "nuc_resc", {}},
-                                   }};
-        ga.runAnalysis();
-    }
-
-    for (auto const &[ext, pi_t, nuc_t] : variants) {
-        Final1Pion1NucleonTruth ga{input_file.c_str(),
-                                   ("outs/final_fsr_" + output_file + ext + ".root").c_str(),
-                                   pi_t,
-                                   nuc_t,
-                                   Final1Pion1NucleonTruth::RunType::FinalStateResc1,
-                                   {},
-                                   {},
-                                   {"ALL", "QE", "DELTA1232", "RES_OTHER", "DIS"},
-                                   {
-                                       {"pi_phi", "reco_pi_phi", {}},
-                                       {"pi_ct", "reco_pi_ct", {}},
-                                       {"pi_p", "reco_pi_p", {}},
-                                       {"pi_E", "reco_pi_E", {}},
-                                   }};
-        ga.runAnalysis();
-    }
-
-    for (auto const &[ext, pi_t, nuc_t] : variants) {
-        Final1Pion1NucleonTruth ga{input_file.c_str(),
-                                   ("outs/final_fs_" + output_file + ext + ".root").c_str(),
-                                   pi_t,
-                                   nuc_t,
-                                   Final1Pion1NucleonTruth::RunType::FinalState,
-                                   {},
-                                   {},
-                                   {"ALL", "QE", "DELTA1232", "RES_OTHER", "DIS"},
-                                   {
-                                       {"pi_phi", "reco_pi_phi", {}},
-                                       {"pi_ct", "reco_pi_ct", {}},
-                                       {"pi_p", "reco_pi_p", {}},
-                                       {"pi_E", "reco_pi_E", {}},
-                                       {"resc_same", "reco_pi_p_test", {}},
-                                       {"resc_same", "p_change_mag", {}},
-                                       {"resc_same", "E_change", {}},
-                                   }};
-        ga.runAnalysis();
-    }
+    return get_ps_fsr_fs(input_file, output_file, true);
 }
