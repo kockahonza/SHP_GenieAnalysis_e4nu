@@ -13,6 +13,7 @@ final_truth_FST
 systematics
 e2a_ep
 
+outs
 doxygen_out
 
 # My vim setup makes a lot of these

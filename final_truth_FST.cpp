@@ -30,22 +30,22 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    /* Final1Pion1NucleonTruth ga{input_file.c_str(), */
-    /*                            ("final_test_" + output_file + ".root").c_str(), */
-    /*                            Final1Pion1NucleonTruth::PionType::Minus, */
-    /*                            Final1Pion1NucleonTruth::NucleonType::Proton, */
-    /*                            Final1Pion1NucleonTruth::RunType::PrimaryState, */
-    /*                            {}, */
-    /*                            {}, */
-    /*                            {"ALL", "QE", "DELTA1232", "RES_OTHER", "DIS"}, */
-    /*                            { */
-    /*                                {"pi_phi", "reco_pi_phi", {}}, */
-    /*                                {"pi_ct", "reco_pi_ct", {}}, */
-    /*                                {"pi_p", "reco_pi_p", {}}, */
-    /*                                {"pi_E", "reco_pi_E", {}}, */
-    /*                                {"pi_resc", "nuc_resc", {}}, */
-    /*                            }}; */
-    /* ga.runAnalysis(); */
+    Final1Pion1NucleonTruth ga{input_file.c_str(),
+                               ("outs/final_test_" + output_file + ".root").c_str(),
+                               Final1Pion1NucleonTruth::PionType::Minus,
+                               Final1Pion1NucleonTruth::NucleonType::Proton,
+                               Final1Pion1NucleonTruth::RunType::PrimaryState,
+                               {},
+                               {},
+                               {"ALL", "QE", "DELTA1232", "RES_OTHER", "DIS"},
+                               {
+                                   {"pi_phi", "reco_pi_phi", {}},
+                                   {"pi_ct", "reco_pi_ct", {}},
+                                   {"pi_p", "reco_pi_p", {}},
+                                   {"pi_E", "reco_pi_E", {}},
+                                   {"pi_resc", "nuc_resc", {}},
+                               }};
+    ga.runAnalysis();
 
     vector<tuple<string, Final1Pion1NucleonTruth::PionType, Final1Pion1NucleonTruth::NucleonType>> variants{
         {"_0pip1pim1p0n", Final1Pion1NucleonTruth::PionType::Minus, Final1Pion1NucleonTruth::NucleonType::Proton},
@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 
     for (auto const &[ext, pi_t, nuc_t] : variants) {
         Final1Pion1NucleonTruth ga{input_file.c_str(),
-                                   ("final_ps_" + output_file + ext + ".root").c_str(),
+                                   ("outs/final_ps_" + output_file + ext + ".root").c_str(),
                                    pi_t,
                                    nuc_t,
                                    Final1Pion1NucleonTruth::RunType::PrimaryState,
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 
     for (auto const &[ext, pi_t, nuc_t] : variants) {
         Final1Pion1NucleonTruth ga{input_file.c_str(),
-                                   ("final_fsr_" + output_file + ext + ".root").c_str(),
+                                   ("outs/final_fsr_" + output_file + ext + ".root").c_str(),
                                    pi_t,
                                    nuc_t,
                                    Final1Pion1NucleonTruth::RunType::FinalStateResc1,
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 
     for (auto const &[ext, pi_t, nuc_t] : variants) {
         Final1Pion1NucleonTruth ga{input_file.c_str(),
-                                   ("final_fs_" + output_file + ext + ".root").c_str(),
+                                   ("outs/final_fs_" + output_file + ext + ".root").c_str(),
                                    pi_t,
                                    nuc_t,
                                    Final1Pion1NucleonTruth::RunType::FinalState,
