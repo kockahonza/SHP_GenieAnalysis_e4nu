@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     }
 
     GAAutoHistograms ga{
-        input_file.c_str(), ("outs/misc_" + output_file + ".root").c_str(), {}, {}, {},
+        input_file.c_str(), ("outs/misc_" + output_file + ".root").c_str(), {}, {}, {"ALL", "QE", "RES", "DIS"}
     };
     ga.runAnalysis();
 
