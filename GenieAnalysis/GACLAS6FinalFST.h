@@ -146,6 +146,9 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
     TLorentzVector m_reco_pi_V4;
     // The difference of the actual and the reconstructed pion 4 momentum
     TLorentzVector m_reco_pi_diff_V4;
+    // The measured 4 momentum of the original nucleon calculated by assuming 0 4 momentum change, see how it's
+    // calculated dat the end of passesCuts
+    TLorentzVector m_original_nuc_V4;
     // The total 4 momentum change, it is the sum of the incident electron and the hit nucleon assumed at rest, minus
     // the total 4 momentum of the electron, pion and nucleon
     TLorentzVector m_total_p_change_V4;
@@ -221,6 +224,22 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
          {"Difference of the 3 momentum magnitudes of the reconstructed and actual pions",
           {500, -2, 2},
           [this]() { return m_reco_pi_V4.P() - m_pi_V4.P(); }}},
+
+        {"org_nuc_phi",
+         {"Measured pre-collision nucleon phi [°]",
+          {720, -30, 330},
+          [this]() {
+              double phi_deg{m_original_nuc_V4.Phi() * TMath::RadToDeg()};
+              return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
+          }}},
+        {"org_nuc_ct",
+         {"Measured pre-collision nucleon cos theta", {500, -1, 1}, [this]() { return m_original_nuc_V4.CosTheta(); }}},
+        {"org_nuc_mag",
+         {"Measured pre-collision nucleon 3 momentum magnitude [GeV/c]",
+          {500, -1, 2},
+          [this]() { return m_original_nuc_V4.P(); }}},
+        {"org_nuc_E",
+         {"Measured pre-collision nucleon energy [GeV/c^2]", {500, -1, 2}, [this]() { return m_original_nuc_V4.E(); }}},
 
         {"p_change_phi",
          {"Total momentum change phi [°]",

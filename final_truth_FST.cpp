@@ -17,12 +17,14 @@ int get_ps_fsr_fs(string input_file, string local_full, bool Wcut) {
         {"_0pip1pim1p0n", Final1Pion1NucleonTruth::PionType::Minus, Final1Pion1NucleonTruth::NucleonType::Proton},
         {"_1pip0pim0p1n", Final1Pion1NucleonTruth::PionType::Plus, Final1Pion1NucleonTruth::NucleonType::Neutron},
 
-        {"_1pip0pim1p0n", Final1Pion1NucleonTruth::PionType::Plus, Final1Pion1NucleonTruth::NucleonType::Proton},
-        {"_0pip1pim0p1n", Final1Pion1NucleonTruth::PionType::Minus, Final1Pion1NucleonTruth::NucleonType::Neutron},
+        /* {"_1pip0pim1p0n", Final1Pion1NucleonTruth::PionType::Plus, Final1Pion1NucleonTruth::NucleonType::Proton}, */
+        /* {"_0pip1pim0p1n", Final1Pion1NucleonTruth::PionType::Minus, Final1Pion1NucleonTruth::NucleonType::Neutron},
+         */
     };
 
     string desc = Wcut ? "Wcut_" + local_full : local_full;
 
+    // ps
     for (auto const &[ext, pi_t, nuc_t] : variants) {
         Final1Pion1NucleonTruth ga{input_file.c_str(),
                                    ("outs/final_ps_" + desc + ext + ".root").c_str(),
@@ -37,6 +39,10 @@ int get_ps_fsr_fs(string input_file, string local_full, bool Wcut) {
                                        {"pi_ct", "reco_pi_ct", {}},
                                        {"pi_p", "reco_pi_p", {}},
                                        {"pi_E", "reco_pi_E", {}},
+                                       {"pi_phi", "reco_pi_p_test", {}},
+                                       {"pi_ct", "reco_pi_p_test", {}},
+                                       {"pi_p", "reco_pi_p_test", {}},
+                                       {"pi_E", "reco_pi_p_test", {}},
                                        {"pi_resc", "nuc_resc", {}},
                                    }};
         if (Wcut) {
@@ -45,6 +51,7 @@ int get_ps_fsr_fs(string input_file, string local_full, bool Wcut) {
         ga.runAnalysis();
     }
 
+    // fsr
     for (auto const &[ext, pi_t, nuc_t] : variants) {
         Final1Pion1NucleonTruth ga{input_file.c_str(),
                                    ("outs/final_fsr_" + desc + ext + ".root").c_str(),
@@ -59,6 +66,10 @@ int get_ps_fsr_fs(string input_file, string local_full, bool Wcut) {
                                        {"pi_ct", "reco_pi_ct", {}},
                                        {"pi_p", "reco_pi_p", {}},
                                        {"pi_E", "reco_pi_E", {}},
+                                       {"pi_phi", "reco_pi_p_test", {}},
+                                       {"pi_ct", "reco_pi_p_test", {}},
+                                       {"pi_p", "reco_pi_p_test", {}},
+                                       {"pi_E", "reco_pi_p_test", {}},
                                    }};
         if (Wcut) {
             ga.m_Wcut = {0, 1.4};
@@ -66,6 +77,7 @@ int get_ps_fsr_fs(string input_file, string local_full, bool Wcut) {
         ga.runAnalysis();
     }
 
+    // fs
     for (auto const &[ext, pi_t, nuc_t] : variants) {
         Final1Pion1NucleonTruth ga{input_file.c_str(),
                                    ("outs/final_fs_" + desc + ext + ".root").c_str(),
@@ -80,6 +92,10 @@ int get_ps_fsr_fs(string input_file, string local_full, bool Wcut) {
                                        {"pi_ct", "reco_pi_ct", {}},
                                        {"pi_p", "reco_pi_p", {}},
                                        {"pi_E", "reco_pi_E", {}},
+                                       {"pi_phi", "reco_pi_p_test", {}},
+                                       {"pi_ct", "reco_pi_p_test", {}},
+                                       {"pi_p", "reco_pi_p_test", {}},
+                                       {"pi_E", "reco_pi_p_test", {}},
                                        {"resc_same", "reco_pi_p_test", {}},
                                        {"resc_same", "p_change_mag", {}},
                                        {"resc_same", "E_change", {}},
@@ -128,5 +144,6 @@ int main(int argc, char *argv[]) {
     /*                            }}; */
     /* ga.runAnalysis(); */
 
+    return get_ps_fsr_fs(input_file, output_file, false);
     return get_ps_fsr_fs(input_file, output_file, true);
 }
