@@ -155,7 +155,7 @@ class GenieAnalysis {
 
     virtual void runPreAnalysis(){};
 
-    virtual Double_t passesCuts() { return 1; }
+    virtual Double_t passesCuts() { return m_ge.wght; }
 
     virtual void useEntry(const Double_t &weight = 1) {}
 

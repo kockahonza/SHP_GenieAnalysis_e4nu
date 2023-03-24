@@ -21,7 +21,8 @@ LDFLAGS   += -std=c++17 $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -O3
 final_truth_FST: final_truth_FST.cpp $(GA_LIB_OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
-all: genie_analysis_deltas genie_analysis_1pi1nuc genie_analysis_1p genie_analysis_FS_transparency genie_analysis_data final_truth_FST
+misc: misc.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o $@ $^ $(LDFLAGS)
 
 genie_analysis_data: genie_analysis_data.cpp $(GA_LIB_OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
@@ -43,6 +44,9 @@ genie_analysis_lucass_cuts: genie_analysis_lucass_cuts.cpp $(GA_LIB_OBJECTS)
 
 genie_analysis_demo: genie_analysis_demo.cpp $(GA_LIB_OBJECTS)
 	$(CXX) -o $@ $^ $(LDFLAGS)
+
+
+all: genie_analysis_deltas genie_analysis_1pi1nuc genie_analysis_1p genie_analysis_FS_transparency genie_analysis_data final_truth_FST
 
 
 # GenieAnalysis "library"
