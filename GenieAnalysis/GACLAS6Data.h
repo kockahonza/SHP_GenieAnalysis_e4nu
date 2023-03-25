@@ -11,8 +11,6 @@
 #include "GAAutoHistograms.h"
 #include "misc.h"
 
-class FiducialWrapper;
-
 using std::unique_ptr, std::optional;
 
 class GACLAS6DataPrepare : public virtual GenieAnalysis {

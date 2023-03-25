@@ -85,7 +85,7 @@ class ElectronFiducials : public GAAutoHistograms {
         : GenieAnalysis(filename, gst_ttree_name), GAAutoHistograms{filename,   output_filename, stages,
                                                                     properties, types,           vs_property_plots},
           m_use_fiducials{use_fiducials}, m_target{target}, m_beam_energy{beam_energy},
-          m_fiducials{std::make_unique<FiducialWrapper>(m_target, m_beam_energy)} {
+          m_fiducials{std::make_unique<FiducialWrapper>(m_beam_energy)} {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
         // Initialize precut parameters
         if (beam_energy == BeamEnergy::MeV_1161) {

@@ -138,7 +138,7 @@ class GACLAS6MCCuts : public virtual GenieAnalysis {
                   const char *gst_ttree_name = "gst")
         : GenieAnalysis(filename, gst_ttree_name), m_target{target}, m_beam_energy{beam_energy},
 
-          m_fiducials{std::make_unique<FiducialWrapper>(m_target, m_beam_energy)},
+          m_fiducials{std::make_unique<FiducialWrapper>(m_beam_energy)},
 
           // Initializing acceptance map files and TH3Ds
           m_el_acceptance_file{getAcceptanceMapFile(m_target, m_beam_energy, "")},
