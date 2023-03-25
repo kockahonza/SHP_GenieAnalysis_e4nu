@@ -1,6 +1,7 @@
 #include <iostream>
 #include <limits>
 #include <optional>
+#include <stdexcept>
 #include <tuple>
 #include <utility>
 
@@ -10,6 +11,7 @@
 #include <TRandom.h>
 #include <TVector3.h>
 
+#include "GenieAnalysis/GACLAS6Common.h"
 #include "GenieAnalysis/GACLAS6FinalFST.h"
 
 int get_ps_fsr_fs(string input_file, string local_full, bool Wcut) {
@@ -110,40 +112,36 @@ int get_ps_fsr_fs(string input_file, string local_full, bool Wcut) {
 }
 
 int main(int argc, char *argv[]) {
-    string input_file, output_file;
-    if (argc == 2) {
-        std::string arg{argv[1]};
-        if (arg == "local") {
-            input_file = "/home/honza/Sync/University/CurrentCourses/SHP/data/Genie_gst_2000000.root";
-            output_file = "local";
-        } else if (arg == "full") {
-            input_file = "/pnfs/genie/persistent/users/apapadop/e4v_SuSav2/Exclusive/electrons/C12_2261GeV/"
-                         "apapadop_SuSav2_C12_2261GeV_master.root";
-            output_file = "full";
-        }
-    } else {
-        std::cout << "Needs an argument to specify which way to run (should be \"local\" or \"full\"), check the code"
-                  << std::endl;
-        return -1;
+    if (argc != 2) {
+        throw std::runtime_error(
+            "Needs an argument to specify which way to run (should be \"local\" or \"full\"), check the code");
     }
+    Target target{Target::Fe56};
+    BeamEnergy beam_energy{BeamEnergy::MeV_2261};
 
-    /* Final1Pion1NucleonTruth ga{input_file.c_str(), */
-    /*                            ("outs/final_test_" + output_file + ".root").c_str(), */
-    /*                            Final1Pion1NucleonTruth::PionType::Minus, */
-    /*                            Final1Pion1NucleonTruth::NucleonType::Proton, */
-    /*                            Final1Pion1NucleonTruth::RunType::PrimaryState, */
-    /*                            {}, */
-    /*                            {}, */
-    /*                            {"ALL", "QE", "DELTA1232", "RES_OTHER", "DIS"}, */
-    /*                            { */
-    /*                                {"pi_phi", "reco_pi_phi", {}}, */
-    /*                                {"pi_ct", "reco_pi_ct", {}}, */
-    /*                                {"pi_p", "reco_pi_p", {}}, */
-    /*                                {"pi_E", "reco_pi_E", {}}, */
-    /*                                {"pi_resc", "nuc_resc", {}}, */
-    /*                            }}; */
-    /* ga.runAnalysis(); */
+    string output_file{argv[1]};
+    string input_file{get_data_filename(target, beam_energy, output_file)};
 
-    return get_ps_fsr_fs(input_file, output_file, false);
-    return get_ps_fsr_fs(input_file, output_file, true);
+    Final1Pion1NucleonTruth ga{input_file.c_str(),
+                               ("outs/final_test_" + output_file + ".root").c_str(),
+                               Final1Pion1NucleonTruth::PionType::Minus,
+                               Final1Pion1NucleonTruth::NucleonType::Proton,
+                               Final1Pion1NucleonTruth::RunType::PrimaryState,
+                               {},
+                               {},
+                               {"ALL", "QE", "DELTA1232", "RES_OTHER", "DIS"},
+                               {
+                                   {"pi_phi", "reco_pi_phi", {}},
+                                   {"pi_ct", "reco_pi_ct", {}},
+                                   {"pi_p", "reco_pi_p", {}},
+                                   {"pi_E", "reco_pi_E", {}},
+                                   {"pi_resc", "nuc_resc", {}},
+                               },
+                               ElectronFiducials::UseFiducials::Option1,
+                               target,
+                               beam_energy};
+    ga.runAnalysis();
+
+    // return get_ps_fsr_fs(input_file, output_file + "_Fe", false);
+    // return get_ps_fsr_fs(input_file, output_file + "_Fe", true);
 }

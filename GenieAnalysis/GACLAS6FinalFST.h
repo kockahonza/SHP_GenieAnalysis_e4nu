@@ -114,14 +114,10 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
     enum class NucleonType { Proton, Neutron };
 
     enum class RunType { PrimaryState, FinalStateResc1, FinalState };
-    // see GACLAS6FinalFST.cpp, the end of the passesCuts function for what they mean
-    // Actually currently thinking ElectronOnly isn't possible so only UsingNucleon will work
-    enum class PiRecoType { UsingNucleon, ElectronOnly };
 
     const PionType m_pi_type;
     const NucleonType m_nuc_type;
     const RunType m_run_type;
-    const PiRecoType m_pi_reco_type;
 
     double m_p_pion_momentum_threshold{0.15};
     double m_p_photon_momentum_threshold{0.3};
@@ -142,7 +138,7 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
     TLorentzVector m_nuc_V4;
 
     // Kinematics reconstruction
-    // The reconstructed pion 4momentum, this is calculated base on `m_pi_reco_type`
+    // The reconstructed pion 4momentum
     TLorentzVector m_reco_pi_V4;
     // The difference of the actual and the reconstructed pion 4 momentum
     TLorentzVector m_reco_pi_diff_V4;
@@ -270,7 +266,6 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
                             const vector<string> &stages = {}, const vector<string> &properties = {},
                             const vector<string> &types = {},
                             const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                            const PiRecoType &pi_reco_type = PiRecoType::UsingNucleon,
                             const UseFiducials &use_fiducials = UseFiducials::Option1,
                             // CLAS6 run params
                             const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
@@ -279,7 +274,7 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
         : GenieAnalysis(filename, gst_ttree_name), ElectronFiducials{filename,      output_filename, stages,
                                                                      properties,    types,           vs_property_plots,
                                                                      use_fiducials, target,          beam_energy},
-          m_pi_type{pi_type}, m_nuc_type{nuc_type}, m_run_type{run_type}, m_pi_reco_type{pi_reco_type} {
+          m_pi_type{pi_type}, m_nuc_type{nuc_type}, m_run_type{run_type} {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
         if (m_run_type == RunType::PrimaryState) {
             m_known_properties["pi_resc"] = {

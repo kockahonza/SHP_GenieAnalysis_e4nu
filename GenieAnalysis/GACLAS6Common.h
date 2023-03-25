@@ -1,6 +1,7 @@
 #ifndef GACLAS6COMMON_H
 #define GACLAS6COMMON_H
 
+#include <optional>
 #include <stdexcept>
 
 #include "Fiducial.h"
@@ -12,6 +13,10 @@ namespace GACLAS6Common {
 enum class Target { C12, Fe56 };
 // If the ~1GeV energy is to be added, smearing resolutions were tripled!, do't forget to add that
 enum class BeamEnergy { MeV_1161, MeV_2261, MeV_4461 };
+
+string targetStr(const Target &target);
+string beamEnergyStr(const BeamEnergy &beam_energy);
+string get_data_filename(GACLAS6Common::Target t, GACLAS6Common::BeamEnergy be, string arg);
 
 /**
  * A very simple wrapper around the Fiducial class, which is taken exactly as in original, so that it can be referred
@@ -50,27 +55,8 @@ class FiducialWrapper {
     bool piAndPhotonCuts(const TVector3 &momentum_V3, const PiPhotonId &which_particle) {
         return m_fiducial.Pi_phot_fid_united(m_beam_energy_str, momentum_V3, static_cast<int>(which_particle));
     }
-
-    static string targetStr(const Target &target) {
-        if (target == Target::C12) {
-            return "12C";
-        } else if (target == Target::Fe56) {
-            return "12C"; // There's no dedicated Fe file and original used 12C for anything except He
-        }
-        throw std::runtime_error("This should not happen");
-    }
-
-    static string beamEnergyStr(const BeamEnergy &beam_energy) {
-        if (beam_energy == BeamEnergy::MeV_1161) {
-            return "1161";
-        } else if (beam_energy == BeamEnergy::MeV_2261) {
-            return "2261";
-        } else if (beam_energy == BeamEnergy::MeV_4461) {
-            return "4461";
-        }
-        throw std::runtime_error("This should not happen");
-    }
 };
+
 } // namespace GACLAS6Common
 
 #endif
