@@ -67,7 +67,9 @@ clean:
 		genie_analysis_1pi1nuc \
 		genie_analysis_FS_transparency \
 		genie_analysis_1p \
-		genie_analysis_data
+		genie_analysis_data \
+		final_truth_FST \
+		misc
 
 debug: CXXFLAGS += -pg
 debug: LDFLAGS += -pg
