@@ -296,10 +296,10 @@ class GACLAS6MC : public GACLAS6MCCuts, public GAAutoHistograms {
 };
 
 /**
- * Continues on from DeltaStudies, adds specific cuts for the number of protons, neutrons and charged pions.
+ * Continues on from GACLAS6MC, adds cuts for the number of protons, neutrons and charged pions.
  * It is a very simple wrapper that might be good for quick tests, that's why I keep it here.
  */
-class GAPiNucleonCounts : public GACLAS6MC {
+class GACLAS6MCPiNucleonCounts : public GACLAS6MC {
   public:
     const optional<int> m_pi_plus_count;
     const optional<int> m_pi_minus_count;
@@ -307,12 +307,12 @@ class GAPiNucleonCounts : public GACLAS6MC {
     const optional<int> m_neutron_count;
 
   public:
-    GAPiNucleonCounts(const char *filename, const char *output_filename, optional<int> pi_plus_count = {},
-                      optional<int> pi_minus_count = {}, optional<int> proton_count = {},
-                      optional<int> neutron_count = {}, const vector<string> &stages = {},
-                      const vector<string> &properties = {}, const vector<string> &types = {},
-                      const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                      const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261)
+    GACLAS6MCPiNucleonCounts(const char *filename, const char *output_filename, optional<int> pi_plus_count = {},
+                             optional<int> pi_minus_count = {}, optional<int> proton_count = {},
+                             optional<int> neutron_count = {}, const vector<string> &stages = {},
+                             const vector<string> &properties = {}, const vector<string> &types = {},
+                             const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                             const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261)
 
         : GenieAnalysis(filename),
           GACLAS6MC(filename, output_filename, stages, properties, types, vs_property_plots, target, beam_energy),

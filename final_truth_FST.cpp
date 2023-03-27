@@ -153,9 +153,9 @@ int main(int argc, char *argv[]) {
 
     Target target;
     if (target_str == "C") {
-        target == Target::C12;
+        target = Target::C12;
     } else if (target_str == "Fe") {
-        target == Target::Fe56;
+        target = Target::Fe56;
     } else {
         throw std::runtime_error("Target specifier not valid");
     }
