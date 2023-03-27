@@ -111,6 +111,35 @@ int do_long(
         ga.runAnalysis();
     }
 
+    // dl
+    for (auto const &[ext, pi_t, nuc_t] : variants) {
+        NuclearTransparencyStudies ga{input_file.c_str(),
+                                      ("outs/final_dl_" + desc + ext + ".root").c_str(),
+                                      pi_t,
+                                      nuc_t,
+                                      NuclearTransparencyStudies::RunType::DetectorLike,
+                                      {},
+                                      {},
+                                      types,
+                                      {
+                                          {"pi_phi", "reco_pi_phi", {}},
+                                          {"pi_ct", "reco_pi_ct", {}},
+                                          {"pi_p", "reco_pi_p", {}},
+                                          {"pi_E", "reco_pi_E", {}},
+                                          {"pi_phi", "reco_pi_p_test", {}},
+                                          {"pi_ct", "reco_pi_p_test", {}},
+                                          {"pi_p", "reco_pi_p_test", {}},
+                                          {"pi_E", "reco_pi_p_test", {}},
+                                          {"resc_same", "reco_pi_p_test", {}},
+                                          {"resc_same", "p_change_mag", {}},
+                                          {"resc_same", "E_change", {}},
+                                      }};
+        if (doWcut) {
+            ga.m_Wcut = {0, 1.4};
+        }
+        ga.runAnalysis();
+    }
+
     return 0;
 }
 

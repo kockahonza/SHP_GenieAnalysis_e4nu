@@ -43,6 +43,11 @@ class NuclearTransparencyStudies : public GAAutoHistograms {
     double m_p_photon_momentum_threshold{0.3};
     double m_p_proton_momentum_threshold{0.3};
 
+    // Electron, pion and nucleon smearing, photons aren't smeared
+    double m_smearing_reso_electron{0.005};
+    double m_smearing_reso_pion{0.007};
+    double m_smearing_reso_proton{0.01};
+
     optional<pair<Double_t, Double_t>> m_Wcut{};
 
   protected:
@@ -75,10 +80,10 @@ class NuclearTransparencyStudies : public GAAutoHistograms {
     bool m_found_nuc;
 
     // Internl storage for DetectorLike particle counting
-    vector<TLorentzVector> m_pips;
-    vector<TLorentzVector> m_pims;
-    vector<TLorentzVector> m_protons;
-    vector<TLorentzVector> m_neutrons;
+    vector<TVector3> m_det_pips;
+    vector<TVector3> m_det_pims;
+    vector<TVector3> m_det_protons;
+    vector<TVector3> m_det_neutrons;
 
   protected:
     // Physical properties of the event and system to be used in passesCuts and for various properties
