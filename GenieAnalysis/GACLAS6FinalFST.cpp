@@ -1,23 +1,21 @@
 #include "GACLAS6FinalFST.h"
 
-Double_t ElectronFiducials::passesCuts() {
+Double_t NuclearTransparencyStudies::passesCuts() {
     // Electron 4 momentum, rotate to be the same as CLAS6
     m_el_V4.SetPxPyPzE(m_ge.pxl, m_ge.pyl, m_ge.pzl, m_ge.El);
     m_el_V4.SetPhi(m_el_V4.Phi() + TMath::Pi());
 
-    if (m_use_fiducials != UseFiducials::No) {
-        // Electron theta and momentum fiducial (essentially I think) cut, the values are specifically for C12 2.261GeV
-        // set by inspecting
-        // https://docs.google.com/presentation/d/1ghG08JfCYXRXh6O8hcXKrhJOFxkAs_9i5ZfoIkiiEHU/edit?usp=sharing and
-        // previous values
-        const double theta_min{TMath::DegToRad() * (m_el_precut_parameter1 + m_el_precut_parameter2 / m_el_V4.P())};
-        if ((m_el_V4.Theta() < theta_min) || (m_el_V4.Theta() > 80 * TMath::DegToRad())) {
-            return 0;
-        }
-        // Electron fiducials
-        if (!m_fiducials->electronCut(m_el_V4.Vect())) {
-            return 0;
-        }
+    // Electron theta and momentum fiducial (essentially I think) cut, the values are specifically for C12 2.261GeV
+    // set by inspecting
+    // https://docs.google.com/presentation/d/1ghG08JfCYXRXh6O8hcXKrhJOFxkAs_9i5ZfoIkiiEHU/edit?usp=sharing and
+    // previous values
+    const double theta_min{TMath::DegToRad() * (m_el_precut_parameter1 + m_el_precut_parameter2 / m_el_V4.P())};
+    if ((m_el_V4.Theta() < theta_min) || (m_el_V4.Theta() > 80 * TMath::DegToRad())) {
+        return 0;
+    }
+    // Electron fiducials
+    if (!m_fiducials->electronCut(m_el_V4.Vect())) {
+        return 0;
     }
 
     // Calculation of kinematic quantities (nu, Q2, x bjorken, q and W) -- literally taken from original though
@@ -31,15 +29,6 @@ Double_t ElectronFiducials::passesCuts() {
         if ((m_reco_W < m_Wcut->first) || (m_reco_W > m_Wcut->second)) {
             return 0;
         }
-    }
-
-    return m_ge.wght;
-}
-
-Double_t Final1Pion1NucleonTruth::passesCuts() {
-    Double_t weight{ElectronFiducials::passesCuts()};
-    if (weight == 0) {
-        return 0;
     }
 
     // Check if primary state particles rescattered in the same way
@@ -85,25 +74,25 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
             V3.SetPhi(V3.Phi() + TMath::Pi());
 
             if ((V3.Mag() < m_p_proton_momentum_threshold) || (!m_fiducials->protonCut(V3))) {
-                if (m_use_fiducials == UseFiducials::Option1) {
-                    continue;
-                } else if (m_use_fiducials == UseFiducials::Option2) {
-                    return 0;
-                }
+                continue;
             }
 
             // If we got here, it means it qualifies as signal, if we are still looking for a proton, make this
             // found, if we are looking for neutrons or have already found a proton, the event is invalid so return
             // 0
-            if ((m_nuc_type == NucleonType::Proton) && (!m_found_nuc)) {
-                m_found_nuc = true;
-                m_nuc_V4 = TLorentzVector(V3, Es[i]);
-                if (m_run_type == RunType::PrimaryState) {
-                    m_ps_nuc_resc = m_ge.resc[i];
+            // DetectorLike data is treated differently!
+            /* if (m_run_type != RunType::DetectorLike) { */
+                if ((m_nuc_type == NucleonType::Proton) && (!m_found_nuc)) {
+                    m_found_nuc = true;
+                    m_nuc_V4 = TLorentzVector(V3, Es[i]);
+                    if (m_run_type == RunType::PrimaryState) {
+                        m_ps_nuc_resc = m_ge.resc[i];
+                    }
+                } else {
+                    return 0;
                 }
-            } else {
-                return 0;
-            }
+            /* } else { */
+            /* } */
 
         } else if (pdgs[i] == 2112) { // neutron
             V3.SetXYZ(pxs[i], pys[i], pzs[i]);
@@ -128,11 +117,7 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
 
             if ((V3.Mag() < m_p_pion_momentum_threshold) ||
                 (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Plus))) {
-                if (m_use_fiducials == UseFiducials::Option1) {
-                    continue;
-                } else if (m_use_fiducials == UseFiducials::Option2) {
-                    return 0;
-                }
+                continue;
             }
 
             // If we got here, it means it qualifies as signal, if we are still looking for a pi+, make this found,
@@ -153,11 +138,7 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
 
             if ((V3.Mag() < m_p_pion_momentum_threshold) ||
                 (!m_fiducials->piAndPhotonCuts(V3, FiducialWrapper::PiPhotonId::Minus))) {
-                if (m_use_fiducials == UseFiducials::Option1) {
-                    continue;
-                } else if (m_use_fiducials == UseFiducials::Option2) {
-                    return 0;
-                }
+                continue;
             }
 
             // If we got here, it means it qualifies as signal, if we are still looking for a pi-, make this found,
@@ -189,5 +170,38 @@ Double_t Final1Pion1NucleonTruth::passesCuts() {
     m_reco_pi_V4 = m_beam_V4 + m_rest_nuc_V4 - m_el_V4 - m_nuc_V4;
     m_reco_pi_diff_V4 = m_pi_V4 - m_reco_pi_V4;
 
-    return weight;
+    return m_ge.wght;
+}
+
+double NuclearTransparencyStudies::acceptanceJoined(const double &p, const double &cos_theta, double phi,
+                                       const std::unique_ptr<TH3D> &generated, const std::unique_ptr<TH3D> &accepted) {
+    // first map -pi, pi to [0, 2pi
+    if (phi < 0) {
+        phi += 2 * TMath::Pi();
+    }
+    phi *= TMath::RadToDeg();
+    // map 330 till 360 to [-30:0] but in radians for the acceptance map histogram
+    if (phi > (330)) {
+        phi -= 360;
+    }
+
+    int redef = 0; // or -30 I think, it was this way in the original
+
+    // Find number of generated events
+    double pbin_gen = generated->GetXaxis()->FindBin(p);
+    double tbin_gen = generated->GetYaxis()->FindBin(cos_theta);
+    double phibin_gen = generated->GetZaxis()->FindBin(phi + redef);
+    double num_gen = generated->GetBinContent(pbin_gen, tbin_gen, phibin_gen);
+
+    // Find number of accepted events
+    double pbin_acc = accepted->GetXaxis()->FindBin(p);
+    double tbin_acc = accepted->GetYaxis()->FindBin(cos_theta);
+    double phibin_acc = accepted->GetZaxis()->FindBin(phi + redef);
+    double num_acc = accepted->GetBinContent(pbin_acc, tbin_acc, phibin_acc);
+
+    double acc_ratio = num_acc / num_gen;
+    // TODO: Unused, use or delete soon
+    /* double acc_err = sqrt(acc_ratio * (1 - acc_ratio)) / num_gen; */
+
+    return acc_ratio;
 }

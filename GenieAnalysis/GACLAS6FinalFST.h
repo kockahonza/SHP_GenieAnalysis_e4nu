@@ -24,118 +24,72 @@ using namespace GACLAS6Common;
  * without compromising the previous stuff, it may be that this is redundant and can be replaced by GACLAS6MC with the
  * right flags.
  */
-class ElectronFiducials : public GAAutoHistograms {
-  public:
-    enum class UseFiducials { No, Option1, Option2 };
-    const UseFiducials m_use_fiducials;
-
-    const Target m_target;
-    const BeamEnergy m_beam_energy;
-
-  public:
-    optional<pair<Double_t, Double_t>> m_Wcut{};
-
-  protected:
-    // Automatically determined parameters -- should be essentially const, but leaving mutable for easy initialization
-    // and maybe someone would like to change them
-    double m_el_precut_parameter1;
-    double m_el_precut_parameter2;
-
-    // Initialized in constructor and then const
-    Double_t m_beam_energy_val;
-    TLorentzVector m_beam_V4;
-
-    // Fiducials, accesible to inheriting classes
-    const unique_ptr<FiducialWrapper> m_fiducials;
-
-  protected:
-    // Physical properties of the event and system to be used in passesCuts and for various properties
-    TLorentzVector m_el_V4;
-
-    Double_t m_reco_W;
-    Double_t m_reco_Q2;
-    Double_t m_reco_x;
-
-    // Extensions to automatic TH1Fs
-    map<string, AutoProperty> m_new_known_properties{
-        // Electrons properties
-        {"el_phi",
-         {"Out electron phi [°]",
-          {720, -30, 330},
-          [this]() {
-              double phi_deg{m_el_V4.Phi() * TMath::RadToDeg()};
-              return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
-          }}},
-        {"el_ct", {"Out electron cos theta", {500, -1, 1}, [this]() { return m_el_V4.CosTheta(); }}},
-        {"el_p", {"Out electron momentum [GeV/c]", {500, 0, 3}, [this]() { return m_el_V4.P(); }}},
-        {"el_E", {"Out electron energy [GeV]", {500, 0, 3}, [this]() { return m_el_V4.E(); }}},
-    };
-
-  public:
-    ElectronFiducials(const char *filename, const char *output_filename,
-                      // Setup for AutoHistograms
-                      const vector<string> &stages = {}, const vector<string> &properties = {},
-                      const vector<string> &types = {},
-                      const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                      const UseFiducials &use_fiducials = UseFiducials::Option1,
-                      // CLAS6 run params
-                      const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
-                      // Pass this to GenieAnalysis
-                      const char *gst_ttree_name = "gst")
-        : GenieAnalysis(filename, gst_ttree_name), GAAutoHistograms{filename,   output_filename, stages,
-                                                                    properties, types,           vs_property_plots},
-          m_use_fiducials{use_fiducials}, m_target{target}, m_beam_energy{beam_energy},
-          m_fiducials{std::make_unique<FiducialWrapper>(m_beam_energy)} {
-        m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
-        // Initialize precut parameters
-        if (beam_energy == BeamEnergy::MeV_1161) {
-            m_el_precut_parameter1 = 17;
-            m_el_precut_parameter2 = 7;
-            m_beam_energy_val = 1.161;
-        } else if (beam_energy == BeamEnergy::MeV_2261) {
-            m_el_precut_parameter1 = 16;
-            m_el_precut_parameter2 = 10.5;
-            m_beam_energy_val = 2.261;
-        } else if (beam_energy == BeamEnergy::MeV_4461) {
-            m_el_precut_parameter1 = 13.5;
-            m_el_precut_parameter2 = 15;
-            m_beam_energy_val = 4.461;
-        }
-        m_beam_V4 = TLorentzVector(0, 0, sqrt(m_beam_energy_val * m_beam_energy_val - mass_electron * mass_electron),
-                                   m_beam_energy_val);
-    }
-
-    Double_t passesCuts() override;
-};
-
-class Final1Pion1NucleonTruth : public ElectronFiducials {
+class NuclearTransparencyStudies : public GAAutoHistograms {
   public:
     enum class PionType { Plus, Minus };
     enum class NucleonType { Proton, Neutron };
 
-    enum class RunType { PrimaryState, FinalStateResc1, FinalState };
+    enum class RunType { PrimaryState, FinalStateResc1, FinalState, DetectorLike };
 
     const PionType m_pi_type;
     const NucleonType m_nuc_type;
     const RunType m_run_type;
 
+    const Target m_target;
+    const BeamEnergy m_beam_energy;
+
+    // This is a part of my "extra" fiducials for the report
     double m_p_pion_momentum_threshold{0.15};
     double m_p_photon_momentum_threshold{0.3};
     double m_p_proton_momentum_threshold{0.3};
 
+    optional<pair<Double_t, Double_t>> m_Wcut{};
+
   protected:
+    // Initialized in constructor and then const
+    Double_t m_beam_energy_val;
+    TLorentzVector m_beam_V4;
     // The 4 momentum of the nucleon of the given type before the collision assuming it at rest
     TLorentzVector m_rest_nuc_V4;
+
+    double m_el_precut_parameter1;
+    double m_el_precut_parameter2;
+
+    // Fiducials
+    const unique_ptr<FiducialWrapper> m_fiducials;
+
+  private:
+    // e2a acceptance maps
+    const unique_ptr<TFile> m_el_acceptance_file;  // electron
+    const unique_ptr<TFile> m_p_acceptance_file;   // proton
+    const unique_ptr<TFile> m_pip_acceptance_file; // pi plus
+    const unique_ptr<TFile> m_pim_acceptance_file; // pi minus
+    // It seems to be necessary for I suppose performance reason? that these are found beforehand and not at each call
+    // to acceptanceJoined
+    const unique_ptr<TH3D> m_acc_el_gen, m_acc_el_acc, m_acc_p_gen, m_acc_p_acc, m_acc_pip_gen, m_acc_pip_acc,
+        m_acc_pim_gen, m_acc_pim_acc;
 
   private:
     // Simple flags
     bool m_found_pi;
     bool m_found_nuc;
 
+    // Internl storage for DetectorLike particle counting
+    vector<TLorentzVector> m_pips;
+    vector<TLorentzVector> m_pims;
+    vector<TLorentzVector> m_protons;
+    vector<TLorentzVector> m_neutrons;
+
   protected:
     // Physical properties of the event and system to be used in passesCuts and for various properties
+    TLorentzVector m_el_V4;
     TLorentzVector m_pi_V4;
     TLorentzVector m_nuc_V4;
+
+    // Reconstructed purely from electron data
+    Double_t m_reco_W;
+    Double_t m_reco_Q2;
+    Double_t m_reco_x;
 
     // Kinematics reconstruction
     // The reconstructed pion 4momentum
@@ -158,6 +112,18 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
 
     // Extensions to automatic TH1Fs
     map<string, AutoProperty> m_new_known_properties{
+        // Electrons properties
+        {"el_phi",
+         {"Out electron phi [°]",
+          {720, -30, 330},
+          [this]() {
+              double phi_deg{m_el_V4.Phi() * TMath::RadToDeg()};
+              return (phi_deg < -30) ? phi_deg + 360 : phi_deg;
+          }}},
+        {"el_ct", {"Out electron cos theta", {500, -1, 1}, [this]() { return m_el_V4.CosTheta(); }}},
+        {"el_p", {"Out electron momentum [GeV/c]", {500, 0, 3}, [this]() { return m_el_V4.P(); }}},
+        {"el_E", {"Out electron energy [GeV]", {500, 0, 3}, [this]() { return m_el_V4.E(); }}},
+        // Pion
         {"pi_phi",
          {"Pion phi [°]",
           {720, -30, 330},
@@ -168,7 +134,7 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
         {"pi_ct", {"Pion cos theta", {500, -1, 1}, [this]() { return m_pi_V4.CosTheta(); }}},
         {"pi_p", {"Pion momentum [GeV/c]", {500, 0, 3}, [this]() { return m_pi_V4.P(); }}},
         {"pi_E", {"Pion energy [GeV]", {500, 0, 3}, [this]() { return m_pi_V4.E(); }}},
-
+        // Nucleon
         {"nuc_phi",
          {"Nucleon phi [°]",
           {720, -30, 330},
@@ -258,30 +224,62 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
     };
 
   public:
-    Final1Pion1NucleonTruth(const char *filename, const char *output_filename,
-                            // Params for this analysis
-                            const PionType &pi_type, const NucleonType &nuc_type,
-                            const RunType &run_type = RunType::PrimaryState,
-                            // Setup for AutoHistograms
-                            const vector<string> &stages = {}, const vector<string> &properties = {},
-                            const vector<string> &types = {},
-                            const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
-                            const UseFiducials &use_fiducials = UseFiducials::Option1,
-                            // CLAS6 run params
-                            const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
-                            // Pass this to GenieAnalysis
-                            const char *gst_ttree_name = "gst")
-        : GenieAnalysis(filename, gst_ttree_name), ElectronFiducials{filename,      output_filename, stages,
-                                                                     properties,    types,           vs_property_plots,
-                                                                     use_fiducials, target,          beam_energy},
-          m_pi_type{pi_type}, m_nuc_type{nuc_type}, m_run_type{run_type} {
+    NuclearTransparencyStudies(const char *filename, const char *output_filename,
+                               // Params for this analysis
+                               const PionType &pi_type, const NucleonType &nuc_type,
+                               const RunType &run_type = RunType::PrimaryState,
+                               // Setup for AutoHistograms
+                               const vector<string> &stages = {}, const vector<string> &properties = {},
+                               const vector<string> &types = {},
+                               const vector<GAAutoHistograms::AutoVsPlot> &vs_property_plots = {},
+                               // CLAS6 run params
+                               const Target &target = Target::C12, const BeamEnergy &beam_energy = BeamEnergy::MeV_2261,
+                               // Pass this to GenieAnalysis
+                               const char *gst_ttree_name = "gst")
+        : GenieAnalysis(filename, gst_ttree_name), GAAutoHistograms{filename,   output_filename, stages,
+                                                                    properties, types,           vs_property_plots},
+          m_pi_type{pi_type}, m_nuc_type{nuc_type}, m_run_type{run_type}, m_target{target}, m_beam_energy{beam_energy},
+          m_fiducials{std::make_unique<FiducialWrapper>(m_beam_energy)},
+
+          // Initializing acceptance map files and TH3Ds
+          m_el_acceptance_file{getAcceptanceMapFile(m_target, m_beam_energy, "")},
+          m_p_acceptance_file{getAcceptanceMapFile(m_target, m_beam_energy, "_p")},
+          m_pip_acceptance_file{getAcceptanceMapFile(m_target, m_beam_energy, "_pip")},
+          m_pim_acceptance_file{getAcceptanceMapFile(m_target, m_beam_energy, "_pim")},
+          m_acc_el_gen{(TH3D *)m_el_acceptance_file->Get("Generated Particles")},
+          m_acc_el_acc{(TH3D *)m_el_acceptance_file->Get("Accepted Particles")},
+          m_acc_p_gen{(TH3D *)m_p_acceptance_file->Get("Generated Particles")},
+          m_acc_p_acc{(TH3D *)m_p_acceptance_file->Get("Accepted Particles")},
+          m_acc_pip_gen{(TH3D *)m_pip_acceptance_file->Get("Generated Particles")},
+          m_acc_pip_acc{(TH3D *)m_pip_acceptance_file->Get("Accepted Particles")},
+          m_acc_pim_gen{(TH3D *)m_pim_acceptance_file->Get("Generated Particles")},
+          m_acc_pim_acc{(TH3D *)m_pim_acceptance_file->Get("Accepted Particles")} {
         m_known_properties.insert(m_new_known_properties.begin(), m_new_known_properties.end());
+
+        // Initialize precut parameters
+        if (beam_energy == BeamEnergy::MeV_1161) {
+            m_el_precut_parameter1 = 17;
+            m_el_precut_parameter2 = 7;
+            m_beam_energy_val = 1.161;
+        } else if (beam_energy == BeamEnergy::MeV_2261) {
+            m_el_precut_parameter1 = 16;
+            m_el_precut_parameter2 = 10.5;
+            m_beam_energy_val = 2.261;
+        } else if (beam_energy == BeamEnergy::MeV_4461) {
+            m_el_precut_parameter1 = 13.5;
+            m_el_precut_parameter2 = 15;
+            m_beam_energy_val = 4.461;
+        }
+        m_beam_V4 = TLorentzVector(0, 0, sqrt(m_beam_energy_val * m_beam_energy_val - mass_electron * mass_electron),
+                                   m_beam_energy_val);
+
         if (m_run_type == RunType::PrimaryState) {
             m_known_properties["pi_resc"] = {
                 "Pion resc code from gst", {11, -2.5, 8.5}, [this]() { return m_ps_pi_resc; }};
             m_known_properties["nuc_resc"] = {
                 "Nucleon resc code from gst", {11, -2.5, 8.5}, [this]() { return m_ps_nuc_resc; }};
         }
+
         if (m_nuc_type == NucleonType::Proton) {
             m_rest_nuc_V4 = TLorentzVector(0, 0, 0, mass_proton);
         } else if (m_nuc_type == NucleonType::Neutron) {
@@ -290,6 +288,46 @@ class Final1Pion1NucleonTruth : public ElectronFiducials {
     }
 
     Double_t passesCuts() override;
+
+    double acceptanceJoined(const double &p, const double &cos_theta, double phi, const unique_ptr<TH3D> &generated,
+                            const unique_ptr<TH3D> &accepted);
+
+    double electronAcceptance(const double &p, const double &cos_theta, const double &phi) {
+        return acceptanceJoined(p, cos_theta, phi, m_acc_el_gen, m_acc_el_acc);
+    }
+
+    double protonAcceptance(const double &p, const double &cos_theta, const double &phi) {
+        return acceptanceJoined(p, cos_theta, phi, m_acc_p_gen, m_acc_p_acc);
+    }
+
+    double piPlusAcceptance(const double &p, const double &cos_theta, const double &phi) {
+        return acceptanceJoined(p, cos_theta, phi, m_acc_pip_gen, m_acc_pip_acc);
+    }
+
+    double piMinusAcceptance(const double &p, const double &cos_theta, const double &phi) {
+        return acceptanceJoined(p, cos_theta, phi, m_acc_pim_gen, m_acc_pim_acc);
+    }
+
+    static unique_ptr<TFile> getAcceptanceMapFile(const Target &target, const BeamEnergy &beam_energy,
+                                                  const string &ending) {
+        string target_str, beam_energy_str;
+        if (target == Target::C12) {
+            target_str = "12C";
+        } else if (target == Target::Fe56) {
+            target_str = "12C"; // There's no dedicated Fe file and original used 12C for anything except He
+        }
+
+        if (beam_energy == BeamEnergy::MeV_1161) {
+            beam_energy_str = "1_161";
+        } else if (beam_energy == BeamEnergy::MeV_2261) {
+            beam_energy_str = "2_261";
+        } else if (beam_energy == BeamEnergy::MeV_4461) {
+            beam_energy_str = "4_461";
+        }
+
+        return unique_ptr<TFile>(TFile::Open(
+            ("original/e2a_maps/e2a_maps_" + target_str + "_E_" + beam_energy_str + ending + ".root").c_str(), "READ"));
+    };
 };
 
 #endif
