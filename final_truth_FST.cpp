@@ -144,21 +144,37 @@ int do_long(
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        throw std::runtime_error(
-            "Needs an argument to specify which way to run (should be \"local\" or \"full\"), check the code");
+    if (argc != 4) {
+        throw std::runtime_error("Needs arguments, check the code");
     }
     string local_or_full{argv[1]};
+    string target_str{argv[2]};
+    string do_Wcut_str{argv[3]};
 
-    Target target{Target::C12};
+    Target target;
+    if (target_str == "C") {
+        target == Target::C12;
+    } else if (target_str == "Fe") {
+        target == Target::Fe56;
+    } else {
+        throw std::runtime_error("Target specifier not valid");
+    }
+
+    bool doWcut;
+    if (do_Wcut_str == "0") {
+        doWcut = false;
+    } else if (do_Wcut_str == "1") {
+        doWcut = true;
+    } else {
+        throw std::runtime_error("Wcut flag not valid");
+    }
+
     BeamEnergy beam_energy{BeamEnergy::MeV_2261};
     vector<string> types{"ALL", "QE", "DELTA1232", "RES_OTHER", "DIS"};
-    bool doWcut{false};
 
     vector<tuple<string, NuclearTransparencyStudies::PionType, NuclearTransparencyStudies::NucleonType>> variants{
         {"_0pip1pim1p0n", NuclearTransparencyStudies::PionType::Minus, NuclearTransparencyStudies::NucleonType::Proton},
-        /* {"_1pip0pim0p1n", NuclearTransparencyStudies::PionType::Plus,
-           NuclearTransparencyStudies::NucleonType::Neutron}, */
+        {"_1pip0pim0p1n", NuclearTransparencyStudies::PionType::Plus, NuclearTransparencyStudies::NucleonType::Neutron},
 
         /* {"_1pip0pim1p0n", NuclearTransparencyStudies::PionType::Plus,
            NuclearTransparencyStudies::NucleonType::Proton}, */
