@@ -18,35 +18,41 @@ LDFLAGS   += -std=c++17 $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -O3
 
 
 # Executables
-final_truth_FST: final_truth_FST.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o $@ $^ $(LDFLAGS)
+built:
+	mkdir built
 
-misc: misc.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o $@ $^ $(LDFLAGS)
+genie_analysis_demo: built apps/genie_analysis_demo.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
 
-genie_analysis_data: genie_analysis_data.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o $@ $^ $(LDFLAGS)
+# Apps from Jan Kocka's SHP done in spring 2023
+final_truth_FST: built apps/jkocka_spring2023/final_truth_FST.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
 
-genie_analysis_1p: genie_analysis_1p.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o $@ $^ $(LDFLAGS)
+misc: built apps/jkocka_spring2023/misc.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
 
-genie_analysis_FS_transparency: genie_analysis_FS_transparency.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o $@ $^ $(LDFLAGS)
+genie_analysis_data: built apps/jkocka_spring2023/genie_analysis_data.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
 
-genie_analysis_1pi1nuc: genie_analysis_1pi1nuc.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o $@ $^ $(LDFLAGS)
+genie_analysis_1p: built apps/jkocka_spring2023/genie_analysis_1p.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
 
-genie_analysis_deltas: genie_analysis_deltas.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o $@ $^ $(LDFLAGS)
+genie_analysis_FS_transparency: built apps/jkocka_spring2023/genie_analysis_FS_transparency.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
 
-genie_analysis_lucass_cuts: genie_analysis_lucass_cuts.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o $@ $^ $(LDFLAGS)
+genie_analysis_1pi1nuc: built apps/jkocka_spring2023/genie_analysis_1pi1nuc.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
 
-genie_analysis_demo: genie_analysis_demo.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o $@ $^ $(LDFLAGS)
+genie_analysis_deltas: built apps/jkocka_spring2023/genie_analysis_deltas.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
+
+genie_analysis_lucass_cuts: built apps/jkocka_spring2023/genie_analysis_lucass_cuts.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
 
 
-all: genie_analysis_deltas genie_analysis_1pi1nuc genie_analysis_1p genie_analysis_FS_transparency genie_analysis_data final_truth_FST
+jkocka_spring2023: genie_analysis_deltas genie_analysis_1pi1nuc genie_analysis_1p genie_analysis_FS_transparency genie_analysis_data final_truth_FST
+
+all: genie_analysis_demo jkocka_spring2023
 
 
 # GenieAnalysis "library"
@@ -60,16 +66,7 @@ GenieAnalysis/%.o: GenieAnalysis/%.cpp GenieAnalysis/%.h
 
 
 clean:
-	@rm -rf GenieAnalysis/*.o *.o \
-		genie_analysis_demo \
-		genie_analysis_lucass_cuts \
-		genie_analysis_deltas \
-		genie_analysis_1pi1nuc \
-		genie_analysis_FS_transparency \
-		genie_analysis_1p \
-		genie_analysis_data \
-		final_truth_FST \
-		misc
+	@rm -rf GenieAnalysis/*.o *.o built
 
 debug: CXXFLAGS += -pg
 debug: LDFLAGS += -pg
