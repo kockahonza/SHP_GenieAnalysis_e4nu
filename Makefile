@@ -3,6 +3,11 @@ ROOTLDFLAGS := $(shell root-config --ldflags)
 ROOTLIBS    := $(shell root-config --libs) -lEG
 ROOTGLIBS   := $(shell root-config --glibs)
 
+CXX       := g++
+CXXFLAGS  += -std=c++17 -Wall -Wshadow -Warray-bounds -Wmissing-field-initializers -fPIC $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -O3
+LDFLAGS   += -std=c++17 $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -O3
+
+# These are the compiled files from the GenieAnalysis "library" (see later) needed for apps
 GA_LIB_OBJECTS := GenieAnalysis/GenieAnalysis.o \
 				  GenieAnalysis/GAAutoHistograms.o \
 				  GenieAnalysis/GACLAS6Common.o \
@@ -12,47 +17,47 @@ GA_LIB_OBJECTS := GenieAnalysis/GenieAnalysis.o \
 				  GenieAnalysis/Fiducial.o \
 				  GenieAnalysis/misc.o
 
-CXX       := g++
-CXXFLAGS  += -std=c++17 -Wall -Wshadow -Warray-bounds -Wmissing-field-initializers -fPIC $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -O3
-LDFLAGS   += -std=c++17 $(ROOTCFLAGS) $(ROOTLDFLAGS) $(ROOTLIBS) -O3
-
 
 # Executables
-built:
-	mkdir built
+default: bin bin/genie_analysis_demo
 
-genie_analysis_demo: built apps/genie_analysis_demo.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
+# Folder where to put all compiled executables
+bin:
+	mkdir bin
+
+bin/genie_analysis_demo: bin apps/genie_analysis_demo.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o $@ $(filter-out bin, $^) -I . $(LDFLAGS)
 
 # Apps from Jan Kocka's SHP done in spring 2023
-final_truth_FST: built apps/jkocka_spring2023/final_truth_FST.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
+bin/final_truth_FST: bin apps/jkocka_spring2023/final_truth_FST.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o $@ $(filter-out bin, $^) -I . $(LDFLAGS)
 
-misc: built apps/jkocka_spring2023/misc.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
+bin/misc: bin apps/jkocka_spring2023/misc.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o $@ $(filter-out bin, $^) -I . $(LDFLAGS)
 
-genie_analysis_data: built apps/jkocka_spring2023/genie_analysis_data.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
+bin/genie_analysis_data: bin apps/jkocka_spring2023/genie_analysis_data.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o $@ $(filter-out bin, $^) -I . $(LDFLAGS)
 
-genie_analysis_1p: built apps/jkocka_spring2023/genie_analysis_1p.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
+bin/genie_analysis_1p: bin apps/jkocka_spring2023/genie_analysis_1p.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o $@ $(filter-out bin, $^) -I . $(LDFLAGS)
 
-genie_analysis_FS_transparency: built apps/jkocka_spring2023/genie_analysis_FS_transparency.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
+bin/genie_analysis_FS_transparency: bin apps/jkocka_spring2023/genie_analysis_FS_transparency.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o $@ $(filter-out bin, $^) -I . $(LDFLAGS)
 
-genie_analysis_1pi1nuc: built apps/jkocka_spring2023/genie_analysis_1pi1nuc.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
+bin/genie_analysis_1pi1nuc: bin apps/jkocka_spring2023/genie_analysis_1pi1nuc.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o $@ $(filter-out bin, $^) -I . $(LDFLAGS)
 
-genie_analysis_deltas: built apps/jkocka_spring2023/genie_analysis_deltas.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
+bin/genie_analysis_deltas: bin apps/jkocka_spring2023/genie_analysis_deltas.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o $@ $(filter-out bin, $^) -I . $(LDFLAGS)
 
-genie_analysis_lucass_cuts: built apps/jkocka_spring2023/genie_analysis_lucass_cuts.cpp $(GA_LIB_OBJECTS)
-	$(CXX) -o built/$@ $(filter-out built, $^) -I . $(LDFLAGS)
+bin/genie_analysis_lucass_cuts: bin apps/jkocka_spring2023/genie_analysis_lucass_cuts.cpp $(GA_LIB_OBJECTS)
+	$(CXX) -o $@ $(filter-out bin, $^) -I . $(LDFLAGS)
 
+# Groups of eecutables - not really needed, but nice to organize stuff
+jkocka_spring2023: bin/genie_analysis_deltas bin/genie_analysis_1pi1nuc bin/genie_analysis_1p \
+	bin/genie_analysis_FS_transparency bin/genie_analysis_data bin/final_truth_FST
 
-jkocka_spring2023: genie_analysis_deltas genie_analysis_1pi1nuc genie_analysis_1p genie_analysis_FS_transparency genie_analysis_data final_truth_FST
-
-all: genie_analysis_demo jkocka_spring2023
+all: bin bin/genie_analysis_demo jkocka_spring2023
 
 
 # GenieAnalysis "library"
@@ -66,7 +71,7 @@ GenieAnalysis/%.o: GenieAnalysis/%.cpp GenieAnalysis/%.h
 
 
 clean:
-	@rm -rf GenieAnalysis/*.o *.o built
+	@rm -rf GenieAnalysis/*.o bin
 
 debug: CXXFLAGS += -pg
 debug: LDFLAGS += -pg

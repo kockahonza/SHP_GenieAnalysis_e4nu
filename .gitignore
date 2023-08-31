@@ -2,7 +2,7 @@
 *.o
 *.root
 
-built
+bin
 outs
 doxygen_out
 
